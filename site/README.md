@@ -8,22 +8,35 @@ no framework, no build step, no dependencies.
 ### Through the dashboard
 
 1. [vercel.com/new](https://vercel.com/new) → import `aquaxs1/Easy-Cloner`
-2. **Root Directory** → set to `site`
-3. **Framework Preset** → `Other`
-4. Leave build command and output directory empty — there is nothing to build
-5. **Deploy**
+2. **Leave Root Directory at its default** (`Easy-Cloner (root)`)
+3. **Deploy**
+
+That is the whole procedure. The `vercel.json` in the repository root tells Vercel
+there is nothing to build and that `site/` is the directory to serve.
+
+> **Do not go looking for `site` in the Root Directory picker — it will not be
+> there.** Vercel only lists subdirectories that contain a project manifest it
+> recognises (`package.json`, `next.config.js`, and friends). This site is plain
+> HTML with no manifest, so the picker shows only the repository root. That is
+> expected, and the root `vercel.json` is what makes it work anyway.
 
 ### From the terminal
 
 ```bash
 npm i -g vercel
-cd site
-vercel          # preview deployment
+vercel          # preview deployment — run from the repository root
 vercel --prod   # production
 ```
 
-> The **Root Directory** setting is the one that matters. Point it at `site`, or
-> Vercel will look at the Python project in the repository root and find no site.
+### Two config files, on purpose
+
+| File | Applies when |
+|---|---|
+| `vercel.json` (repo root) | Root Directory is the default — **the documented path** |
+| `site/vercel.json` | Root Directory was manually set to `site` |
+
+Both carry the same headers and redirects, so either setup produces the same
+result. If you change one, change the other too.
 
 ## Running it locally
 

@@ -458,6 +458,8 @@ Easy-Cloner/
 │   ├── config.py                 .env-Auswertung und Validierung
 │   └── logging_setup.py          Farbiges Konsolen-Logging
 ├── tests/
+├── site/                         Website (statisches HTML, siehe unten)
+├── vercel.json                   Liefert site/ aus, ohne Build-Schritt
 ├── Dockerfile · docker-compose.yml
 ├── .env.example
 └── requirements.txt
@@ -467,6 +469,30 @@ Easy-Cloner/
 er stammt. `cloner.py` wendet so einen Bauplan an. Dadurch sind Klonen, Sichern,
 Wiederherstellen und Abgleichen **derselbe Code** — nur die Quelle des Bauplans
 unterscheidet sich.
+
+---
+
+# 🌐 Website
+
+Im Ordner [`site/`](site/) liegt die Projektseite: Landing Page mit klickbarer
+Slideshow, Setup-Anleitung, Befehlsreferenz, FAQ und Nutzungsbedingungen. Statisches
+HTML, CSS und JavaScript — kein Framework, kein Build-Schritt.
+
+**Auf Vercel deployen:** [vercel.com/new](https://vercel.com/new) → Repository
+importieren → **Root Directory unverändert lassen** → Deploy. Das `vercel.json` im
+Repository-Root erledigt den Rest.
+
+> `site` erscheint **nicht** in Vercels Root-Directory-Auswahl. Vercel listet dort nur
+> Ordner mit einem erkennbaren Projekt-Manifest (`package.json` & Co.), und diese Seite
+> ist reines HTML. Das ist kein Fehler — lass die Auswahl einfach auf dem Standard.
+
+**Lokal ansehen:**
+
+```bash
+cd site && python3 -m http.server 8000
+```
+
+Details in [`site/README.md`](site/README.md).
 
 ---
 

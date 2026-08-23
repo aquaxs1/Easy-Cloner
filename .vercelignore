@@ -1,0 +1,19 @@
+# Vercel liefert nur den Ordner site/ aus (siehe outputDirectory in vercel.json).
+# Alles andere muss gar nicht erst hochgeladen werden — das hält den Deploy klein
+# und schnell.
+
+easy_server_cloner/
+tests/
+main.py
+requirements.txt
+pyproject.toml
+Dockerfile
+docker-compose.yml
+.env.example
+
+# Laufzeit-Artefakte des Bots
+backups/
+state/
+__pycache__/
+*.pyc
+.venv/
