@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup — Easy Server Cloner</title>
+<meta name="description" content="Step-by-step setup for Easy Server Cloner: create the bot, get your token, invite it, install the project and run your first clone.">
+<meta name="theme-color" content="#070A16">
+<link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/logo.png">
+<meta property="og:title" content="Setup — Easy Server Cloner">
+<meta property="og:description" content="From an empty Developer Portal to a finished clone, in nine steps.">
+<meta property="og:image" content="/assets/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<canvas id="pixelfield" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/index.html">
+      <img src="/assets/img/logo.svg" alt="" width="30" height="30">
+      Easy Server Cloner
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Toggle menu" aria-controls="nav-links">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/index.html">Home</a></li>
+      <li><a href="/features.html">Features</a></li>
+      <li><a href="/setup.html" aria-current="page">Setup</a></li>
+      <li><a href="/faq.html">FAQ</a></li>
+      <li class="nav-cta"><a class="btn btn-sm" href="https://github.com/aquaxs1/Easy-Cloner">GitHub</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="main">
+
+<div class="page-head">
+  <div class="narrow">
+    <span class="eyebrow">Setup guide</span>
+    <h1>From zero to <span class="grad-text">first clone</span></h1>
+    <p>Nine steps. Roughly fifteen minutes the first time. Every command below has
+       a copy button — hover over the block.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="docs-layout">
+
+    <!-- ── Table of contents ─────────────────────────────────────────────── -->
+    <aside class="toc">
+      <h4>On this page</h4>
+      <ul>
+        <li><a href="#requirements">1 · Requirements</a></li>
+        <li><a href="#application">2 · Create the bot</a></li>
+        <li><a href="#token">3 · Get the token</a></li>
+        <li><a href="#invite">4 · Invite it</a></li>
+        <li><a href="#hierarchy">5 · Role position</a></li>
+        <li><a href="#install">6 · Install</a></li>
+        <li><a href="#configure">7 · Configure</a></li>
+        <li><a href="#run">8 · Start it</a></li>
+        <li><a href="#first-clone">9 · First clone</a></li>
+        <li><a href="#docker">Docker</a></li>
+        <li><a href="#optional">Optional extras</a></li>
+      </ul>
+    </aside>
+
+    <!-- ── Steps ─────────────────────────────────────────────────────────── -->
+    <div>
+      <ol class="steps">
+
+        <!-- 1 -->
+        <li class="step doc-section" id="requirements">
+          <h3>Check your requirements</h3>
+          <p>You need <strong>Python 3.10 or newer</strong> and administrator rights
+             on both servers — the one you copy from and the one you copy to.</p>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> check python</div>
+<pre><span class="c"># Windows</span>
+python --version
+
+<span class="c"># macOS / Linux</span>
+python3 --version</pre>
+          </div>
+          <p>Anything below 3.10 or a “command not found”? Install Python from
+             <a href="https://www.python.org/downloads/">python.org</a>. On Windows,
+             tick <strong>“Add Python to PATH”</strong> during installation.</p>
+          <div class="callout">
+            <span class="ic">💡</span>
+            <p>No target server yet? In Discord, click <strong>+</strong> at the bottom
+               of the server list → <strong>Create My Own</strong>. An empty server is
+               the ideal target.</p>
+          </div>
+        </li>
+
+        <!-- 2 -->
+        <li class="step doc-section" id="application">
+          <h3>Create the application</h3>
+          <p>Open the
+             <a href="https://discord.com/developers/applications">Discord Developer Portal</a>
+             and sign in with your Discord account.</p>
+          <ul>
+            <li>Top right → <strong>New Application</strong></li>
+            <li>Name it, e.g. <code>Easy Server Cloner</code></li>
+            <li>Accept the terms → <strong>Create</strong></li>
+          </ul>
+        </li>
+
+        <!-- 3 -->
+        <li class="step doc-section" id="token">
+          <h3>Get your bot token</h3>
+          <p>In the left menu go to <strong>Bot</strong>. Next to the token field,
+             press <strong>Reset Token</strong> and confirm. Copy what appears.</p>
+          <div class="callout danger">
+            <span class="ic">🔐</span>
+            <p><strong>The token is shown exactly once.</strong> Lose it and you simply
+               reset again. Never share it and never commit it — anyone holding the
+               token has full control of your bot.</p>
+          </div>
+          <p>While you are on this page, set two things:</p>
+          <ul>
+            <li><strong>Public Bot</strong> → turn <strong>off</strong>, so nobody else can invite your cloner.</li>
+            <li><strong>Privileged Gateway Intents</strong> → leave all <strong>off</strong>. You only need them for the <a href="#optional">optional extras</a>.</li>
+          </ul>
+          <p>Press <strong>Save Changes</strong>.</p>
+        </li>
+
+        <!-- 4 -->
+        <li class="step doc-section" id="invite">
+          <h3>Invite the bot to both servers</h3>
+          <p>Left menu → <strong>OAuth2</strong> → <strong>OAuth2 URL Generator</strong>.</p>
+          <div class="grid grid-2" style="margin:1.2rem 0">
+            <div class="card">
+              <h3 style="font-size:0.95rem">Scopes</h3>
+              <ul class="check-list yes" style="margin:0">
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><code>bot</code></li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><code>applications.commands</code></li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3 style="font-size:0.95rem">Bot permissions</h3>
+              <ul class="check-list yes" style="margin:0">
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><strong>Administrator</strong></li>
+              </ul>
+            </div>
+          </div>
+          <p>Copy the <strong>Generated URL</strong> at the bottom and open it in your
+             browser. Pick a server → <strong>Continue</strong> → <strong>Authorize</strong>.
+             <strong>Do this twice</strong> — once for the source server, once for the target.</p>
+          <div class="callout">
+            <span class="ic">❓</span>
+            <p><strong>Why Administrator?</strong> Discord only lets a bot grant
+               permissions it holds itself. With anything less, your copied roles would
+               arrive stripped of exactly the permissions you cared about.</p>
+          </div>
+        </li>
+
+        <!-- 5 -->
+        <li class="step doc-section" id="hierarchy">
+          <h3>Move the bot's role to the top</h3>
+          <p>This is the step almost everyone skips, and it decides how your result looks.</p>
+          <p><strong>Discord never lets a bot create roles above its own.</strong> If the
+             bot sits at the bottom of the list, every copied role lands below it and
+             your whole hierarchy comes out flattened.</p>
+          <p>On the <strong>target server</strong>: <strong>Server Settings</strong> →
+             <strong>Roles</strong> → drag <code>Easy Server Cloner</code> all the way up.</p>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> role order</div>
+<pre><span class="c">   Before                      After</span>
+<span class="c">   ──────────                  ──────────</span>
+   Admin                    <span class="s">🤖 Easy Server Cloner  ← top</span>
+   Moderator                   Admin
+   Member                      Moderator
+<span class="v">   🤖 Easy Server Cloner</span>       Member</pre>
+          </div>
+        </li>
+
+        <!-- 6 -->
+        <li class="step doc-section" id="install">
+          <h3>Install the project</h3>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> terminal</div>
+<pre>git clone https://github.com/aquaxs1/Easy-Cloner.git
+cd Easy-Cloner
+pip install -r requirements.txt</pre>
+          </div>
+          <p>Prefer keeping your system Python clean? Use a virtual environment:</p>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> virtual environment</div>
+<pre>python -m venv .venv
+
+<span class="c"># macOS / Linux</span>
+source .venv/bin/activate
+
+<span class="c"># Windows</span>
+.venv\Scripts\activate
+
+pip install -r requirements.txt</pre>
+          </div>
+        </li>
+
+        <!-- 7 -->
+        <li class="step doc-section" id="configure">
+          <h3>Configure your <code>.env</code></h3>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> copy the template</div>
+<pre><span class="c"># macOS / Linux</span>
+cp .env.example .env
+
+<span class="c"># Windows</span>
+copy .env.example .env</pre>
+          </div>
+          <p>Open the new <code>.env</code> in any editor and fill in three lines:</p>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> .env</div>
+<pre><span class="c"># Required — from the Developer Portal</span>
+DISCORD_TOKEN=<span class="v">your.real.token.here</span>
+
+<span class="c"># Recommended — only you may run the bot</span>
+OWNER_IDS=<span class="v">123456789012345678</span>
+
+<span class="c"># Recommended — commands appear instantly instead of in ~1 hour</span>
+DEV_GUILD_ID=<span class="v">987654321098765432</span></pre>
+          </div>
+          <div class="callout">
+            <span class="ic">🆔</span>
+            <p><strong>Finding IDs:</strong> Discord → <strong>Settings</strong> →
+               <strong>Advanced</strong> → enable <strong>Developer Mode</strong>. Then
+               right-click yourself → <em>Copy User ID</em>, or right-click a server icon
+               → <em>Copy Server ID</em>.</p>
+          </div>
+          <div class="callout ok">
+            <span class="ic">✅</span>
+            <p><code>.env</code> is git-ignored by default, so your token can never
+               travel to GitHub by accident.</p>
+          </div>
+        </li>
+
+        <!-- 8 -->
+        <li class="step doc-section" id="run">
+          <h3>Start the bot</h3>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> terminal</div>
+<pre>python main.py</pre>
+          </div>
+          <p>If everything is right, you will see:</p>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> output</div>
+<pre>  ______                     _____ _
+ |  ____|                   / ____| |
+ | |__   __ _ ___ _   _    | |    | | ___  _ __   ___ _ __
+ |  __| / _` / __| | | |   | |    | |/ _ \| '_ \ / _ \ '__|
+ | |___| (_| \__ \ |_| |   | |____| | (_) | | | |  __/ |
+ |______\__,_|___/\__, |    \_____|_|\___/|_| |_|\___|_|
+                   __/ |     Easy Server Cloner v2.1.0
+                  |___/      Discord Server Structure Cloner
+
+<span class="s">14:32:01  INFO   Slash commands registered for dev guild.</span>
+<span class="s">14:32:02  INFO   Logged in as Easy Server Cloner#1234</span>
+<span class="s">14:32:02  INFO   Active on 2 server(s).</span></pre>
+          </div>
+          <p><strong>Keep the window open</strong> — the bot is online for as long as it
+             runs. Stop it with <kbd>Ctrl</kbd> + <kbd>C</kbd>. For permanent hosting,
+             see <a href="#docker">Docker</a> below.</p>
+        </li>
+
+        <!-- 9 -->
+        <li class="step doc-section" id="first-clone">
+          <h3>Run your first clone</h3>
+          <p>Switch to Discord and type <code>/</code> — the bot's commands appear.</p>
+
+          <h4 style="margin:1.4rem 0 0.4rem;font-size:1rem">a · Look around</h4>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> discord</div>
+<pre>/servers</pre>
+          </div>
+          <p>Lists every server the bot can reach. 👑 means ready, ⚠️ means missing permissions.</p>
+
+          <h4 style="margin:1.4rem 0 0.4rem;font-size:1rem">b · Back up first</h4>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> discord</div>
+<pre>/backup</pre>
+          </div>
+          <p>Pick your <strong>source server</strong> from the suggestion list — you never
+             type IDs, the bot offers every server it can see. Keep the file it hands back.</p>
+
+          <h4 style="margin:1.4rem 0 0.4rem;font-size:1rem">c · Dry run</h4>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> discord</div>
+<pre>/preview  source: &lt;source server&gt;  target: &lt;target server&gt;</pre>
+          </div>
+          <p>Shows exactly what would be copied, what would be deleted, and roughly how
+             long it takes. <strong>Changes nothing.</strong> Read it carefully.</p>
+
+          <h4 style="margin:1.4rem 0 0.4rem;font-size:1rem">d · Clone</h4>
+          <div class="code">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> discord</div>
+<pre>/clone  source: &lt;source server&gt;  target: &lt;target server&gt;</pre>
+          </div>
+          <p>A confirmation appears with all the numbers. Nothing happens until you press
+             <strong>🧬 Clone now</strong>. Then a live progress bar runs, with a
+             <strong>🛑 Cancel</strong> button you can hit at any moment.</p>
+
+          <h4 style="margin:1.4rem 0 0.4rem;font-size:1rem">e · Finish by hand</h4>
+          <p>Three things no bot can do for you:</p>
+          <ol>
+            <li><strong>Sort the role hierarchy.</strong> Every copied role sits below the bot's role — drag them into place.</li>
+            <li><strong>Invite your members.</strong> People have to join themselves.</li>
+            <li><strong>Enable Community features</strong> if the source had them — rules channel, onboarding, stage channels.</li>
+          </ol>
+          <div class="callout ok">
+            <span class="ic">🎉</span>
+            <p><strong>Done.</strong> Your target server is now a copy of the source.</p>
+          </div>
+        </li>
+
+      </ol>
+
+      <hr class="divider" style="margin:3rem 0">
+
+      <!-- Docker -->
+      <section class="doc-section" id="docker">
+        <h2>
+          <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg></span>
+          Run it permanently with Docker
+        </h2>
+        <p>So you do not have to keep a terminal open:</p>
+        <div class="code">
+          <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> terminal</div>
+<pre>cp .env.example .env      <span class="c"># fill in your token</span>
+docker compose up -d</pre>
+        </div>
+        <div class="code">
+          <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> managing it</div>
+<pre>docker compose logs -f    <span class="c"># watch the logs</span>
+docker compose restart    <span class="c"># after editing .env</span>
+docker compose down       <span class="c"># stop</span></pre>
+        </div>
+        <p>The <code>backups/</code> and <code>state/</code> folders are mounted as
+           volumes and survive restarts. The container runs as its own user, not root.</p>
+      </section>
+
+      <!-- Optional -->
+      <section class="doc-section" id="optional">
+        <h2>
+          <span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4-6.2-4.6-6.2 4.6 2.4-7.4L2 9.4h7.6z"/></svg></span>
+          Optional extras
+        </h2>
+        <p>Two features need <strong>privileged intents</strong>. Only switch them on if
+           you actually want them — both make a run noticeably slower.</p>
+
+        <div class="callout warn">
+          <span class="ic">⚠️</span>
+          <p>If a switch is <code>true</code> in your <code>.env</code> but the matching
+             intent is off in the Developer Portal, <strong>Discord refuses the login
+             entirely</strong>. Always flip both together.</p>
+        </div>
+
+        <h3 style="margin-top:2rem">Rebuild messages</h3>
+        <p>Replays the last <em>n</em> messages per channel through a webhook, with the
+           original name and avatar.</p>
+        <div class="callout">
+          <span class="ic">ℹ️</span>
+          <p>This is a <strong>reconstruction, not a migration</strong>. The messages look
+             genuine but come from a webhook — reactions, threads and edit history stay behind.</p>
+        </div>
+        <ol>
+          <li>Developer Portal → <strong>Bot</strong> → enable <strong>Message Content Intent</strong> → Save</li>
+          <li>In <code>.env</code>: <code>ENABLE_MESSAGE_CLONE=true</code></li>
+          <li>Restart the bot</li>
+          <li>Run <code>/clone messages:100</code></li>
+        </ol>
+
+        <h3 style="margin-top:2rem">Reassign member roles</h3>
+        <p>Gives members who are on <strong>both</strong> servers the same roles in the target.</p>
+        <ol>
+          <li>Developer Portal → <strong>Bot</strong> → enable <strong>Server Members Intent</strong> → Save</li>
+          <li>In <code>.env</code>: <code>ENABLE_MEMBER_ROLES=true</code></li>
+          <li>Restart the bot</li>
+          <li>Run <code>/clone member_roles:True</code></li>
+        </ol>
+      </section>
+
+      <div class="cta-band reveal" style="margin-top:3rem">
+        <h2>Stuck somewhere?</h2>
+        <p>The FAQ covers the errors people actually hit — missing commands, permission
+           messages, roles landing in the wrong order.</p>
+        <div class="btn-row">
+          <a class="btn" href="/faq.html">
+            Read the FAQ
+            <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="/features.html">View More</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-about">
+        <a class="brand" href="/index.html">
+          <img src="/assets/img/logo.svg" alt="" width="30" height="30">
+          Easy Server Cloner
+        </a>
+        <p>An open-source Discord bot that copies a server's full structure — and
+           gives you a backup file you actually own.</p>
+        <div class="footer-social">
+          <a href="https://github.com/aquaxs1/Easy-Cloner" aria-label="GitHub repository">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+          </a>
+          <a href="https://discord.com/developers/applications" aria-label="Discord Developer Portal">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.32 4.44A19.8 19.8 0 0 0 15.43 3l-.25.46a13.6 13.6 0 0 1 4.02 2.03 18.9 18.9 0 0 0-14.4 0A13.6 13.6 0 0 1 8.82 3.5L8.57 3a19.8 19.8 0 0 0-4.89 1.44C.87 8.62.1 12.7.48 16.72a19.9 19.9 0 0 0 6.04 3.06l.8-1.37c-.66-.25-1.3-.55-1.9-.9l.47-.36a14.2 14.2 0 0 0 12.22 0l.47.36c-.6.35-1.24.65-1.9.9l.8 1.37a19.9 19.9 0 0 0 6.04-3.06c.44-4.65-.75-8.7-3.2-12.28zM8.68 14.4c-1.18 0-2.15-1.08-2.15-2.4 0-1.34.95-2.42 2.15-2.42 1.2 0 2.17 1.09 2.15 2.41 0 1.33-.95 2.41-2.15 2.41zm6.64 0c-1.18 0-2.15-1.08-2.15-2.4 0-1.34.95-2.42 2.15-2.42 1.2 0 2.17 1.09 2.15 2.41 0 1.33-.95 2.41-2.15 2.41z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/features.html">All features</a></li>
+          <li><a href="/features.html#commands">Commands</a></li>
+          <li><a href="/features.html#backup">Backup &amp; restore</a></li>
+          <li><a href="/features.html#limits">What can't be copied</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Get started</h4>
+        <ul>
+          <li><a href="/setup.html">Setup guide</a></li>
+          <li><a href="/setup.html#token">Bot token</a></li>
+          <li><a href="/setup.html#docker">Docker</a></li>
+          <li><a href="/index.html#how-it-works">How it works</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="/faq.html">FAQ</a></li>
+          <li><a href="/faq.html#troubleshooting">Troubleshooting</a></li>
+          <li><a href="https://github.com/aquaxs1/Easy-Cloner/issues">Report an issue</a></li>
+          <li><a href="/terms.html">Terms of Use</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© <span data-year>2026</span> Easy Server Cloner · MIT licensed</span>
+      <nav aria-label="Quick links">
+        <a href="/terms.html">Terms of Use</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/features.html">Features</a>
+        <a href="/setup.html">Setup</a>
+        <a href="https://github.com/aquaxs1/Easy-Cloner">GitHub</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

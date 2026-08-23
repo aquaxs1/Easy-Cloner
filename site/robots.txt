@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# Every page is reachable from the navigation and the footer, so a sitemap
+# adds nothing here. If you add one later, point to it with:
+# Sitemap: https://your-domain.example/sitemap.xml
