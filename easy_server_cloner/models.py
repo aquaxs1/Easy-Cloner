@@ -12,6 +12,7 @@ class Stage(str, Enum):
 
     IDLE = "Bereit"
     VALIDATING = "Prüfe Voraussetzungen"
+    READING = "Lese Quell-Server"
     WIPING = "Räume Ziel-Server auf"
     SETTINGS = "Übertrage Server-Einstellungen"
     ROLES = "Kopiere Rollen"
@@ -20,6 +21,8 @@ class Stage(str, Enum):
     FINALIZING = "Setze Feinheiten"
     EMOJIS = "Kopiere Emojis"
     STICKERS = "Kopiere Sticker"
+    MESSAGES = "Baue Nachrichten nach"
+    MEMBER_ROLES = "Weise Mitgliedern Rollen zu"
     DONE = "Abgeschlossen"
     FAILED = "Fehlgeschlagen"
     CANCELLED = "Abgebrochen"
@@ -28,6 +31,7 @@ class Stage(str, Enum):
 # Reihenfolge für die Fortschrittsanzeige. IDLE und die Endzustände zählen nicht.
 STAGE_ORDER: tuple[Stage, ...] = (
     Stage.VALIDATING,
+    Stage.READING,
     Stage.WIPING,
     Stage.SETTINGS,
     Stage.ROLES,
@@ -36,7 +40,11 @@ STAGE_ORDER: tuple[Stage, ...] = (
     Stage.FINALIZING,
     Stage.EMOJIS,
     Stage.STICKERS,
+    Stage.MESSAGES,
+    Stage.MEMBER_ROLES,
 )
+
+END_STAGES = (Stage.DONE, Stage.FAILED, Stage.CANCELLED)
 
 
 @dataclass(slots=True)
@@ -52,6 +60,18 @@ class CloneOptions:
     stickers: bool = True
     dry_run: bool = False
 
+    # Gleichnamige Objekte im Ziel wiederverwenden statt doppelt anzulegen.
+    # Das ist der Kern von /sync.
+    skip_existing: bool = False
+
+    # Wie viele Nachrichten je Text-Channel per Webhook nachgebaut werden.
+    # 0 = aus. Braucht den privilegierten Message-Content-Intent.
+    messages_per_channel: int = 0
+
+    # Rollen an Mitglieder verteilen, die auf beiden Servern sind.
+    # Braucht den privilegierten Members-Intent.
+    member_roles: bool = False
+
     def summary(self) -> list[str]:
         """Menschenlesbare Auflistung der aktiven Optionen."""
         parts = [
@@ -62,7 +82,14 @@ class CloneOptions:
             ("Emojis", self.emojis),
             ("Sticker", self.stickers),
         ]
-        return [f"{'✅' if on else '❌'} {label}" for label, on in parts]
+        lines = [f"{'✅' if on else '❌'} {label}" for label, on in parts]
+        if self.messages_per_channel:
+            lines.append(f"✅ Nachrichten (max. {self.messages_per_channel}/Channel)")
+        if self.member_roles:
+            lines.append("✅ Rollen-Zuweisungen")
+        if self.skip_existing:
+            lines.append("♻️ Vorhandenes wird wiederverwendet")
+        return lines
 
 
 @dataclass(slots=True)
@@ -77,15 +104,18 @@ class CloneReport:
     forum_channels_created: int = 0
     emojis_created: int = 0
     stickers_created: int = 0
+    messages_copied: int = 0
+    members_updated: int = 0
     channels_deleted: int = 0
     roles_deleted: int = 0
+    throttle_events: int = 0
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     started_at: float = field(default_factory=time.monotonic)
     finished_at: float | None = None
 
-    # Warnungen/Fehler werden gedeckelt, damit ein kaputter Server das Embed
-    # nicht sprengt — der Zähler bleibt trotzdem korrekt.
+    # Warnungen und Fehler werden gedeckelt, damit ein kaputter Server das
+    # Embed nicht sprengt — die Zähler bleiben trotzdem korrekt.
     _warning_overflow: int = 0
     _error_overflow: int = 0
 
@@ -144,6 +174,9 @@ class Progress:
     current: int = 0
     total: int = 0
     report: CloneReport = field(default_factory=CloneReport)
+    # Aktuelle Pause der adaptiven Taktung — für die Anzeige "Discord bremst".
+    delay: float = 0.0
+    throttled: bool = False
 
     @property
     def stage_index(self) -> int:
@@ -155,7 +188,7 @@ class Progress:
     @property
     def fraction(self) -> float:
         """Grober Gesamtfortschritt zwischen 0.0 und 1.0."""
-        if self.stage in (Stage.DONE, Stage.FAILED, Stage.CANCELLED):
+        if self.stage in END_STAGES:
             return 1.0
         if self.stage is Stage.IDLE:
             return 0.0

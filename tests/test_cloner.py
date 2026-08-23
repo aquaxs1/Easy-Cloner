@@ -2,8 +2,8 @@
 Tests für die Klon-Engine.
 
 Der Fokus liegt auf den Fehlern, die in der ursprünglichen Skript-Version
-steckten: verdrehte Rollen-Hierarchie, hart kodiertes Bitrate-Limit,
-identische Quelle und Ziel sowie das versehentliche Löschen des Ziel-Icons.
+steckten, und auf den Zusagen der neuen Funktionen: Fortsetzbarkeit, Abgleich
+ohne Löschen, adaptive Taktung.
 """
 
 from __future__ import annotations
@@ -14,108 +14,64 @@ from unittest.mock import AsyncMock, MagicMock
 import discord
 import pytest
 
+from easy_server_cloner.blueprint import (
+    EVERYONE_KEY,
+    KIND_CATEGORY,
+    KIND_TEXT,
+    KIND_VOICE,
+    OverwriteData,
+)
 from easy_server_cloner.cloner import CloneError, ServerCloner
 from easy_server_cloner.models import CloneOptions
+from easy_server_cloner.state import CloneState
+
+from helpers import blueprint, channel_bp, make_guild, make_role, role_bp
 
 
-# ── Hilfsobjekte ──────────────────────────────────────────────────────────────
+def cloner_for(bp, target, **kw):
+    kw.setdefault("delay", 0)
+    return ServerCloner(bp, target, **kw)
 
 
-def make_role(role_id: int, name: str, position: int, *, default=False, managed=False):
-    role = MagicMock(spec=discord.Role)
-    role.id = role_id
-    role.name = name
-    role.position = position
-    role.managed = managed
-    role.is_default.return_value = default
-    role.permissions = discord.Permissions.none()
-    role.colour = discord.Colour.default()
-    role.hoist = False
-    role.mentionable = False
-    role.display_icon = None
-    return role
-
-
-def make_guild(guild_id: int, name: str, *, roles=None, bot_top_position=99):
-    guild = MagicMock(spec=discord.Guild)
-    guild.id = guild_id
-    guild.name = name
-    guild.roles = roles or []
-    guild.channels = []
-    guild.categories = []
-    guild.text_channels = []
-    guild.voice_channels = []
-    guild.stage_channels = []
-    guild.forums = []
-    guild.emojis = []
-    guild.stickers = []
-    guild.features = []
-    guild.icon = None
-    guild.banner = None
-    guild.splash = None
-    guild.description = None
-    guild.afk_channel = None
-    guild.system_channel = None
-    guild.bitrate_limit = 96000
-    guild.emoji_limit = 50
-    guild.sticker_limit = 5
-    # Wie bei Discord ist die @everyone-Rolle Teil der Rollenliste.
-    guild.default_role = next(
-        (r for r in guild.roles if r.is_default()),
-        make_role(guild_id, "@everyone", 0, default=True),
-    )
-
-    me = MagicMock(spec=discord.Member)
-    me.id = 999
-    me.guild_permissions = discord.Permissions.all()
-    me.top_role = make_role(guild_id + 1, "Bot", bot_top_position)
-    guild.me = me
-    guild.owner_id = 1
-
-    guild.create_role = AsyncMock(
-        side_effect=lambda **kw: make_role(hash(kw["name"]) & 0xFFFF, kw["name"], 1)
-    )
-    guild.edit = AsyncMock()
-    guild.default_role.edit = AsyncMock()
-    return guild
-
-
-def cloner_for(source, target, **kw):
-    return ServerCloner(source, target, delay=0, **kw)
-
-
-# ── Sicherheitsnetz: Quelle == Ziel ───────────────────────────────────────────
+# ── Sicherheitsnetz ───────────────────────────────────────────────────────────
 
 
 def test_source_equals_target_is_rejected():
-    """Der schlimmste denkbare Bedienfehler muss vor dem ersten Löschen greifen."""
-    guild = make_guild(1, "Mein Server")
-    c = cloner_for(guild, guild)
+    """Der teuerste Bedienfehler muss vor dem ersten Löschen greifen."""
+    target = make_guild(1, "Mein Server")
+    c = cloner_for(blueprint(source_id="1"), target)
 
     with pytest.raises(CloneError, match="identisch"):
         asyncio.run(c.run())
 
-    guild.edit.assert_not_awaited()
+    target.edit.assert_not_awaited()
 
 
 def test_missing_permissions_are_rejected():
-    source = make_guild(1, "Quelle")
     target = make_guild(2, "Ziel")
     target.me.guild_permissions = discord.Permissions.none()
 
-    c = cloner_for(source, target)
     with pytest.raises(CloneError, match="fehlen"):
-        asyncio.run(c.run())
+        asyncio.run(cloner_for(blueprint(), target).run())
 
 
 def test_bot_not_in_target_is_rejected():
-    source = make_guild(1, "Quelle")
     target = make_guild(2, "Ziel")
     target.me = None
 
-    c = cloner_for(source, target)
     with pytest.raises(CloneError, match="kein Mitglied"):
-        asyncio.run(c.run())
+        asyncio.run(cloner_for(blueprint(), target).run())
+
+
+def test_dry_run_changes_nothing():
+    target = make_guild(2, "Ziel")
+    bp = blueprint(roles=[role_bp("10", "Admin", 3)])
+
+    c = cloner_for(bp, target, options=CloneOptions(dry_run=True))
+    asyncio.run(c.run())
+
+    target.edit.assert_not_awaited()
+    target.create_role.assert_not_awaited()
 
 
 # ── Rollen-Hierarchie ─────────────────────────────────────────────────────────
@@ -124,49 +80,43 @@ def test_bot_not_in_target_is_rejected():
 def test_roles_are_created_from_highest_to_lowest():
     """
     Discord legt jede neue Rolle ganz unten an. Wer aufsteigend kopiert, dreht
-    die Hierarchie um — genau der Bug im Originalskript. Erwartet wird also
-    absteigende Erstellungsreihenfolge.
+    die Hierarchie um — genau der Bug im Originalskript.
     """
-    admin = make_role(10, "Admin", 3)
-    mod = make_role(11, "Mod", 2)
-    member = make_role(12, "Member", 1)
-    everyone = make_role(1, "@everyone", 0, default=True)
-    integration = make_role(13, "BotRolle", 4, managed=True)
-
-    source = make_guild(1, "Quelle", roles=[everyone, member, mod, admin, integration])
+    bp = blueprint(
+        roles=[
+            role_bp(EVERYONE_KEY, "@everyone", 0, default=True),
+            role_bp("12", "Member", 1),
+            role_bp("11", "Mod", 2),
+            role_bp("10", "Admin", 3),
+        ]
+    )
     target = make_guild(2, "Ziel")
 
-    c = cloner_for(source, target)
-    asyncio.run(c._clone_roles())
+    c = cloner_for(bp, target)
+    asyncio.run(c._apply_roles())
 
     created = [call.kwargs["name"] for call in target.create_role.await_args_list]
     assert created == ["Admin", "Mod", "Member"]
-    # @everyone und verwaltete Integrations-Rollen dürfen nicht kopiert werden.
-    assert "BotRolle" not in created
     assert "@everyone" not in created
     assert c.report.roles_created == 3
 
 
 def test_everyone_permissions_are_transferred():
-    everyone = make_role(1, "@everyone", 0, default=True)
-    everyone.permissions = discord.Permissions(send_messages=True)
-    source = make_guild(1, "Quelle", roles=[everyone])
+    perms = discord.Permissions(send_messages=True)
+    bp = blueprint(roles=[role_bp(EVERYONE_KEY, "@everyone", 0, default=True, permissions=perms.value)])
     target = make_guild(2, "Ziel")
 
-    c = cloner_for(source, target)
-    asyncio.run(c._clone_roles())
+    asyncio.run(cloner_for(bp, target)._apply_roles())
 
     target.default_role.edit.assert_awaited_once()
-    assert target.default_role.edit.await_args.kwargs["permissions"] == everyone.permissions
+    assert target.default_role.edit.await_args.kwargs["permissions"] == perms
 
 
 def test_role_creation_falls_back_without_permissions():
     """Kann der Bot die Rechte nicht vergeben, entsteht trotzdem die Rolle."""
-    role = make_role(10, "Admin", 1)
-    source = make_guild(1, "Quelle", roles=[role])
+    bp = blueprint(roles=[role_bp("10", "Admin", 1)])
     target = make_guild(2, "Ziel")
-
-    calls = []
+    calls: list[dict] = []
 
     async def create_role(**kw):
         calls.append(kw)
@@ -176,68 +126,56 @@ def test_role_creation_falls_back_without_permissions():
 
     target.create_role = AsyncMock(side_effect=create_role)
 
-    c = cloner_for(source, target)
-    asyncio.run(c._clone_roles())
+    c = cloner_for(bp, target)
+    asyncio.run(c._apply_roles())
 
     assert len(calls) == 2
     assert "permissions" not in calls[1]
     assert c.report.roles_created == 1
 
 
+def test_warns_when_bot_role_is_too_low():
+    bp = blueprint(roles=[role_bp(str(i), f"R{i}", i) for i in range(1, 6)])
+    target = make_guild(2, "Ziel", bot_top_position=2)
+
+    c = cloner_for(bp, target)
+    asyncio.run(c._validate())
+
+    assert any("gestaucht" in w for w in c.report.warnings)
+
+
 # ── Permission-Overwrites ─────────────────────────────────────────────────────
 
 
 def test_overwrites_map_roles_and_default_role():
-    source_everyone = make_role(1, "@everyone", 0, default=True)
-    source_mod = make_role(11, "Mod", 2)
-    unmapped = make_role(12, "Fremd", 3)
-
-    source = make_guild(1, "Quelle")
     target = make_guild(2, "Ziel")
-    c = cloner_for(source, target)
+    c = cloner_for(blueprint(), target)
 
     new_mod = make_role(77, "Mod", 1)
-    c.role_map[11] = new_mod
+    c.role_map[EVERYONE_KEY] = target.default_role
+    c.role_map["11"] = new_mod
 
-    ov_everyone = discord.PermissionOverwrite(view_channel=False)
-    ov_mod = discord.PermissionOverwrite(view_channel=True)
-    ov_other = discord.PermissionOverwrite(manage_messages=True)
+    deny_view = discord.Permissions(view_channel=True)
+    entries = [
+        OverwriteData(EVERYONE_KEY, allow=0, deny=deny_view.value),
+        OverwriteData("11", allow=deny_view.value, deny=0),
+        OverwriteData("99-existiert-nicht", allow=deny_view.value, deny=0),
+    ]
 
-    result = c._build_overwrites(
-        {source_everyone: ov_everyone, source_mod: ov_mod, unmapped: ov_other}
-    )
+    result = c._build_overwrites(entries)
 
-    assert result == {target.default_role: ov_everyone, new_mod: ov_mod}
-
-
-def test_member_overwrites_are_skipped_with_single_warning():
-    member_a = MagicMock(spec=discord.Member)
-    member_b = MagicMock(spec=discord.Member)
-    source, target = make_guild(1, "Q"), make_guild(2, "Z")
-    c = cloner_for(source, target)
-
-    ov = discord.PermissionOverwrite(view_channel=True)
-    result = c._build_overwrites({member_a: ov, member_b: ov})
-
-    assert result == {}
-    # Bei 200 Channels sollen nicht 200 identische Warnungen entstehen.
-    assert c.report.warning_count == 1
+    assert set(result) == {target.default_role, new_mod}
+    assert result[target.default_role].view_channel is False
+    assert result[new_mod].view_channel is True
 
 
 # ── Server-Einstellungen ──────────────────────────────────────────────────────
 
 
-def test_missing_source_icon_does_not_wipe_target_icon():
-    """
-    Im Originalskript wurde `icon=None` übergeben, sobald die Quelle kein Icon
-    hatte — das löschte das Icon des Ziel-Servers.
-    """
-    source = make_guild(1, "Quelle")
-    source.icon = None
+def test_missing_icon_does_not_wipe_target_icon():
+    """Im Originalskript löschte `icon=None` das Icon des Ziel-Servers."""
     target = make_guild(2, "Ziel")
-
-    c = cloner_for(source, target, options=CloneOptions())
-    asyncio.run(c._clone_settings())
+    asyncio.run(cloner_for(blueprint(name="Quelle"), target)._apply_settings())
 
     kwargs = target.edit.await_args.kwargs
     assert "icon" not in kwargs
@@ -245,70 +183,205 @@ def test_missing_source_icon_does_not_wipe_target_icon():
     assert kwargs["name"] == "Quelle"
 
 
-def test_source_icon_is_read_and_transferred():
-    source = make_guild(1, "Quelle")
-    asset = MagicMock(spec=discord.Asset)
-    asset.read = AsyncMock(return_value=b"PNGDATA")
-    source.icon = asset
+def test_icon_from_blueprint_is_applied():
+    import base64
+
+    bp = blueprint(icon=base64.b64encode(b"PNGDATA").decode())
     target = make_guild(2, "Ziel")
 
-    c = cloner_for(source, target)
-    asyncio.run(c._clone_settings())
+    asyncio.run(cloner_for(bp, target)._apply_settings())
 
     assert target.edit.await_args.kwargs["icon"] == b"PNGDATA"
+
+
+def test_settings_retry_drops_boost_only_fields():
+    """Ein abgelehntes Banner darf nicht den ganzen Vorgang kippen."""
+    import base64
+
+    bp = blueprint(banner=base64.b64encode(b"BANNER").decode())
+    target = make_guild(2, "Ziel")
+    attempts: list[dict] = []
+
+    async def edit(**kw):
+        attempts.append(kw)
+        if "banner" in kw:
+            raise discord.HTTPException(MagicMock(status=400), "banner not allowed")
+
+    target.edit = AsyncMock(side_effect=edit)
+
+    c = cloner_for(bp, target)
+    asyncio.run(c._apply_settings())
+
+    assert len(attempts) == 2
+    assert "banner" not in attempts[1]
+    assert c.report.error_count == 0
+    assert any("Boost" in w for w in c.report.warnings)
 
 
 # ── Voice-Bitrate ─────────────────────────────────────────────────────────────
 
 
-def test_bitrate_uses_target_limit_not_hardcoded_value():
-    """
-    Fest verdrahtete 96 kbit/s verschenken auf geboosteten Ziel-Servern Qualität.
-    Maßgeblich ist das Limit des Ziel-Servers.
-    """
-    source, target = make_guild(1, "Q"), make_guild(2, "Z")
-    target.bitrate_limit = 384000
+@pytest.mark.parametrize(
+    "source_bitrate, target_limit, expected",
+    [
+        (256000, 384000, 256000),  # geboostetes Ziel: Qualität bleibt erhalten
+        (256000, 64000, 64000),  # ungeboostetes Ziel: sauber gedeckelt
+    ],
+)
+def test_bitrate_follows_target_limit(source_bitrate, target_limit, expected):
+    """Fest verdrahtete 96 kbit/s waren in beide Richtungen falsch."""
+    target = make_guild(2, "Ziel")
+    target.bitrate_limit = target_limit
     target.create_voice_channel = AsyncMock(return_value=MagicMock())
 
-    channel = MagicMock(spec=discord.VoiceChannel)
-    channel.name = "Talk"
-    channel.bitrate = 256000
-    channel.user_limit = 0
-    channel.rtc_region = None
-    channel.video_quality_mode = discord.VideoQualityMode.auto
-
-    c = cloner_for(source, target)
+    channel = channel_bp("5", "Talk", KIND_VOICE, bitrate=source_bitrate)
+    c = cloner_for(blueprint(), target)
     asyncio.run(c._create_voice_channel(channel, {"name": "Talk"}))
 
-    assert target.create_voice_channel.await_args.kwargs["bitrate"] == 256000
+    assert target.create_voice_channel.await_args.kwargs["bitrate"] == expected
 
 
-def test_bitrate_is_capped_at_target_limit():
-    source, target = make_guild(1, "Q"), make_guild(2, "Z")
-    target.bitrate_limit = 64000
-    target.create_voice_channel = AsyncMock(return_value=MagicMock())
+# ── Community-Beschränkungen ──────────────────────────────────────────────────
 
-    channel = MagicMock(spec=discord.VoiceChannel)
-    channel.name = "Talk"
-    channel.bitrate = 256000
-    channel.user_limit = 0
-    channel.rtc_region = None
-    channel.video_quality_mode = discord.VideoQualityMode.auto
+@pytest.mark.parametrize("kind", ["stage", "forum"])
+def test_community_channels_are_skipped_on_normal_servers(kind):
+    target = make_guild(2, "Ziel", features=[])
+    c = cloner_for(blueprint(), target)
 
-    c = cloner_for(source, target)
-    asyncio.run(c._create_voice_channel(channel, {"name": "Talk"}))
+    result = asyncio.run(c._create_channel(channel_bp("7", "Bühne", kind)))
 
-    assert target.create_voice_channel.await_args.kwargs["bitrate"] == 64000
+    assert result is None
+    assert any("Community-Server" in w for w in c.report.warnings)
+
+
+# ── Fortsetzbarkeit ───────────────────────────────────────────────────────────
+
+
+def test_resume_skips_objects_that_still_exist():
+    bp = blueprint(
+        roles=[role_bp("10", "Admin", 2), role_bp("11", "Mod", 1)],
+        channels=[channel_bp("20", "allgemein", KIND_TEXT)],
+    )
+    target = make_guild(2, "Ziel")
+
+    existing_role = make_role(500, "Admin", 1)
+    existing_channel = MagicMock(spec=discord.TextChannel)
+    existing_channel.id = 600
+    target.get_role = MagicMock(side_effect=lambda rid: existing_role if rid == 500 else None)
+    target.get_channel = MagicMock(side_effect=lambda cid: existing_channel if cid == 600 else None)
+
+    state = CloneState(target_id=2, roles={"10": 500}, channels={"20": 600})
+    c = cloner_for(bp, target, state=state)
+
+    asyncio.run(c._validate())
+    c._restore_maps_from_state()
+    asyncio.run(c._apply_roles())
+
+    created = [call.kwargs["name"] for call in target.create_role.await_args_list]
+    assert created == ["Mod"]  # Admin war schon da
+    assert c.role_map["10"] is existing_role
+
+
+def test_resume_recreates_objects_that_vanished():
+    """Wurde ein Objekt zwischenzeitlich gelöscht, entsteht es neu."""
+    bp = blueprint(roles=[role_bp("10", "Admin", 1)])
+    target = make_guild(2, "Ziel")
+    target.get_role = MagicMock(return_value=None)
+
+    state = CloneState(target_id=2, roles={"10": 500})
+    c = cloner_for(bp, target, state=state)
+    c._restore_maps_from_state()
+    asyncio.run(c._apply_roles())
+
+    assert [call.kwargs["name"] for call in target.create_role.await_args_list] == ["Admin"]
+
+
+def test_resume_never_wipes_the_target():
+    """Beim Fortsetzen wäre erneutes Leeren genau das Gegenteil des Ziels."""
+    target = make_guild(2, "Ziel")
+    target.channels = [MagicMock(spec=discord.TextChannel)]
+
+    state = CloneState(target_id=2, roles={"10": 500})
+    c = cloner_for(
+        blueprint(), target, state=state, options=CloneOptions(wipe_target=True)
+    )
+    c._wipe_target = AsyncMock()
+
+    asyncio.run(c.run())
+
+    c._wipe_target.assert_not_awaited()
+
+
+def test_state_is_saved_on_cancel_and_cleared_on_success():
+    bp = blueprint(roles=[role_bp(str(i), f"R{i}", i) for i in range(1, 4)])
+    target = make_guild(2, "Ziel")
+
+    c = ServerCloner(bp, target, delay=0.01)
+    original = target.create_role
+
+    async def create_and_cancel(**kw):
+        c.cancel()
+        return await original(**kw)
+
+    target.create_role = AsyncMock(side_effect=create_and_cancel)
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(c.run())
+
+    assert CloneState.path_for(2).exists()
+    assert CloneState.load(2) is not None
+
+    # Ein sauberer Durchlauf räumt den Zwischenstand wieder ab.
+    target2 = make_guild(2, "Ziel")
+    asyncio.run(ServerCloner(blueprint(), target2, delay=0).run())
+    assert not CloneState.path_for(2).exists()
+
+
+# ── /sync: nichts löschen, Vorhandenes wiederverwenden ────────────────────────
+
+
+def test_skip_existing_reuses_channels_by_name():
+    bp = blueprint(channels=[channel_bp("20", "allgemein", KIND_TEXT)])
+    target = make_guild(2, "Ziel")
+
+    existing = MagicMock(spec=discord.TextChannel)
+    existing.id = 600
+    existing.name = "allgemein"
+    target.channels = [existing]
+    target.create_text_channel = AsyncMock()
+
+    c = cloner_for(bp, target, options=CloneOptions(skip_existing=True))
+    asyncio.run(c._apply_channels())
+
+    target.create_text_channel.assert_not_awaited()
+    assert c.channel_map["20"] is existing
+
+
+def test_skip_existing_reuses_categories_by_name():
+    bp = blueprint(channels=[channel_bp("30", "INFO", KIND_CATEGORY)])
+    target = make_guild(2, "Ziel")
+
+    existing = MagicMock(spec=discord.CategoryChannel)
+    existing.id = 700
+    existing.name = "INFO"
+    target.categories = [existing]
+    target.create_category = AsyncMock()
+
+    c = cloner_for(bp, target, options=CloneOptions(skip_existing=True))
+    asyncio.run(c._apply_categories())
+
+    target.create_category.assert_not_awaited()
+    assert c.channel_map["30"] is existing
 
 
 # ── Abbruch ───────────────────────────────────────────────────────────────────
 
 
 def test_cancel_stops_the_run():
-    source = make_guild(1, "Quelle", roles=[make_role(10 + i, f"R{i}", i) for i in range(5)])
+    bp = blueprint(roles=[role_bp(str(i), f"R{i}", i) for i in range(1, 6)])
     target = make_guild(2, "Ziel")
 
-    c = ServerCloner(source, target, delay=0.01)
+    c = ServerCloner(bp, target, delay=0.01)
     original = target.create_role
 
     async def create_and_cancel(**kw):
@@ -321,3 +394,20 @@ def test_cancel_stops_the_run():
         asyncio.run(c.run())
 
     assert c.cancelled
+    assert c.report.roles_created < 5
+
+
+# ── Extras ohne Quell-Server ──────────────────────────────────────────────────
+
+
+def test_extras_warn_when_restoring_from_a_file():
+    """Aus einer Datei gibt es keine Nachrichten und keine Mitglieder."""
+    target = make_guild(2, "Ziel")
+    c = cloner_for(
+        blueprint(),
+        target,
+        options=CloneOptions(messages_per_channel=10, member_roles=True),
+    )
+    asyncio.run(c._apply_extras())
+
+    assert any("Quell-Server" in w for w in c.report.warnings)

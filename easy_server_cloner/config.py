@@ -44,6 +44,19 @@ def _get_int(key: str, default: int | None = None) -> int | None:
         ) from exc
 
 
+def _get_bool(key: str, default: bool = False) -> bool:
+    raw = _get_str(key).lower()
+    if not raw:
+        return default
+    if raw in ("1", "true", "yes", "ja", "on"):
+        return True
+    if raw in ("0", "false", "no", "nein", "off"):
+        return False
+    raise ConfigError(
+        f"{key}='{raw}' ist kein Wahrheitswert. Erlaubt sind true/false bzw. ja/nein."
+    )
+
+
 def _get_float(key: str, default: float) -> float:
     raw = _get_str(key)
     if not raw:
@@ -109,6 +122,10 @@ class Config:
     clone_delay: float = 0.6
     embed_color: int = 0x5865F2
     log_level: str = "INFO"
+    # Beide schalten privilegierte Intents ein, die im Developer Portal
+    # zusätzlich freigeschaltet werden müssen.
+    enable_message_clone: bool = False
+    enable_member_roles: bool = False
 
     @classmethod
     def load(cls) -> "Config":
@@ -144,6 +161,8 @@ class Config:
             clone_delay=delay,
             embed_color=_get_color("EMBED_COLOR", 0x5865F2),
             log_level=log_level,
+            enable_message_clone=_get_bool("ENABLE_MESSAGE_CLONE"),
+            enable_member_roles=_get_bool("ENABLE_MEMBER_ROLES"),
         )
 
     def is_owner(self, user_id: int) -> bool:

@@ -32,7 +32,11 @@ htmlcov/
 # ─── Logs & Laufzeit-Artefakte ────────────────────────────────────────────────
 *.log
 logs/
+
+# Server-Backups und Zwischenstände enthalten die komplette Rechtestruktur
+# deiner Server — die gehören niemals in ein Repository.
 backups/
+state/
 
 # ─── Editor / OS ──────────────────────────────────────────────────────────────
 .vscode/

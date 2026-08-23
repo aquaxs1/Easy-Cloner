@@ -1,0 +1,21 @@
+services:
+  easy-server-cloner:
+    build: .
+    container_name: easy-server-cloner
+    restart: unless-stopped
+
+    # Der Token kommt aus der .env und landet nie im Image.
+    env_file:
+      - .env
+
+    volumes:
+      # Backups und abgebrochene Läufe überleben so jeden Neustart.
+      - ./backups:/app/backups
+      - ./state:/app/state
+
+    # Der Bot baut nur ausgehende Verbindungen auf — keine Ports nach außen.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,10 +1,18 @@
-"""Alle Embeds des Bots an einer Stelle — damit das Design konsistent bleibt."""
+"""
+Alle Embeds des Bots an einer Stelle — damit das Design konsistent bleibt.
+
+Die Funktionen nehmen bewusst einen *Namen* als Quelle entgegen, keinen
+`discord.Guild`: beim Wiederherstellen aus einer Backup-Datei gibt es keinen
+Quell-Server mehr, wohl aber einen Bauplan mit Namen.
+"""
 
 from __future__ import annotations
 
 import discord
 
+from .blueprint import GuildBlueprint
 from .models import STAGE_ORDER, CloneOptions, CloneReport, Progress, Stage
+from .state import CloneState
 
 BRAND = "Easy Server Cloner"
 BRAND_ICON = "🧬"
@@ -55,6 +63,12 @@ def _truncate(lines: list[str], limit: int = 1000) -> str:
     return "\n".join(out) or "—"
 
 
+def _deletable(guild: discord.Guild) -> tuple[int, int]:
+    """Wie viele Channels und Rollen im Ziel gelöscht würden."""
+    roles = [r for r in guild.roles if not r.is_default() and not r.managed]
+    return len(guild.channels), len(roles)
+
+
 # ── Allgemein ─────────────────────────────────────────────────────────────────
 
 
@@ -75,19 +89,21 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
     embed = discord.Embed(
         title=f"{BRAND_ICON} {BRAND}",
         description=(
-            "Kopiert die komplette Struktur eines Discord-Servers auf einen "
-            "anderen: Rollen, Kategorien, Channels, Rechte, Emojis und Sticker."
+            "Kopiert die komplette Struktur eines Discord-Servers: Rollen, "
+            "Kategorien, Channels, Rechte, Emojis und Sticker — live von Server "
+            "zu Server oder über eine Backup-Datei."
         ),
         color=color,
     )
     embed.add_field(
         name="📋 Befehle",
         value=(
-            "**`/clone`** — Server klonen (mit Sicherheitsabfrage)\n"
-            "**`/preview`** — Vorschau: was würde kopiert werden?\n"
-            "**`/servers`** — Alle Server auflisten, auf denen der Bot ist\n"
-            "**`/status`** — Läuft gerade ein Klon-Vorgang?\n"
-            "**`/help`** — Diese Übersicht"
+            "**`/clone`** — Server auf einen anderen kopieren\n"
+            "**`/sync`** — nur Fehlendes ergänzen, nichts löschen\n"
+            "**`/backup`** — Server als Datei sichern\n"
+            "**`/restore`** — Backup-Datei auf einen Server anwenden\n"
+            "**`/preview`** — Trockenlauf, verändert nichts\n"
+            "**`/servers`** · **`/status`** · **`/help`**"
         ),
         inline=False,
     )
@@ -95,9 +111,11 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
         name="🚀 Schnellstart",
         value=(
             "1. Bot auf **beide** Server einladen (Quelle & Ziel)\n"
-            "2. `/servers` ausführen und beide Server-IDs kopieren\n"
-            "3. `/preview` für einen Trockenlauf\n"
-            "4. `/clone` ausführen und bestätigen"
+            "2. `/backup` auf dem Quell-Server — erst sichern\n"
+            "3. `/preview` für den Trockenlauf\n"
+            "4. `/clone` ausführen und bestätigen\n\n"
+            "IDs tippen musst du nicht: die Server-Felder schlagen dir alle "
+            "erreichbaren Server zur Auswahl vor."
         ),
         inline=False,
     )
@@ -106,9 +124,10 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
         value=(
             "• Der Bot braucht auf beiden Servern **Administrator**\n"
             "• Kopierte Rollen landen immer **unterhalb** der Bot-Rolle — "
-            "schiebe sie also möglichst weit nach oben\n"
+            "schiebe sie möglichst weit nach oben\n"
             "• `wipe_target: True` **löscht** alle Channels und Rollen im Ziel\n"
-            "• **Nachrichten und Mitglieder** lassen sich technisch nicht klonen"
+            "• Ein Abbruch kostet keine Arbeit: `/clone resume:True` macht weiter\n"
+            "• **Mitglieder** lassen sich nicht klonen, Nachrichten nur nachbauen"
         ),
         inline=False,
     )
@@ -119,34 +138,33 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
 
 
 def preview_embed(
-    source: discord.Guild,
+    blueprint: GuildBlueprint,
     target: discord.Guild,
-    counts: dict[str, int],
     est_seconds: float,
     color: int = COLOR_INFO,
+    *,
+    source_icon_url: str | None = None,
 ) -> discord.Embed:
+    channels, roles = _deletable(target)
     embed = discord.Embed(
         title="🔍 Vorschau — es wird noch nichts verändert",
         description=(
-            f"**Quelle** → {source.name} `{source.id}`\n"
+            f"**Quelle** → {blueprint.name}\n"
             f"**Ziel** → {target.name} `{target.id}`"
         ),
         color=color,
     )
-    if source.icon:
-        embed.set_thumbnail(url=source.icon.url)
+    if source_icon_url:
+        embed.set_thumbnail(url=source_icon_url)
 
     embed.add_field(
         name="📦 Wird kopiert",
-        value="\n".join(f"`{value:>4}` × {label}" for label, value in counts.items()),
+        value="\n".join(f"`{value:>4}` × {label}" for label, value in blueprint.counts().items()),
         inline=True,
     )
     embed.add_field(
         name="🗑️ Wird im Ziel gelöscht",
-        value=(
-            f"`{len(target.channels):>4}` × Channels\n"
-            f"`{len([r for r in target.roles if not r.is_default() and not r.managed]):>4}` × Rollen"
-        ),
+        value=f"`{channels:>4}` × Channels\n`{roles:>4}` × Rollen",
         inline=True,
     )
     embed.add_field(
@@ -157,8 +175,8 @@ def preview_embed(
     embed.add_field(
         name="🚫 Nicht übertragbar",
         value=(
-            "Nachrichten · Mitglieder · Rollen-Zuweisungen · "
-            "Webhooks · Bots · Server-Boosts · Audit-Log"
+            "Mitglieder · Bots · Webhooks · Server-Boosts · Audit-Log · "
+            "Reaktionen und Threads"
         ),
         inline=False,
     )
@@ -169,40 +187,46 @@ def preview_embed(
 
 
 def confirm_embed(
-    source: discord.Guild,
+    blueprint: GuildBlueprint,
     target: discord.Guild,
     options: CloneOptions,
-    counts: dict[str, int],
+    *,
+    title: str = "⚠️ Klon-Vorgang bestätigen",
+    resume_state: CloneState | None = None,
 ) -> discord.Embed:
-    total = sum(counts.values())
+    channels, roles = _deletable(target)
     embed = discord.Embed(
-        title="⚠️ Klon-Vorgang bestätigen",
+        title=title,
         description=(
             f"Du bist dabei, **{target.name}** mit dem Inhalt von "
-            f"**{source.name}** zu überschreiben."
+            f"**{blueprint.name}** zu überschreiben."
         ),
         color=COLOR_WARNING,
     )
     embed.add_field(
         name="📥 Quelle",
-        value=f"{source.name}\n`{source.id}`\n{total} Objekte",
+        value=f"{blueprint.name}\n{blueprint.total_objects} Objekte",
         inline=True,
     )
-    embed.add_field(
-        name="📤 Ziel",
-        value=f"{target.name}\n`{target.id}`",
-        inline=True,
-    )
+    embed.add_field(name="📤 Ziel", value=f"{target.name}\n`{target.id}`", inline=True)
     embed.add_field(name="​", value="​", inline=True)
     embed.add_field(name="⚙️ Optionen", value="\n".join(options.summary()), inline=True)
 
-    if options.wipe_target:
+    if resume_state is not None:
+        embed.add_field(
+            name="♻️ Fortsetzung",
+            value=(
+                f"**{resume_state.object_count} Objekte** aus einem abgebrochenen "
+                f"Lauf werden übersprungen. Es wird **nichts gelöscht**."
+            ),
+            inline=True,
+        )
+    elif options.wipe_target:
         embed.add_field(
             name="🗑️ Achtung: Ziel wird geleert",
             value=(
-                f"**{len(target.channels)} Channels** und "
-                f"**{len([r for r in target.roles if not r.is_default() and not r.managed])} "
-                f"Rollen** werden **unwiderruflich gelöscht**."
+                f"**{channels} Channels** und **{roles} Rollen** werden "
+                f"**unwiderruflich gelöscht**."
             ),
             inline=True,
         )
@@ -211,6 +235,17 @@ def confirm_embed(
             name="➕ Modus",
             value="Bestehende Inhalte im Ziel bleiben erhalten.",
             inline=True,
+        )
+
+    if options.messages_per_channel:
+        embed.add_field(
+            name="💬 Nachrichten",
+            value=(
+                f"Die letzten **{options.messages_per_channel}** Nachrichten je "
+                f"Channel werden per Webhook **nachgestellt** — nicht migriert. "
+                f"Autor und Avatar sehen echt aus, sind es aber nicht."
+            ),
+            inline=False,
         )
 
     embed.add_field(
@@ -226,18 +261,16 @@ def confirm_embed(
 
 def progress_embed(
     progress: Progress,
-    source: discord.Guild,
+    source_name: str,
     target: discord.Guild,
     color: int = COLOR_INFO,
 ) -> discord.Embed:
-    stage = progress.stage
     report = progress.report
 
     embed = discord.Embed(
-        title="🔄 Klon-Vorgang läuft…",
+        title="🔄 Vorgang läuft…",
         description=(
-            f"**{source.name}** → **{target.name}**\n\n"
-            f"{progress_bar(progress.fraction)}"
+            f"**{source_name}** → **{target.name}**\n\n{progress_bar(progress.fraction)}"
         ),
         color=color,
     )
@@ -245,7 +278,7 @@ def progress_embed(
     counter = f" · {progress.current}/{progress.total}" if progress.total else ""
     embed.add_field(
         name=f"Schritt {progress.stage_index}/{len(STAGE_ORDER)}",
-        value=f"**{stage.value}**{counter}\n{progress.detail or '…'}",
+        value=f"**{progress.stage.value}**{counter}\n{progress.detail or '…'}",
         inline=False,
     )
 
@@ -256,19 +289,26 @@ def progress_embed(
         ("🔊 Voice", report.voice_channels_created),
         ("😀 Emojis", report.emojis_created),
         ("🏷️ Sticker", report.stickers_created),
+        ("✉️ Nachrichten", report.messages_copied),
+        ("👥 Mitglieder", report.members_updated),
     ]
     embed.add_field(
-        name="✅ Bisher erstellt",
+        name="✅ Bisher erledigt",
         value=" · ".join(f"{label} `{n}`" for label, n in created if n) or "—",
         inline=False,
     )
 
+    footer_bits = []
     if report.warning_count or report.error_count:
-        embed.add_field(
-            name="📋 Meldungen",
-            value=f"⚠️ `{report.warning_count}` Warnungen · ❌ `{report.error_count}` Fehler",
-            inline=False,
+        footer_bits.append(
+            f"⚠️ `{report.warning_count}` Warnungen · ❌ `{report.error_count}` Fehler"
         )
+    if progress.throttled:
+        footer_bits.append(
+            f"🐢 Discord bremst — Pause automatisch auf `{progress.delay:.2f}s` erhöht"
+        )
+    if footer_bits:
+        embed.add_field(name="📋 Meldungen", value="\n".join(footer_bits), inline=False)
 
     return _footer(embed)
 
@@ -279,22 +319,22 @@ def progress_embed(
 def result_embed(
     report: CloneReport,
     stage: Stage,
-    source: discord.Guild,
+    source_name: str,
     target: discord.Guild,
 ) -> discord.Embed:
     if stage is Stage.CANCELLED:
-        title, color = "🛑 Klon-Vorgang abgebrochen", COLOR_WARNING
+        title, color = "🛑 Vorgang abgebrochen", COLOR_WARNING
     elif stage is Stage.FAILED:
-        title, color = "❌ Klon-Vorgang fehlgeschlagen", COLOR_DANGER
+        title, color = "❌ Vorgang fehlgeschlagen", COLOR_DANGER
     elif report.error_count:
-        title, color = "⚠️ Klon-Vorgang mit Fehlern beendet", COLOR_WARNING
+        title, color = "⚠️ Vorgang mit Fehlern beendet", COLOR_WARNING
     else:
-        title, color = "✅ Klon-Vorgang abgeschlossen", COLOR_SUCCESS
+        title, color = "✅ Vorgang abgeschlossen", COLOR_SUCCESS
 
     embed = discord.Embed(
         title=title,
         description=(
-            f"**{source.name}** → **{target.name}**\n"
+            f"**{source_name}** → **{target.name}**\n"
             f"Dauer: **{_fmt_duration(report.duration)}** · "
             f"**{report.total_created}** Objekte erstellt"
         ),
@@ -317,14 +357,18 @@ def result_embed(
         ),
         inline=True,
     )
-    embed.add_field(
-        name="🗑️ Gelöscht",
-        value=(
-            f"Channels `{report.channels_deleted}`\n"
-            f"Rollen `{report.roles_deleted}`"
-        ),
-        inline=True,
-    )
+
+    extra = [
+        f"Channels gelöscht `{report.channels_deleted}`",
+        f"Rollen gelöscht `{report.roles_deleted}`",
+    ]
+    if report.messages_copied:
+        extra.append(f"Nachrichten `{report.messages_copied}`")
+    if report.members_updated:
+        extra.append(f"Mitglieder `{report.members_updated}`")
+    if report.throttle_events:
+        extra.append(f"Rate-Limit `{report.throttle_events}×`")
+    embed.add_field(name="🔧 Weiteres", value="\n".join(extra), inline=True)
 
     if report.errors:
         embed.add_field(
@@ -339,18 +383,94 @@ def result_embed(
             inline=False,
         )
 
-    if stage is Stage.DONE and not report.error_count:
+    if stage is Stage.CANCELLED:
+        embed.add_field(
+            name="♻️ Weitermachen",
+            value="`/clone resume:True` setzt genau hier fort — nichts geht verloren.",
+            inline=False,
+        )
+    elif stage is Stage.DONE and not report.error_count:
         embed.add_field(
             name="💡 Nächste Schritte",
             value=(
                 "• Rollen-Rangfolge prüfen — sie liegt komplett unter der Bot-Rolle\n"
-                "• Mitgliedern ihre Rollen neu zuweisen\n"
+                "• Mitgliedern ihre Rollen zuweisen (`/clone member_roles:True`)\n"
                 "• Community-Funktionen (Regeln, Onboarding) manuell aktivieren"
             ),
             inline=False,
         )
 
     return _footer(embed)
+
+
+# ── /backup ───────────────────────────────────────────────────────────────────
+
+
+def backup_embed(
+    blueprint: GuildBlueprint,
+    filename: str,
+    size_text: str,
+    compressed: bool,
+    local_path: str | None,
+    color: int = COLOR_INFO,
+) -> discord.Embed:
+    embed = discord.Embed(
+        title="💾 Backup erstellt",
+        description=(
+            f"**{blueprint.name}** wurde vollständig gesichert.\n"
+            f"Mit `/restore` lässt sich daraus jederzeit ein Server aufbauen."
+        ),
+        color=COLOR_SUCCESS,
+    )
+    embed.add_field(
+        name="📦 Inhalt",
+        value="\n".join(
+            f"`{value:>4}` × {label}" for label, value in blueprint.counts().items()
+        ),
+        inline=True,
+    )
+    embed.add_field(
+        name="📄 Datei",
+        value=(
+            f"`{filename}`\n"
+            f"Größe: **{size_text}**\n"
+            f"{'gzip-komprimiert' if compressed else 'Klartext-JSON'}\n"
+            f"{'Bilder enthalten' if blueprint.has_images else 'ohne Bilder'}"
+        ),
+        inline=True,
+    )
+    if local_path:
+        embed.add_field(
+            name="🗄️ Zusätzlich gespeichert",
+            value=f"`{local_path}`",
+            inline=False,
+        )
+    embed.add_field(
+        name="🔐 Achtung",
+        value=(
+            "Die Datei enthält die komplette Rechtestruktur deines Servers. "
+            "Behandle sie so vertraulich wie den Server selbst."
+        ),
+        inline=False,
+    )
+    return _footer(embed)
+
+
+def backup_too_large_embed(size_text: str, limit_text: str) -> discord.Embed:
+    return _footer(
+        discord.Embed(
+            title="📦 Backup zu groß für Discord",
+            description=(
+                f"Das Backup ist **{size_text}** groß, Discord nimmt hier aber nur "
+                f"bis **{limit_text}** an.\n\n"
+                f"**Lösung:** `/backup include_images:False` — dann bleiben Icon, "
+                f"Emojis und Sticker außen vor und die Struktur passt problemlos. "
+                f"Eine vollständige Kopie liegt weiterhin im Ordner `backups/` "
+                f"neben dem Bot."
+            ),
+            color=COLOR_WARNING,
+        )
+    )
 
 
 # ── /servers ──────────────────────────────────────────────────────────────────
@@ -362,8 +482,7 @@ def servers_embed(
     embed = discord.Embed(
         title="🌐 Verfügbare Server",
         description=(
-            f"**{bot_user}** ist auf **{len(guilds)}** Server(n).\n"
-            "Kopiere die IDs für `/clone` und `/preview`."
+            f"**{bot_user}** ist auf **{len(guilds)}** Server(n)."
             if guilds
             else "Der Bot ist auf keinem Server. Lade ihn zuerst ein."
         ),
@@ -382,7 +501,5 @@ def servers_embed(
             inline=True,
         )
     if len(guilds) > 24:
-        embed.add_field(
-            name="​", value=f"… und {len(guilds) - 24} weitere", inline=False
-        )
+        embed.add_field(name="​", value=f"… und {len(guilds) - 24} weitere", inline=False)
     return _footer(embed)
