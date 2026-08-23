@@ -1,0 +1,22 @@
+[project]
+name = "easy-server-cloner"
+version = "2.0.0"
+description = "Discord-Bot, der Server-Strukturen klont: Rollen, Channels, Rechte, Emojis."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "discord.py>=2.4,<3.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+# Sorgt dafür, dass `python -m pytest` das Paket auch aus Unterordnern findet.
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
