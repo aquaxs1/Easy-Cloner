@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found — Easy Server Cloner</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#070A16">
+<link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+  /* Die 404 füllt den Bildschirm und braucht deshalb keine eigene Navigation. */
+  .lost { min-height: 100vh; display: grid; place-items: center; text-align: center; padding: 3rem 1.5rem; }
+  .lost .mark { width: 132px; animation: float 8s ease-in-out infinite; filter: drop-shadow(0 20px 44px rgba(60,40,180,0.5)); }
+  .lost .code404 {
+    font-family: var(--mono);
+    font-size: clamp(4rem, 16vw, 8rem);
+    font-weight: 500;
+    letter-spacing: -0.05em;
+    margin: 1.2rem 0 0;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+<canvas id="pixelfield" aria-hidden="true"></canvas>
+
+<main class="lost">
+  <div>
+    <img class="mark" src="/assets/img/logo.svg" alt="" width="132" height="132">
+    <p class="code404 grad-text">404</p>
+    <h1 style="font-size:clamp(1.5rem,4vw,2.2rem);margin-top:0.6rem">This page dissolved into pixels</h1>
+    <p style="max-width:44ch;margin-inline:auto">
+      The address you followed does not lead anywhere. It may have moved, or it may
+      never have existed at all.
+    </p>
+    <div class="btn-row" style="justify-content:center;margin-top:1.6rem">
+      <a class="btn" href="/index.html">
+        Back to home
+        <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="/features.html">Features</a>
+      <a class="btn btn-ghost" href="/setup.html">Setup</a>
+      <a class="btn btn-ghost" href="/faq.html">FAQ</a>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>
