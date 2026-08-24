@@ -516,7 +516,7 @@
                 <animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.3;0.36;0.95;1"/>
               </text>
 
-              <!-- Zwischenstand: Rahmen steht immer, nur der Haken kommt dazu -->
+              <!-- Intermediate state: the frame is always there, only the check is added -->
               <rect x="60" y="100" width="300" height="40" rx="10" fill="#9B8AFF" fill-opacity="0.07" stroke="#2A2350" stroke-width="1"/>
               <text x="78" y="118" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9.5">state/staging.json</text>
               <text x="78" y="132" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">47 objects checkpointed</text>
@@ -530,7 +530,7 @@
               <text x="60" y="176" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">Resumed run</text>
               <rect x="60" y="188" width="300" height="16" rx="8" fill="#151B36"/>
               <g clip-path="url(#s6c2)">
-                <!-- Der bereits erledigte Teil wird übersprungen, nicht neu gebaut. -->
+                <!-- The part already done is skipped, not rebuilt. -->
                 <rect x="60" y="188" width="168" height="16" fill="#6C58F0" fill-opacity="0.4"/>
                 <rect x="60" y="188" width="0" height="16" rx="8" fill="url(#s6bar)">
                   <animate attributeName="width" values="0;0;168;300;300" dur="6s" repeatCount="indefinite" keyTimes="0;0.5;0.56;0.9;1"/>
