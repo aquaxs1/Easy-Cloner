@@ -119,11 +119,6 @@
               The bot needs to stand on both sides: it reads from the source server
               and writes to the target. One OAuth link, used twice — once per server.
             </p>
-            <p>
-              It asks for <strong>Administrator</strong> for one reason: Discord only
-              lets a bot hand out permissions it holds itself. With anything less,
-              your roles would arrive incomplete.
-            </p>
             <div class="slide-note">
               <strong>Tip</strong>
               <span>Drag the bot's role to the top of the target server's role list — Discord never lets a bot create roles above its own.</span>
@@ -275,10 +270,6 @@
               stops and shows you exactly what it is about to do: how many objects
               come in, how many channels and roles go out, and which options are on.
             </p>
-            <p>
-              Only the person who ran the command can press the button, and the
-              prompt expires after 60 seconds on its own.
-            </p>
             <div class="slide-note warn">
               <strong>Safety</strong>
               <span>If source and target are the same server, the bot refuses outright — that mistake would delete the original.</span>
@@ -336,11 +327,6 @@
               The bot posts a progress message and keeps it updated: which stage it is
               on, how far along, and how many roles, channels and emojis exist so far.
               A cancel button sits right underneath.
-            </p>
-            <p>
-              Roles are created from the highest down — Discord inserts every new role
-              at the bottom, so building the other way around would flip your whole
-              hierarchy upside down.
             </p>
             <div class="slide-note">
               <strong>Self-pacing</strong>
@@ -405,11 +391,6 @@
               blueprint. Keep it, version it, hand it to a co-owner. Above one
               megabyte it is gzip-compressed automatically so it stays under
               Discord's upload limit.
-            </p>
-            <p>
-              <code>/restore</code> takes that file and builds the server back —
-              on a brand new server, months later, without the original needing to
-              exist any more.
             </p>
             <div class="slide-note warn">
               <strong>Treat it like a key</strong>
