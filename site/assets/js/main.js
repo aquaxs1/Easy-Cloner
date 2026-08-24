@@ -215,7 +215,7 @@
     items.forEach((el) => io.observe(el));
   }
 
-  /* ── Lichtschein auf Karten ──────────────────────────────────────────── */
+  /* ── Glow on cards ───────────────────────────────────────────────────── */
 
   function initCardGlow() {
     if (reduceMotion || !window.matchMedia("(hover: hover)").matches) return;
