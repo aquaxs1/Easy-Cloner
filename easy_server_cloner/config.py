@@ -48,9 +48,9 @@ def _get_bool(key: str, default: bool = False) -> bool:
     raw = _get_str(key).lower()
     if not raw:
         return default
-    if raw in ("1", "true", "yes", "ja", "on"):
+    if raw in ("1", "true", "yes", "on"):
         return True
-    if raw in ("0", "false", "no", "nein", "off"):
+    if raw in ("0", "false", "no", "off"):
         return False
     raise ConfigError(
         f"{key}='{raw}' is not a boolean. Allowed: true/false or yes/no."
@@ -133,14 +133,14 @@ class Config:
         load_dotenv(ENV_FILE)
 
         token = _get_str("DISCORD_TOKEN") or _get_str("BOT_TOKEN")
-        if not token or token.startswith("hier."):
+        if not token or token.startswith("put."):
             raise ConfigError(
                 "No bot token is configured.\n\n"
                 "  1. Copy the template:  cp .env.example .env\n"
                 "  2. Open .env and put your token in DISCORD_TOKEN\n"
-                "  3. Den Token findest du unter "
+                "  3. You will find the token under "
                 "https://discord.com/developers/applications "
-                "→ dein Bot → 'Bot' → 'Reset Token'\n\n"
+                "→ your bot → 'Bot' → 'Reset Token'\n\n"
                 "Alternativ als Umgebungsvariable:  export DISCORD_TOKEN=...",
             )
 

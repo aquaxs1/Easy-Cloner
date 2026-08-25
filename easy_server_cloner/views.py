@@ -34,7 +34,7 @@ class ConfirmView(discord.ui.View):
                 item.disabled = True
 
     @discord.ui.button(
-        label="Jetzt klonen", style=discord.ButtonStyle.danger, emoji="🧬"
+        label="Clone now", style=discord.ButtonStyle.danger, emoji="🧬"
     )
     async def confirm(
         self, interaction: discord.Interaction, button: discord.ui.Button

@@ -120,9 +120,9 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
         inline=False,
     )
     embed.add_field(
-        name="⚠️ Wichtig zu wissen",
+        name="⚠️ Worth knowing",
         value=(
-            "• Der Bot braucht auf beiden Servern **Administrator**\n"
+            "• The bot needs **administrator** on both servers\n"
             "• Copied roles always land **below** the bot's own role — "
             "move it as high as you can\n"
             "• `wipe_target: True` **deletes** every channel and role in the target\n"
@@ -293,7 +293,7 @@ def progress_embed(
         ("👥 Members", report.members_updated),
     ]
     embed.add_field(
-        name="✅ Bisher erledigt",
+        name="✅ Done so far",
         value=" · ".join(f"{label} `{n}`" for label, n in created if n) or "—",
         inline=False,
     )
@@ -385,8 +385,8 @@ def result_embed(
 
     if stage is Stage.CANCELLED:
         embed.add_field(
-            name="♻️ Weitermachen",
-            value="`/clone resume:True` setzt genau hier fort — nichts geht verloren.",
+            name="♻️ Carrying on",
+            value="`/clone resume:True` picks up exactly here — nothing is lost.",
             inline=False,
         )
     elif stage is Stage.DONE and not report.error_count:
@@ -423,7 +423,7 @@ def backup_embed(
         color=COLOR_SUCCESS,
     )
     embed.add_field(
-        name="📦 Inhalt",
+        name="📦 Contents",
         value="\n".join(
             f"`{value:>4}` × {label}" for label, value in blueprint.counts().items()
         ),
@@ -462,7 +462,7 @@ def backup_too_large_embed(size_text: str, limit_text: str) -> discord.Embed:
             title="📦 Backup too large for Discord",
             description=(
                 f"The backup is **{size_text}**, but Discord only accepts "
-                f"bis **{limit_text}** an.\n\n"
+                f"up to **{limit_text}**.\n\n"
                 f"**Fix:** `/backup include_images:False` — that leaves out the icon, "
                 f"emojis and stickers, and the structure fits comfortably. "
                 f"A complete copy still sits in the `backups/` folder "
@@ -496,7 +496,7 @@ def servers_embed(
             value=(
                 f"`{guild.id}`\n"
                 f"{len(guild.channels)} channels · {len(guild.roles)} roles\n"
-                f"{'Bereit' if admin else 'Kein Administrator'}"
+                f"{'Ready' if admin else 'Not an administrator'}"
             ),
             inline=True,
         )

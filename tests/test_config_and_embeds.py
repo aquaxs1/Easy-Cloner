@@ -75,7 +75,7 @@ def test_token_is_required(monkeypatch):
 
 
 def test_placeholder_token_is_rejected(monkeypatch):
-    _env(monkeypatch, DISCORD_TOKEN="hier.deinen.bot-token.eintragen")
+    _env(monkeypatch, DISCORD_TOKEN="put.your.bot-token.here")
     with pytest.raises(ConfigError):
         Config.load()
 
@@ -99,7 +99,7 @@ def test_clone_delay_has_a_floor(monkeypatch):
 
 @pytest.mark.parametrize(
     "value, expected",
-    [("true", True), ("JA", True), ("1", True), ("false", False), ("nein", False), ("", False)],
+    [("true", True), ("YES", True), ("1", True), ("false", False), ("no", False), ("", False)],
 )
 def test_privileged_flags_are_parsed(monkeypatch, value, expected):
     _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", ENABLE_MESSAGE_CLONE=value)

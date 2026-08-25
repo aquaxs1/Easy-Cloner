@@ -67,12 +67,12 @@ class CloneBot(discord.Client):
             log.info("Global slash commands registered (up to 1h propagation delay).")
 
     async def on_ready(self) -> None:
-        # on_ready feuert bei jedem Reconnect erneut — einmalige Aktionen
+        # on_ready fires again on every reconnect — one-off actions
         # and therefore need guarding.
         if not self._greeted:
             self._greeted = True
             log.info("Eingeloggt als %s (ID %s)", self.user, self.user.id if self.user else "?")
-            log.info("Aktiv auf %d Server(n).", len(self.guilds))
+            log.info("Active on %d server(s).", len(self.guilds))
 
         await self.change_presence(
             activity=discord.Activity(
@@ -100,7 +100,7 @@ def _resolve_guild(bot: CloneBot, raw: str, label: str = "Server") -> discord.Gu
     if guild is None:
         raise CloneError(
             f"Server `{raw}` not found. Is the bot invited there?\n"
-            f"Mit `/servers` siehst du alle erreichbaren Server."
+            f"`/servers` lists every server the bot can reach."
         )
     return guild
 
@@ -221,7 +221,7 @@ def register_commands(bot: CloneBot) -> None:  # noqa: C901 - one registration s
                 minutes = int(state.age_seconds // 60)
                 lines.append(
                     f"♻️ **{guild.name}** — interrupted run with "
-                    f"{state.object_count} Objekten, vor {minutes} Min. "
+                    f"{state.object_count} objects, {minutes} min ago. "
                     f"→ `/clone resume:True`"
                 )
 

@@ -38,7 +38,7 @@ def cloner_for(bp, target, **kw):
 
 def test_source_equals_target_is_rejected():
     """The most expensive mistake has to be caught before the first delete."""
-    target = make_guild(1, "Mein Server")
+    target = make_guild(1, "My Server")
     c = cloner_for(blueprint(source_id="1"), target)
 
     with pytest.raises(CloneError, match="are the same"):
@@ -229,7 +229,7 @@ def test_settings_retry_drops_boost_only_fields():
     ],
 )
 def test_bitrate_follows_target_limit(source_bitrate, target_limit, expected):
-    """Fest verdrahtete 96 kbit/s waren in beide Richtungen falsch."""
+    """A hard-wired 96 kbit/s was wrong in both directions."""
     target = make_guild(2, "Target")
     target.bitrate_limit = target_limit
     target.create_voice_channel = AsyncMock(return_value=MagicMock())
@@ -278,7 +278,7 @@ def test_resume_skips_objects_that_still_exist():
     asyncio.run(c._apply_roles())
 
     created = [call.kwargs["name"] for call in target.create_role.await_args_list]
-    assert created == ["Mod"]  # Admin war schon da
+    assert created == ["Mod"]  # the admin was already there
     assert c.role_map["10"] is existing_role
 
 

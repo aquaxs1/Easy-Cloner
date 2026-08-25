@@ -137,7 +137,7 @@ def test_from_guild_without_images_leaves_assets_empty():
 
 def test_round_trip_preserves_everything():
     original = blueprint(
-        name="Mein Server",
+        name="My Server",
         roles=[
             role_bp(EVERYONE_KEY, "@everyone", 0, default=True, permissions=2048),
             role_bp("10", "Admin", 5, permissions=8),

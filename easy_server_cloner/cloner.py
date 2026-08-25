@@ -179,7 +179,7 @@ class ServerCloner:
             self.state.save()
             self.report.warn(
                 "Job cancelled. The checkpoint has been saved — "
-                "`/clone resume:True` setzt dort fort."
+                "`/clone resume:True` picks up there."
             )
             raise
         except CloneError as exc:
@@ -676,7 +676,7 @@ class ServerCloner:
                 continue
             data = emoji.image_bytes
             if not data:
-                await self._emit(detail=f":{emoji.name}: (kein Bild)", current=index)
+                await self._emit(detail=f":{emoji.name}: (no image)", current=index)
                 continue
             try:
                 await self._call(
@@ -714,7 +714,7 @@ class ServerCloner:
                 continue
             data = sticker.image_bytes
             if not data:
-                await self._emit(detail=f"{sticker.name} (kein Bild)", current=index)
+                await self._emit(detail=f"{sticker.name} (no image)", current=index)
                 continue
             try:
                 suffix = "gif" if sticker.file_format == "gif" else "png"

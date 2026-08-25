@@ -62,7 +62,7 @@ def main() -> int:
     except discord.PrivilegedIntentsRequired:
         log.error(
             "Discord verlangt privilegierte Intents. Aktiviere sie im Developer "
-            "Portal unter 'Bot' → 'Privileged Gateway Intents'."
+            "portal under 'Bot' → 'Privileged Gateway Intents'."
         )
         return 1
     except KeyboardInterrupt:

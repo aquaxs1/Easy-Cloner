@@ -191,7 +191,7 @@
     });
   }
 
-  /* ── Auftauchen beim Scrollen ────────────────────────────────────────── */
+  /* ── revealing on scroll ───────────────────────────────────────────── */
 
   function initReveal() {
     const items = $$(".reveal");
@@ -264,7 +264,7 @@
     }
   }
 
-  /* ── Inhaltsverzeichnis mitlaufen lassen ─────────────────────────────── */
+  /* ── keeping the table of contents in step ──────────────────────────── */
 
   function initTocSpy() {
     const links = $$(".toc a");
@@ -334,7 +334,7 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        // Am rechten Rand hinaus, links wieder herein — wie im Logo.
+        // Out at the right edge, back in at the left — as in the logo.
         if (p.x > width + 10) {
           p.x = -10;
           p.y = Math.random() * height;
