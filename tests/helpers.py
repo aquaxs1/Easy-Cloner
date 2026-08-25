@@ -1,7 +1,7 @@
 """Gemeinsame Test-Attrappen.
 
-`MagicMock(spec=...)` besteht `isinstance`-Prüfungen, deshalb lässt sich damit
-ein Discord-Server nachbilden, ohne echte Gateway-Objekte zu bauen.
+`MagicMock(spec=...)` passes `isinstance` checks, so it can stand in for a
+Discord server without building real gateway objects.
 """
 
 from __future__ import annotations
@@ -66,7 +66,7 @@ def make_guild(guild_id: int, name: str, *, roles=None, bot_top_position=99, fea
     guild.explicit_content_filter = discord.ContentFilter.disabled
     guild.system_channel_flags = discord.SystemChannelFlags()
 
-    # Wie bei Discord ist @everyone Teil der Rollenliste.
+    # As in Discord, @everyone is part of the role list.
     guild.default_role = next(
         (r for r in guild.roles if r.is_default()),
         make_role(guild_id, "@everyone", 0, default=True),

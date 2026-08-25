@@ -1,4 +1,4 @@
-"""Interaktive Komponenten: Sicherheitsabfrage und Abbruch-Knopf."""
+"""Interactive components: the safety prompt and the cancel button."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from . import embeds
 
 
 class ConfirmView(discord.ui.View):
-    """Zwei-Knopf-Abfrage, die nur der auslösende Nutzer bedienen darf."""
+    """A two-button prompt only the invoking user may operate."""
 
     def __init__(self, requester_id: int, *, timeout: float = 60.0) -> None:
         super().__init__(timeout=timeout)
@@ -21,7 +21,7 @@ class ConfirmView(discord.ui.View):
             await interaction.response.send_message(
                 embed=embeds.error(
                     "Nicht dein Vorgang",
-                    "Nur wer den Befehl ausgeführt hat, darf ihn bestätigen.",
+                    "Only the person who ran the command can confirm it.",
                 ),
                 ephemeral=True,
             )
@@ -56,7 +56,7 @@ class ConfirmView(discord.ui.View):
         await interaction.response.edit_message(
             embed=embeds.info(
                 "✖️ Abgebrochen",
-                "Es wurde nichts verändert.",
+                "Nothing was changed.",
                 color=embeds.COLOR_MUTED,
             ),
             view=self,
@@ -69,7 +69,7 @@ class ConfirmView(discord.ui.View):
 
 
 class CancelView(discord.ui.View):
-    """Abbruch-Knopf, der während des laufenden Klons angezeigt wird."""
+    """The cancel button shown while a clone is running."""
 
     def __init__(self, cloner, requester_id: int) -> None:
         super().__init__(timeout=None)
@@ -81,7 +81,7 @@ class CancelView(discord.ui.View):
             await interaction.response.send_message(
                 embed=embeds.error(
                     "Nicht dein Vorgang",
-                    "Nur wer den Klon gestartet hat, kann ihn abbrechen.",
+                    "Only the person who started the clone can cancel it.",
                 ),
                 ephemeral=True,
             )

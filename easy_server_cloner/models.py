@@ -1,4 +1,4 @@
-"""Datenmodelle für Klon-Optionen, Fortschritt und Ergebnisbericht."""
+"""Data models for clone options, progress and the result report."""
 
 from __future__ import annotations
 
@@ -8,27 +8,27 @@ from enum import Enum
 
 
 class Stage(str, Enum):
-    """Die Phasen, die ein Klon-Vorgang durchläuft."""
+    """The stages a clone run passes through."""
 
     IDLE = "Bereit"
-    VALIDATING = "Prüfe Voraussetzungen"
+    VALIDATING = "Checking prerequisites"
     READING = "Lese Quell-Server"
-    WIPING = "Räume Ziel-Server auf"
-    SETTINGS = "Übertrage Server-Einstellungen"
-    ROLES = "Kopiere Rollen"
+    WIPING = "Clearing the target server"
+    SETTINGS = "Copying server settings"
+    ROLES = "Copying roles"
     CATEGORIES = "Kopiere Kategorien"
     CHANNELS = "Kopiere Channels"
     FINALIZING = "Setze Feinheiten"
     EMOJIS = "Kopiere Emojis"
     STICKERS = "Kopiere Sticker"
-    MESSAGES = "Baue Nachrichten nach"
-    MEMBER_ROLES = "Weise Mitgliedern Rollen zu"
+    MESSAGES = "Re-staging messages"
+    MEMBER_ROLES = "Assigning roles to members"
     DONE = "Abgeschlossen"
     FAILED = "Fehlgeschlagen"
     CANCELLED = "Abgebrochen"
 
 
-# Reihenfolge für die Fortschrittsanzeige. IDLE und die Endzustände zählen nicht.
+# Order for the progress display. IDLE and the terminal states do not count.
 STAGE_ORDER: tuple[Stage, ...] = (
     Stage.VALIDATING,
     Stage.READING,
@@ -49,7 +49,7 @@ END_STAGES = (Stage.DONE, Stage.FAILED, Stage.CANCELLED)
 
 @dataclass(slots=True)
 class CloneOptions:
-    """Was genau soll kopiert werden?"""
+    """What exactly should be copied?"""
 
     wipe_target: bool = True
     settings: bool = True
@@ -61,40 +61,40 @@ class CloneOptions:
     dry_run: bool = False
 
     # Gleichnamige Objekte im Ziel wiederverwenden statt doppelt anzulegen.
-    # Das ist der Kern von /sync.
+    # This is the heart of /sync.
     skip_existing: bool = False
 
-    # Wie viele Nachrichten je Text-Channel per Webhook nachgebaut werden.
-    # 0 = aus. Braucht den privilegierten Message-Content-Intent.
+    # How many messages per text channel are re-staged through a webhook.
+    # 0 = off. Needs the privileged message content intent.
     messages_per_channel: int = 0
 
-    # Rollen an Mitglieder verteilen, die auf beiden Servern sind.
-    # Braucht den privilegierten Members-Intent.
+    # Give roles to members present on both servers.
+    # Needs the privileged members intent.
     member_roles: bool = False
 
     def summary(self) -> list[str]:
-        """Menschenlesbare Auflistung der aktiven Optionen."""
+        """A human-readable list of the active options."""
         parts = [
             ("Server-Einstellungen", self.settings),
             ("Icon & Banner", self.icon),
-            ("Rollen", self.roles),
+            ("Roles", self.roles),
             ("Kategorien & Channels", self.channels),
             ("Emojis", self.emojis),
             ("Sticker", self.stickers),
         ]
         lines = [f"{'✅' if on else '❌'} {label}" for label, on in parts]
         if self.messages_per_channel:
-            lines.append(f"✅ Nachrichten (max. {self.messages_per_channel}/Channel)")
+            lines.append(f"✅ Messages (max {self.messages_per_channel}/channel)")
         if self.member_roles:
-            lines.append("✅ Rollen-Zuweisungen")
+            lines.append("✅ Role assignments")
         if self.skip_existing:
-            lines.append("♻️ Vorhandenes wird wiederverwendet")
+            lines.append("♻️ Existing objects are reused")
         return lines
 
 
 @dataclass(slots=True)
 class CloneReport:
-    """Zählt mit, was tatsächlich passiert ist."""
+    """Counts what actually happened."""
 
     roles_created: int = 0
     categories_created: int = 0
@@ -114,8 +114,8 @@ class CloneReport:
     started_at: float = field(default_factory=time.monotonic)
     finished_at: float | None = None
 
-    # Warnungen und Fehler werden gedeckelt, damit ein kaputter Server das
-    # Embed nicht sprengt — die Zähler bleiben trotzdem korrekt.
+    # Warnings and errors are capped so a broken server cannot blow up the
+    # embed — the counters stay correct regardless.
     _warning_overflow: int = 0
     _error_overflow: int = 0
 
@@ -167,14 +167,14 @@ class CloneReport:
 
 @dataclass(slots=True)
 class Progress:
-    """Aktueller Stand, den die Live-Anzeige rendert."""
+    """The current state the live display renders."""
 
     stage: Stage = Stage.IDLE
     detail: str = ""
     current: int = 0
     total: int = 0
     report: CloneReport = field(default_factory=CloneReport)
-    # Aktuelle Pause der adaptiven Taktung — für die Anzeige "Discord bremst".
+    # The adaptive pacer's current pause — for the "Discord is throttling" note.
     delay: float = 0.0
     throttled: bool = False
 
@@ -187,7 +187,7 @@ class Progress:
 
     @property
     def fraction(self) -> float:
-        """Grober Gesamtfortschritt zwischen 0.0 und 1.0."""
+        """Rough overall progress between 0.0 and 1.0."""
         if self.stage in END_STAGES:
             return 1.0
         if self.stage is Stage.IDLE:

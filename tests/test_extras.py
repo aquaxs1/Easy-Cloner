@@ -1,4 +1,4 @@
-"""Tests für Nachrichten-Nachbau und Rollen-Zuweisung."""
+"""Tests for message re-staging and role assignment."""
 
 from __future__ import annotations
 
@@ -49,11 +49,11 @@ def build_cloner(target, source, channels=None):
     return ServerCloner(bp, target, delay=0, source_guild=source)
 
 
-# ── Nachrichten ───────────────────────────────────────────────────────────────
+# ── Messages ──────────────────────────────────────────────────────────────────
 
 
 def test_messages_are_reposted_in_chronological_order():
-    """Discord liefert neueste zuerst — im Ziel muss die Reihenfolge stimmen."""
+    """Discord returns newest first — the order in the target must be right."""
     source = make_guild(1, "Quelle")
     target = make_guild(2, "Ziel")
 
@@ -78,7 +78,7 @@ def test_messages_are_reposted_in_chronological_order():
 
 
 def test_webhook_is_removed_afterwards():
-    """Ein zurückgelassener Webhook wäre ein dauerhaftes Sicherheitsloch."""
+    """A webhook left behind would be a permanent security hole."""
     source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
     source.get_channel = MagicMock(return_value=make_history_channel([make_message()]))
 
@@ -119,7 +119,7 @@ def test_webhook_is_removed_even_when_sending_fails():
 def test_mass_mentions_are_defused_and_nobody_is_pinged():
     source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
     source.get_channel = MagicMock(
-        return_value=make_history_channel([make_message("Achtung @everyone und @here!")])
+        return_value=make_history_channel([make_message("Heads up @everyone and @here!")])
     )
 
     mirror = MagicMock(spec=discord.TextChannel)
@@ -134,7 +134,7 @@ def test_mass_mentions_are_defused_and_nobody_is_pinged():
     asyncio.run(extras.copy_messages(cloner, source, 10))
 
     kwargs = webhook.send.await_args.kwargs
-    # Ein unsichtbares Zeichen bricht die Erwähnung auf.
+    # An invisible character breaks the mention apart.
     assert "@everyone" not in kwargs["content"]
     assert "@here" not in kwargs["content"]
     assert kwargs["allowed_mentions"].everyone is False
@@ -193,10 +193,10 @@ def test_unreadable_history_is_reported_not_fatal():
 
     asyncio.run(extras.copy_messages(cloner, source, 10))
 
-    assert any("Zugriff" in w for w in cloner.report.warnings)
+    assert any("No access" in w for w in cloner.report.warnings)
 
 
-# ── Rollen-Zuweisung ──────────────────────────────────────────────────────────
+# ── Role assignment ───────────────────────────────────────────────────────────
 
 
 def make_member(user_id, roles=(), bot=False):
@@ -246,7 +246,7 @@ def test_roles_are_assigned_to_shared_members():
 
 def test_bots_and_strangers_are_skipped():
     source = make_guild(1, "Quelle")
-    source.get_member = MagicMock(return_value=None)  # niemand ist auf beiden Servern
+    source.get_member = MagicMock(return_value=None)  # nobody is on both servers
 
     bot_member = make_member(1, bot=True)
     stranger = make_member(2)
@@ -261,7 +261,7 @@ def test_bots_and_strangers_are_skipped():
 
 
 def test_roles_above_the_bot_are_not_attempted():
-    """Discord verbietet das ohnehin — ein Versuch wäre nur ein Fehler mehr."""
+    """Discord forbids it anyway — trying would only add another error."""
     source_admin = make_role(11, "Admin", 5)
     source = make_guild(1, "Quelle")
     source.get_member = MagicMock(return_value=make_member(555, roles=[source_admin]))
@@ -271,7 +271,7 @@ def test_roles_above_the_bot_are_not_attempted():
     target.me.top_role = make_role(900, "Bot", 3)
 
     cloner = ServerCloner(blueprint(), target, delay=0, source_guild=source)
-    # Die gemappte Rolle sitzt ÜBER der Bot-Rolle.
+    # The mapped role sits ABOVE the bot's role.
     cloner.role_map["11"] = make_role(77, "Admin", 8)
 
     asyncio.run(extras.assign_member_roles(cloner, source))

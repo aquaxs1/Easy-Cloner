@@ -1,13 +1,13 @@
 """
-Adaptive Taktung der API-Aufrufe.
+Adaptive pacing of API calls.
 
-discord.py wartet Rate-Limits intern selbst ab — nach außen sieht man kein 429,
-sondern nur einen Aufruf, der ungewöhnlich lange gedauert hat. Genau daran
-erkennt der Pacer, dass Discord bremst, und vergrößert den Abstand zwischen den
-Aufrufen. Läuft alles glatt, nähert er sich wieder dem Wunschwert an.
+discord.py waits out rate limits internally — from the outside you never see
+a 429, only a call that took unusually long. That is exactly how the pacer
+notices Discord throttling, and widens the gap between calls. When everything
+runs smoothly it eases back towards the desired value.
 
-Das ist schneller als eine fest eingestellte, sicherheitshalber große Pause und
-zugleich schonender als eine fest eingestellte kleine.
+That is faster than a fixed, defensively large pause, and gentler than a
+fixed small one.
 """
 
 from __future__ import annotations
@@ -18,23 +18,23 @@ import time
 
 log = logging.getLogger(__name__)
 
-# Ab dieser Dauer gilt ein einzelner API-Aufruf als ausgebremst.
+# From this duration on, a single API call counts as throttled.
 SLOW_CALL_SECONDS = 1.5
 
-# Grenzen, zwischen denen sich die Pause bewegt.
+# Bounds the pause moves between.
 MIN_DELAY = 0.25
 MAX_DELAY = 5.0
 
-# Wie stark bei Bremsung erhöht bzw. bei ruhigem Lauf wieder gesenkt wird.
+# How sharply it rises when throttled, and falls again on a quiet run.
 BACKOFF_FACTOR = 1.6
 RECOVER_FACTOR = 0.93
 
-# So viele störungsfreie Aufrufe müssen vergehen, bevor wieder beschleunigt wird.
+# This many undisturbed calls must pass before speeding up again.
 RECOVER_AFTER = 5
 
 
 class AdaptivePacer:
-    """Hält den Abstand zwischen API-Aufrufen und passt ihn laufend an."""
+    """Holds the gap between API calls and keeps adjusting it."""
 
     def __init__(self, base_delay: float, *, cancel_event: asyncio.Event | None = None) -> None:
         self.base_delay = max(MIN_DELAY, base_delay)
@@ -47,7 +47,7 @@ class AdaptivePacer:
     # ── Messung ───────────────────────────────────────────────────────────────
 
     def observe(self, elapsed: float) -> None:
-        """Meldet die Dauer eines API-Aufrufs zurück."""
+        """Reports back how long an API call took."""
         self.calls += 1
         if elapsed >= SLOW_CALL_SECONDS:
             self.throttle_events += 1
@@ -68,7 +68,7 @@ class AdaptivePacer:
     # ── Warten ────────────────────────────────────────────────────────────────
 
     async def wait(self) -> None:
-        """Wartet die aktuelle Pause ab. Ein Abbruch wirkt sofort."""
+        """Waits out the current pause. A cancellation takes effect at once."""
         if self._cancel is not None and self._cancel.is_set():
             raise asyncio.CancelledError
         if self.delay <= 0:
@@ -83,7 +83,7 @@ class AdaptivePacer:
         raise asyncio.CancelledError
 
     async def call(self, coro):
-        """Führt einen API-Aufruf aus, misst ihn und wartet anschließend."""
+        """Runs an API call, measures it, then waits."""
         started = time.monotonic()
         try:
             return await coro

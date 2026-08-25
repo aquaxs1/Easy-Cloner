@@ -1,13 +1,13 @@
 """
 Fortsetzbarkeit.
 
-Ein Klon großer Server dauert Minuten. Bricht er ab — Verbindungsverlust,
-Neustart, Abbruch-Knopf —, soll der zweite Anlauf nicht wieder bei Null
-beginnen. Deshalb schreibt der Cloner nach jedem erzeugten Objekt mit, was
+Cloning a large server takes minutes. If it breaks off — a dropped
+connection, a restart, the cancel button — the second attempt should not
+start from zero. So the cloner records what already exists after every
 bereits existiert.
 
-Der Zustand liegt als JSON unter `state/<ziel-id>.json` und wird gelöscht,
-sobald ein Durchlauf sauber abgeschlossen ist.
+The state lives as JSON at `state/<target-id>.json` and is deleted once a
+run finishes cleanly.
 """
 
 from __future__ import annotations
@@ -22,18 +22,18 @@ log = logging.getLogger(__name__)
 
 STATE_DIR = Path(__file__).resolve().parent.parent / "state"
 
-# Ein Zustand, der älter ist als das hier, gehört zu einem längst vergessenen
-# Versuch und wird nicht mehr zum Fortsetzen angeboten.
+# A state older than this belongs to a long-forgotten attempt and is no
+# longer offered for resuming.
 MAX_AGE_SECONDS = 24 * 60 * 60
 
 
 @dataclass(slots=True)
 class CloneState:
-    """Was in diesem Ziel-Server bereits angelegt wurde."""
+    """What has already been created in this target server."""
 
     target_id: int
     source_name: str = ""
-    # Bauplan-Schlüssel → ID des im Ziel erzeugten Objekts
+    # Blueprint key -> ID of the object created in the target
     roles: dict[str, int] = field(default_factory=dict)
     channels: dict[str, int] = field(default_factory=dict)
     emojis: list[str] = field(default_factory=list)
@@ -55,11 +55,11 @@ class CloneState:
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            log.warning("Zwischenstand %s ist unlesbar: %s", path, exc)
+            log.warning("Checkpoint %s is unreadable: %s", path, exc)
             return None
 
         if time.time() - data.get("updated_at", 0) > MAX_AGE_SECONDS:
-            log.info("Zwischenstand für %s ist veraltet und wird verworfen.", target_id)
+            log.info("Checkpoint for %s is stale and is being discarded.", target_id)
             path.unlink(missing_ok=True)
             return None
 
@@ -71,15 +71,15 @@ class CloneState:
         try:
             STATE_DIR.mkdir(parents=True, exist_ok=True)
             path = self.path_for(self.target_id)
-            # Erst in eine Nebendatei schreiben, dann umbenennen: so bleibt bei
-            # einem Absturz mitten im Schreiben der alte Stand intakt.
+            # Write to a sidecar file first, then rename: that way a crash
+            # mid-write leaves the previous state intact.
             tmp = path.with_suffix(".tmp")
             tmp.write_text(
                 json.dumps(self.__as_dict(), ensure_ascii=False, indent=1), encoding="utf-8"
             )
             tmp.replace(path)
         except OSError as exc:
-            log.warning("Zwischenstand nicht speicherbar: %s", exc)
+            log.warning("Could not save the checkpoint: %s", exc)
 
     def clear(self) -> None:
         self.path_for(self.target_id).unlink(missing_ok=True)

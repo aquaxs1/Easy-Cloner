@@ -1,9 +1,9 @@
 """
-Tests für die Klon-Engine.
+Tests for the clone engine.
 
-Der Fokus liegt auf den Fehlern, die in der ursprünglichen Skript-Version
-steckten, und auf den Zusagen der neuen Funktionen: Fortsetzbarkeit, Abgleich
-ohne Löschen, adaptive Taktung.
+The focus is on the bugs that were in the original script version, and on
+what the new features promise: resumability, syncing without deleting, and
+adaptive pacing.
 """
 
 from __future__ import annotations
@@ -37,11 +37,11 @@ def cloner_for(bp, target, **kw):
 
 
 def test_source_equals_target_is_rejected():
-    """Der teuerste Bedienfehler muss vor dem ersten Löschen greifen."""
+    """The most expensive mistake has to be caught before the first delete."""
     target = make_guild(1, "Mein Server")
     c = cloner_for(blueprint(source_id="1"), target)
 
-    with pytest.raises(CloneError, match="identisch"):
+    with pytest.raises(CloneError, match="are the same"):
         asyncio.run(c.run())
 
     target.edit.assert_not_awaited()
@@ -51,7 +51,7 @@ def test_missing_permissions_are_rejected():
     target = make_guild(2, "Ziel")
     target.me.guild_permissions = discord.Permissions.none()
 
-    with pytest.raises(CloneError, match="fehlen"):
+    with pytest.raises(CloneError, match="missing these permissions"):
         asyncio.run(cloner_for(blueprint(), target).run())
 
 
@@ -59,7 +59,7 @@ def test_bot_not_in_target_is_rejected():
     target = make_guild(2, "Ziel")
     target.me = None
 
-    with pytest.raises(CloneError, match="kein Mitglied"):
+    with pytest.raises(CloneError, match="not a member"):
         asyncio.run(cloner_for(blueprint(), target).run())
 
 
@@ -74,13 +74,13 @@ def test_dry_run_changes_nothing():
     target.create_role.assert_not_awaited()
 
 
-# ── Rollen-Hierarchie ─────────────────────────────────────────────────────────
+# ── Role hierarchy ────────────────────────────────────────────────────────────
 
 
 def test_roles_are_created_from_highest_to_lowest():
     """
-    Discord legt jede neue Rolle ganz unten an. Wer aufsteigend kopiert, dreht
-    die Hierarchie um — genau der Bug im Originalskript.
+    Discord inserts every new role at the very bottom. Copying in ascending
+    order inverts the hierarchy — exactly the bug in the original script.
     """
     bp = blueprint(
         roles=[
@@ -113,7 +113,7 @@ def test_everyone_permissions_are_transferred():
 
 
 def test_role_creation_falls_back_without_permissions():
-    """Kann der Bot die Rechte nicht vergeben, entsteht trotzdem die Rolle."""
+    """If the bot cannot grant the permissions, the role is still created."""
     bp = blueprint(roles=[role_bp("10", "Admin", 1)])
     target = make_guild(2, "Ziel")
     calls: list[dict] = []
@@ -141,7 +141,7 @@ def test_warns_when_bot_role_is_too_low():
     c = cloner_for(bp, target)
     asyncio.run(c._validate())
 
-    assert any("gestaucht" in w for w in c.report.warnings)
+    assert any("compressed" in w for w in c.report.warnings)
 
 
 # ── Permission-Overwrites ─────────────────────────────────────────────────────
@@ -159,7 +159,7 @@ def test_overwrites_map_roles_and_default_role():
     entries = [
         OverwriteData(EVERYONE_KEY, allow=0, deny=deny_view.value),
         OverwriteData("11", allow=deny_view.value, deny=0),
-        OverwriteData("99-existiert-nicht", allow=deny_view.value, deny=0),
+        OverwriteData("99-does-not-exist", allow=deny_view.value, deny=0),
     ]
 
     result = c._build_overwrites(entries)
@@ -173,7 +173,7 @@ def test_overwrites_map_roles_and_default_role():
 
 
 def test_missing_icon_does_not_wipe_target_icon():
-    """Im Originalskript löschte `icon=None` das Icon des Ziel-Servers."""
+    """In the original script, `icon=None` deleted the target server's icon."""
     target = make_guild(2, "Ziel")
     asyncio.run(cloner_for(blueprint(name="Quelle"), target)._apply_settings())
 
@@ -195,7 +195,7 @@ def test_icon_from_blueprint_is_applied():
 
 
 def test_settings_retry_drops_boost_only_fields():
-    """Ein abgelehntes Banner darf nicht den ganzen Vorgang kippen."""
+    """A rejected banner must not bring down the whole job."""
     import base64
 
     bp = blueprint(banner=base64.b64encode(b"BANNER").decode())
@@ -215,7 +215,7 @@ def test_settings_retry_drops_boost_only_fields():
     assert len(attempts) == 2
     assert "banner" not in attempts[1]
     assert c.report.error_count == 0
-    assert any("Boost" in w for w in c.report.warnings)
+    assert any("boost" in w for w in c.report.warnings)
 
 
 # ── Voice-Bitrate ─────────────────────────────────────────────────────────────
@@ -224,7 +224,7 @@ def test_settings_retry_drops_boost_only_fields():
 @pytest.mark.parametrize(
     "source_bitrate, target_limit, expected",
     [
-        (256000, 384000, 256000),  # geboostetes Ziel: Qualität bleibt erhalten
+        (256000, 384000, 256000),  # boosted target: quality is preserved
         (256000, 64000, 64000),  # ungeboostetes Ziel: sauber gedeckelt
     ],
 )
@@ -241,17 +241,17 @@ def test_bitrate_follows_target_limit(source_bitrate, target_limit, expected):
     assert target.create_voice_channel.await_args.kwargs["bitrate"] == expected
 
 
-# ── Community-Beschränkungen ──────────────────────────────────────────────────
+# ── Community restrictions ────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("kind", ["stage", "forum"])
 def test_community_channels_are_skipped_on_normal_servers(kind):
     target = make_guild(2, "Ziel", features=[])
     c = cloner_for(blueprint(), target)
 
-    result = asyncio.run(c._create_channel(channel_bp("7", "Bühne", kind)))
+    result = asyncio.run(c._create_channel(channel_bp("7", "Stage", kind)))
 
     assert result is None
-    assert any("Community-Server" in w for w in c.report.warnings)
+    assert any("Community server" in w for w in c.report.warnings)
 
 
 # ── Fortsetzbarkeit ───────────────────────────────────────────────────────────
@@ -283,7 +283,7 @@ def test_resume_skips_objects_that_still_exist():
 
 
 def test_resume_recreates_objects_that_vanished():
-    """Wurde ein Objekt zwischenzeitlich gelöscht, entsteht es neu."""
+    """If an object was deleted in the meantime, it is created again."""
     bp = blueprint(roles=[role_bp("10", "Admin", 1)])
     target = make_guild(2, "Ziel")
     target.get_role = MagicMock(return_value=None)
@@ -297,7 +297,7 @@ def test_resume_recreates_objects_that_vanished():
 
 
 def test_resume_never_wipes_the_target():
-    """Beim Fortsetzen wäre erneutes Leeren genau das Gegenteil des Ziels."""
+    """On resume, wiping again would be the exact opposite of the goal."""
     target = make_guild(2, "Ziel")
     target.channels = [MagicMock(spec=discord.TextChannel)]
 
@@ -331,13 +331,13 @@ def test_state_is_saved_on_cancel_and_cleared_on_success():
     assert CloneState.path_for(2).exists()
     assert CloneState.load(2) is not None
 
-    # Ein sauberer Durchlauf räumt den Zwischenstand wieder ab.
+    # A clean run clears the checkpoint again.
     target2 = make_guild(2, "Ziel")
     asyncio.run(ServerCloner(blueprint(), target2, delay=0).run())
     assert not CloneState.path_for(2).exists()
 
 
-# ── /sync: nichts löschen, Vorhandenes wiederverwenden ────────────────────────
+# ── /sync: delete nothing, reuse what exists ──────────────────────────────────
 
 
 def test_skip_existing_reuses_channels_by_name():
@@ -397,11 +397,11 @@ def test_cancel_stops_the_run():
     assert c.report.roles_created < 5
 
 
-# ── Extras ohne Quell-Server ──────────────────────────────────────────────────
+# ── Extras without a source server ────────────────────────────────────────────
 
 
 def test_extras_warn_when_restoring_from_a_file():
-    """Aus einer Datei gibt es keine Nachrichten und keine Mitglieder."""
+    """A file has neither messages nor members."""
     target = make_guild(2, "Ziel")
     c = cloner_for(
         blueprint(),
@@ -410,4 +410,4 @@ def test_extras_warn_when_restoring_from_a_file():
     )
     asyncio.run(c._apply_extras())
 
-    assert any("Quell-Server" in w for w in c.report.warnings)
+    assert any("source" in w for w in c.report.warnings)

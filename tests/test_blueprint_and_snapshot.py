@@ -1,4 +1,4 @@
-"""Tests für Bauplan, Backup-Dateien, Zwischenstände und adaptive Taktung."""
+"""Tests for the blueprint, backup files, checkpoints and adaptive pacing."""
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ def test_creatable_roles_are_sorted_high_to_low():
 
 
 def test_channels_are_grouped_by_category_order():
-    """Channels müssen kategorieweise in der Reihenfolge der Kategorien kommen."""
+    """Channels must come category by category, in category order."""
     bp = blueprint(
         channels=[
             channel_bp("cat-b", "ZWEITE", KIND_CATEGORY, position=1),
@@ -54,13 +54,13 @@ def test_channels_are_grouped_by_category_order():
             channel_bp("2", "b-zwei", KIND_TEXT, position=1, category_key="cat-b"),
             channel_bp("1", "b-eins", KIND_TEXT, position=0, category_key="cat-b"),
             channel_bp("0", "a-eins", KIND_TEXT, position=0, category_key="cat-a"),
-            channel_bp("9", "ohne-kategorie", KIND_TEXT, position=0),
+            channel_bp("9", "no-category", KIND_TEXT, position=0),
         ]
     )
 
     assert [c.name for c in bp.categories] == ["ERSTE", "ZWEITE"]
     assert [c.name for c in bp.non_categories] == [
-        "ohne-kategorie",  # kategorielose zuerst, wie in Discord
+        "no-category",  # uncategorised first, as in Discord
         "a-eins",
         "b-eins",
         "b-zwei",
@@ -78,9 +78,9 @@ def test_counts_and_totals():
         ],
     )
     counts = bp.counts()
-    assert counts["Rollen"] == 1  # @everyone zählt nicht als anzulegende Rolle
+    assert counts["Roles"] == 1  # @everyone does not count as a role to create
     assert counts["Kategorien"] == 1
-    assert counts["Text-Channels"] == 2  # Ankündigungs-Channels zählen mit
+    assert counts["Text-Channels"] == 2  # announcement channels count too
     assert counts["Voice-Channels"] == 1
     assert bp.total_objects == sum(counts.values())
 
@@ -114,7 +114,7 @@ def test_from_guild_skips_managed_roles_and_member_overwrites():
 
     bp = asyncio.run(GuildBlueprint.from_guild(guild, include_images=False))
 
-    assert [r.name for r in bp.roles] == ["@everyone", "Mod"]  # Bot-Rolle fehlt
+    assert [r.name for r in bp.roles] == ["@everyone", "Mod"]  # the bot role is absent
     keys = {o.role_key for o in bp.channels[0].overwrites}
     assert keys == {EVERYONE_KEY, "11"}  # Nutzer-Override fehlt
 
@@ -176,7 +176,7 @@ def test_forum_tags_survive_the_round_trip():
                 "f",
                 "hilfe",
                 KIND_FORUM,
-                available_tags=[ForumTagData(name="Gelöst", emoji="✅", moderated=True)],
+                available_tags=[ForumTagData(name="Solved", emoji="✅", moderated=True)],
                 default_sort_order=1,
             )
         ]
@@ -184,7 +184,7 @@ def test_forum_tags_survive_the_round_trip():
     restored = GuildBlueprint.from_dict(json.loads(json.dumps(original.to_dict())))
     tag = restored.channels[0].available_tags[0]
 
-    assert (tag.name, tag.emoji, tag.moderated) == ("Gelöst", "✅", True)
+    assert (tag.name, tag.emoji, tag.moderated) == ("Solved", "✅", True)
     assert restored.channels[0].default_sort_order == 1
 
 
@@ -197,7 +197,7 @@ def test_newer_format_version_is_refused():
 
 
 def test_unknown_extra_keys_are_ignored():
-    """Ein Backup aus einer neueren Nebenversion darf nicht hart scheitern."""
+    """A backup from a newer minor version must not fail hard."""
     data = blueprint().to_dict()
     data["ein_feld_das_es_noch_nicht_gibt"] = 42
 
@@ -216,8 +216,8 @@ def test_small_backup_stays_plain_json():
 
 
 def test_large_backup_is_compressed():
-    """Bilder machen Backups groß — gzip hält sie unter Discords Limit."""
-    big = blueprint(name="Groß", icon="A" * (2 * 1024 * 1024))
+    """Images make backups large — gzip keeps them under Discord's limit."""
+    big = blueprint(name="Large", icon="A" * (2 * 1024 * 1024))
     shot = snapshot.dump(big)
 
     assert shot.compressed
@@ -235,20 +235,20 @@ def test_load_handles_both_formats(compress):
 
 def test_load_rejects_garbage():
     with pytest.raises(snapshot.SnapshotError):
-        snapshot.load(b"das ist kein backup")
+        snapshot.load(b"this is not a backup")
     with pytest.raises(snapshot.SnapshotError):
-        snapshot.load(b'["eine liste, kein objekt"]')
-    with pytest.raises(snapshot.SnapshotError, match="beschädigt oder unvollständig"):
+        snapshot.load(b'["a list, not an object"]')
+    with pytest.raises(snapshot.SnapshotError, match="damaged or incomplete"):
         snapshot.load(b"\x1f\x8b" + b"kaputt")
 
 
 def test_filenames_are_safe():
-    shot = snapshot.dump(blueprint(name="Mein / Server: <böse>  Zeichen"))
+    shot = snapshot.dump(blueprint(name="My / Server: <nasty>  characters"))
 
     assert "/" not in shot.filename
     assert ":" not in shot.filename
     assert "<" not in shot.filename
-    assert shot.filename.startswith("Mein-Server-")
+    assert shot.filename.startswith("My-Server-")
 
 
 def test_save_to_disk_writes_the_file(isolated_state):
@@ -265,7 +265,7 @@ def test_human_size():
     assert snapshot.human_size(5 * 1024 * 1024) == "5.0 MB"
 
 
-# ── Zwischenstände ────────────────────────────────────────────────────────────
+# ── Checkpoints ───────────────────────────────────────────────────────────────
 
 
 def test_state_round_trip():
@@ -286,7 +286,7 @@ def test_state_is_none_when_missing():
 def test_stale_state_is_discarded():
     state = CloneState(target_id=7, roles={"a": 1})
     state.save()
-    # Auf zwei Tage zurückdatieren.
+    # Backdate by two days.
     path = CloneState.path_for(7)
     data = json.loads(path.read_text())
     data["updated_at"] = time.time() - 48 * 3600
@@ -365,7 +365,7 @@ def test_pacer_wait_reacts_to_cancel_immediately():
         started = time.monotonic()
         with pytest.raises(asyncio.CancelledError):
             await pacer.wait()
-        # Nicht die vollen 10 Sekunden abwarten.
+        # Do not wait the full 10 seconds.
         assert time.monotonic() - started < 1.0
 
     asyncio.run(scenario())

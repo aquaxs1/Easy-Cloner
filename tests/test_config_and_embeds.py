@@ -1,4 +1,4 @@
-"""Tests für Konfiguration und Embed-Aufbau."""
+"""Tests for the configuration and embed construction."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from easy_server_cloner.state import CloneState
 
 from helpers import blueprint
 
-# Discord-Grenzwerte, die ein Embed nicht überschreiten darf.
+# Discord limits an embed must not exceed.
 LIMIT_TITLE = 256
 LIMIT_DESCRIPTION = 4096
 LIMIT_FIELD_NAME = 256
@@ -70,7 +70,7 @@ def _env(monkeypatch, **values):
 
 def test_token_is_required(monkeypatch):
     _env(monkeypatch)
-    with pytest.raises(ConfigError, match="kein Bot-Token"):
+    with pytest.raises(ConfigError, match="No bot token"):
         Config.load()
 
 
@@ -86,8 +86,8 @@ def test_owner_ids_are_parsed(monkeypatch):
 
 
 def test_invalid_owner_id_raises(monkeypatch):
-    _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", OWNER_IDS="123,nicht-numerisch")
-    with pytest.raises(ConfigError, match="ungültigen Eintrag"):
+    _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", OWNER_IDS="123,not-numeric")
+    with pytest.raises(ConfigError, match="invalid entry"):
         Config.load()
 
 
@@ -108,7 +108,7 @@ def test_privileged_flags_are_parsed(monkeypatch, value, expected):
 
 def test_invalid_boolean_raises(monkeypatch):
     _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", ENABLE_MEMBER_ROLES="vielleicht")
-    with pytest.raises(ConfigError, match="Wahrheitswert"):
+    with pytest.raises(ConfigError, match="not a boolean"):
         Config.load()
 
 
@@ -136,7 +136,7 @@ def test_confirm_embed_is_within_limits():
 
 
 def test_confirm_embed_shows_resume_instead_of_deletion_warning():
-    """Beim Fortsetzen wird nichts gelöscht — das darf die Abfrage nicht behaupten."""
+    """Resuming deletes nothing — the prompt must not claim otherwise."""
     state = CloneState(target_id=2, roles={"a": 1}, channels={"b": 2})
     embed = embeds.confirm_embed(
         blueprint("Quelle"), fake_guild("Ziel"), CloneOptions(wipe_target=True), resume_state=state
@@ -154,7 +154,7 @@ def test_confirm_embed_flags_message_reconstruction():
     )
     text = " ".join(f.value for f in embed.fields)
 
-    assert "nachgestellt" in text and "nicht migriert" in text
+    assert "re-staged" in text and "not migrated" in text
     assert_valid_embed(embed)
 
 
@@ -175,15 +175,15 @@ def test_progress_embed_reports_throttling():
 
 
 def test_result_embed_truncates_a_flood_of_messages():
-    """Ein kaputter Server darf das Ergebnis-Embed nicht sprengen."""
+    """A broken server must not blow up the result embed."""
     report = CloneReport()
     for i in range(500):
-        report.warn(f"Warnung Nummer {i} mit einem recht ausführlichen Text dahinter")
-        report.fail(f"Fehler Nummer {i} mit einem recht ausführlichen Text dahinter")
+        report.warn(f"Warning number {i} with a fairly verbose explanation after it")
+        report.fail(f"Error number {i} with a fairly verbose explanation after it")
 
     embed = embeds.result_embed(report, Stage.DONE, "Quelle", fake_guild("Ziel"))
     assert_valid_embed(embed)
-    # Die Zähler bleiben trotz Kürzung korrekt.
+    # The counters stay correct despite the trimming.
     assert report.warning_count == 500
     assert report.error_count == 500
 
@@ -227,6 +227,6 @@ def test_servers_embed_handles_no_guilds():
 def test_progress_bar_endpoints():
     assert "0%" in embeds.progress_bar(0.0)
     assert "100%" in embeds.progress_bar(1.0)
-    # Werte außerhalb von 0..1 dürfen die Leiste nicht verformen.
+    # Values outside 0..1 must not deform the bar.
     assert "100%" in embeds.progress_bar(5.0)
     assert "0%" in embeds.progress_bar(-1.0)
