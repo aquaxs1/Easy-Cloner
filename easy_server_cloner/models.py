@@ -12,7 +12,7 @@ class Stage(str, Enum):
 
     IDLE = "Bereit"
     VALIDATING = "Checking prerequisites"
-    READING = "Lese Quell-Server"
+    READING = "Reading the source server"
     WIPING = "Clearing the target server"
     SETTINGS = "Copying server settings"
     ROLES = "Copying roles"
@@ -24,8 +24,8 @@ class Stage(str, Enum):
     MESSAGES = "Re-staging messages"
     MEMBER_ROLES = "Assigning roles to members"
     DONE = "Abgeschlossen"
-    FAILED = "Fehlgeschlagen"
-    CANCELLED = "Abgebrochen"
+    FAILED = "Failed"
+    CANCELLED = "Cancelled"
 
 
 # Order for the progress display. IDLE and the terminal states do not count.
@@ -60,7 +60,7 @@ class CloneOptions:
     stickers: bool = True
     dry_run: bool = False
 
-    # Gleichnamige Objekte im Ziel wiederverwenden statt doppelt anzulegen.
+    # reuse same-named objects on the target instead of creating duplicates.
     # This is the heart of /sync.
     skip_existing: bool = False
 
@@ -75,7 +75,7 @@ class CloneOptions:
     def summary(self) -> list[str]:
         """A human-readable list of the active options."""
         parts = [
-            ("Server-Einstellungen", self.settings),
+            ("Server settings", self.settings),
             ("Icon & Banner", self.icon),
             ("Roles", self.roles),
             ("Kategorien & Channels", self.channels),

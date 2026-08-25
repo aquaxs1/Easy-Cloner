@@ -145,7 +145,7 @@
     }
   }
 
-  /* ── Kopieren ────────────────────────────────────────────────────────── */
+  /* ── copy to clipboard ─────────────────────────────────────────────── */
 
   function initCopy() {
     $$(".code").forEach((block) => {
@@ -205,7 +205,7 @@
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        // Kleiner Versatz je Element, damit Gruppen gestaffelt erscheinen.
+        // A small offset per element, so groups appear staggered.
         const delay = Number(entry.target.dataset.delay || 0);
         setTimeout(() => entry.target.classList.add("in"), delay);
         io.unobserve(entry.target);
@@ -366,7 +366,7 @@
       resizeTimer = setTimeout(resize, 180);
     });
 
-    // Im Hintergrund-Tab nicht weiterrechnen.
+    // Stop computing while the tab is in the background.
     document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
   }
 

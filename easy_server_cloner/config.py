@@ -40,7 +40,7 @@ def _get_int(key: str, default: int | None = None) -> int | None:
     except ValueError as exc:
         raise ConfigError(
             f"{key}='{raw}' is not a valid number. "
-            f"Discord-IDs bestehen nur aus Ziffern."
+            f"Discord IDs consist of digits only."
         ) from exc
 
 

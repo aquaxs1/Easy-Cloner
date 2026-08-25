@@ -29,7 +29,7 @@ from easy_server_cloner.state import CloneState
 from helpers import blueprint, channel_bp, make_guild, make_role, role_bp
 
 
-# ── Bauplan: Reihenfolgen ─────────────────────────────────────────────────────
+# ── blueprint: ordering ───────────────────────────────────────────────────────
 
 
 def test_creatable_roles_are_sorted_high_to_low():
@@ -49,8 +49,8 @@ def test_channels_are_grouped_by_category_order():
     """Channels must come category by category, in category order."""
     bp = blueprint(
         channels=[
-            channel_bp("cat-b", "ZWEITE", KIND_CATEGORY, position=1),
-            channel_bp("cat-a", "ERSTE", KIND_CATEGORY, position=0),
+            channel_bp("cat-b", "SECOND", KIND_CATEGORY, position=1),
+            channel_bp("cat-a", "FIRST", KIND_CATEGORY, position=0),
             channel_bp("2", "b-zwei", KIND_TEXT, position=1, category_key="cat-b"),
             channel_bp("1", "b-eins", KIND_TEXT, position=0, category_key="cat-b"),
             channel_bp("0", "a-eins", KIND_TEXT, position=0, category_key="cat-a"),
@@ -58,7 +58,7 @@ def test_channels_are_grouped_by_category_order():
         ]
     )
 
-    assert [c.name for c in bp.categories] == ["ERSTE", "ZWEITE"]
+    assert [c.name for c in bp.categories] == ["FIRST", "SECOND"]
     assert [c.name for c in bp.non_categories] == [
         "no-category",  # uncategorised first, as in Discord
         "a-eins",
@@ -85,14 +85,14 @@ def test_counts_and_totals():
     assert bp.total_objects == sum(counts.values())
 
 
-# ── Bauplan: aus einem Live-Server lesen ──────────────────────────────────────
+# ── blueprint: reading from a live server ─────────────────────────────────────
 
 
 def test_from_guild_skips_managed_roles_and_member_overwrites():
     everyone = make_role(1, "@everyone", 0, default=True)
     mod = make_role(11, "Mod", 2)
     bot_role = make_role(12, "BotRolle", 3, managed=True)
-    guild = make_guild(1, "Quelle", roles=[everyone, mod, bot_role])
+    guild = make_guild(1, "Source", roles=[everyone, mod, bot_role])
 
     channel = MagicMock(spec=discord.TextChannel)
     channel.id = 20
@@ -116,11 +116,11 @@ def test_from_guild_skips_managed_roles_and_member_overwrites():
 
     assert [r.name for r in bp.roles] == ["@everyone", "Mod"]  # the bot role is absent
     keys = {o.role_key for o in bp.channels[0].overwrites}
-    assert keys == {EVERYONE_KEY, "11"}  # Nutzer-Override fehlt
+    assert keys == {EVERYONE_KEY, "11"}  # the per-member override is missing
 
 
 def test_from_guild_without_images_leaves_assets_empty():
-    guild = make_guild(1, "Quelle")
+    guild = make_guild(1, "Source")
     asset = MagicMock(spec=discord.Asset)
     asset.read = AsyncMock(return_value=b"ICON")
     guild.icon = asset
@@ -132,7 +132,7 @@ def test_from_guild_without_images_leaves_assets_empty():
     asset.read.assert_not_awaited()
 
 
-# ── Bauplan: Serialisierung ───────────────────────────────────────────────────
+# ── blueprint: serialisation ──────────────────────────────────────────────────
 
 
 def test_round_trip_preserves_everything():
@@ -192,7 +192,7 @@ def test_newer_format_version_is_refused():
     data = blueprint().to_dict()
     data["format_version"] = 999
 
-    with pytest.raises(ValueError, match="Format-Version"):
+    with pytest.raises(ValueError, match="format version"):
         GuildBlueprint.from_dict(data)
 
 
@@ -201,10 +201,10 @@ def test_unknown_extra_keys_are_ignored():
     data = blueprint().to_dict()
     data["ein_feld_das_es_noch_nicht_gibt"] = 42
 
-    assert GuildBlueprint.from_dict(data).name == "Quelle"
+    assert GuildBlueprint.from_dict(data).name == "Source"
 
 
-# ── Backup-Dateien ────────────────────────────────────────────────────────────
+# ── backup files ──────────────────────────────────────────────────────────────
 
 
 def test_small_backup_stays_plain_json():
@@ -269,7 +269,7 @@ def test_human_size():
 
 
 def test_state_round_trip():
-    state = CloneState(target_id=42, source_name="Quelle", roles={"a": 1}, channels={"b": 2})
+    state = CloneState(target_id=42, source_name="Source", roles={"a": 1}, channels={"b": 2})
     state.save()
 
     loaded = CloneState.load(42)

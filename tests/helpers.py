@@ -106,7 +106,7 @@ def channel_bp(key: str, name: str, kind: str, position: int = 0, **kwargs):
     return ChannelBlueprint(key=key, name=name, kind=kind, position=position, **kwargs)
 
 
-def blueprint(name="Quelle", *, roles=None, channels=None, source_id="1", **kwargs):
+def blueprint(name="Source", *, roles=None, channels=None, source_id="1", **kwargs):
     return GuildBlueprint(
         name=name,
         roles=roles or [role_bp(EVERYONE_KEY, "@everyone", 0, default=True)],

@@ -135,11 +135,11 @@ async def _send_one(
         await cloner._call(
             webhook.send(
                 content=content or discord.utils.MISSING,
-                username=message.author.display_name[:80] or "Unbekannt",
+                username=message.author.display_name[:80] or "Unknown",
                 avatar_url=message.author.display_avatar.url,
                 files=files or discord.utils.MISSING,
                 embeds=embeds or discord.utils.MISSING,
-                # Der Nachbau darf niemanden anpingen.
+                # the re-staged message must not ping anyone.
                 allowed_mentions=discord.AllowedMentions.none(),
                 wait=False,
             )

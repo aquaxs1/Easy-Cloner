@@ -1,5 +1,5 @@
 """
-Backups: Bauplan ↔ Datei.
+Backups: blueprint ↔ file.
 
 A backup is a JSON file holding a server's complete blueprint. Because icons,
 emojis and stickers are embedded as base64, anything past a certain size is

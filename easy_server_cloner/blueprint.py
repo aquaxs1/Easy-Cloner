@@ -170,7 +170,7 @@ class ChannelBlueprint:
                 EVERYONE_KEY if entity.is_default() else str(entity.id), overwrite
             )
             for entity, overwrite in channel.overwrites.items()
-            # Rechte einzelner Mitglieder ergeben auf einem anderen Server
+            # per-member overwrites make no sense on a different server
             # make no sense there — those users need not exist on the target.
             if isinstance(entity, discord.Role)
         ]
@@ -269,7 +269,7 @@ class StickerBlueprint:
         return _unb64(self.image)
 
 
-# ── Der komplette Bauplan ─────────────────────────────────────────────────────
+# ── the complete blueprint ────────────────────────────────────────────────────
 
 
 @dataclass(slots=True)
@@ -375,8 +375,8 @@ class GuildBlueprint:
         version = data.get("format_version", 0)
         if version > FORMAT_VERSION:
             raise ValueError(
-                f"Diese Backup-Datei hat Format-Version {version}, dieser Bot kennt "
-                f"only up to {FORMAT_VERSION}. Update the bot."
+                f"This backup file is format version {version}; this bot only knows "
+                f"up to {FORMAT_VERSION}. Update the bot."
             )
         if "name" not in data:
             raise ValueError("The file has no server name — it is not a valid backup.")

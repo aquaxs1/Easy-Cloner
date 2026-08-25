@@ -64,7 +64,7 @@ class ServerCloner:
         self.blueprint = blueprint
         self.target = target
         # Only needed for message re-staging and role assignment; when
-        # Wiederherstellen aus einer Datei gibt es keinen Quell-Server.
+        # restoring from a file there is no source server.
         self.source_guild = source_guild
         self.options = options or CloneOptions()
         self.reason = reason
@@ -275,7 +275,7 @@ class ServerCloner:
             f"skipped."
         )
 
-    # ── 1. Ziel-Server leeren ─────────────────────────────────────────────────
+    # ── 1. wipe the target server ─────────────────────────────────────────────
 
     async def _wipe_target(self) -> None:
         channels = list(self.target.channels)
@@ -312,7 +312,7 @@ class ServerCloner:
             await self._emit(detail=f"@{role.name}", current=done)
             await self._tick()
 
-    # ── 2. Server-Einstellungen ───────────────────────────────────────────────
+    # ── 2. server settings ────────────────────────────────────────────────────
 
     async def _apply_settings(self) -> None:
         await self._emit(Stage.SETTINGS, "Name, icon and base settings", 0, 1)
@@ -355,14 +355,14 @@ class ServerCloner:
                 k: v for k, v in payload.items() if k not in ("banner", "splash", "description")
             }
             self.report.warn(
-                f"Einige Server-Einstellungen wurden abgelehnt ({exc.text or exc}). "
+                f"Some server settings were rejected ({exc.text or exc}). "
                 f"Banner and splash require a server boost level."
             )
             if fallback:
                 try:
                     await self._call(self.target.edit(reason=self.reason, **fallback))  # type: ignore[arg-type]
                 except discord.HTTPException as exc2:
-                    self.report.fail(f"Server-Einstellungen fehlgeschlagen: {exc2.text or exc2}")
+                    self.report.fail(f"The server settings failed: {exc2.text or exc2}")
 
         await self._emit(detail=bp.name, current=1)
         await self._tick()
@@ -626,7 +626,7 @@ class ServerCloner:
         self.report.forum_channels_created += 1
         return created
 
-    # ── 6. Server-weite Channel-Verweise ──────────────────────────────────────
+    # ── 6. server-wide channel references ─────────────────────────────────────
 
     async def _apply_guild_channel_links(self) -> None:
         """Links the AFK, system and rules channels afterwards."""
@@ -754,7 +754,7 @@ class ServerCloner:
             )
             return
 
-        # Import bewusst hier: `extras` importiert seinerseits aus diesem Modul.
+        # imported here on purpose: `extras` imports from this module in turn.
         from . import extras
 
         if self.options.messages_per_channel > 0:

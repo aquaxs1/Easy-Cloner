@@ -48,7 +48,7 @@ def test_source_equals_target_is_rejected():
 
 
 def test_missing_permissions_are_rejected():
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     target.me.guild_permissions = discord.Permissions.none()
 
     with pytest.raises(CloneError, match="missing these permissions"):
@@ -56,7 +56,7 @@ def test_missing_permissions_are_rejected():
 
 
 def test_bot_not_in_target_is_rejected():
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     target.me = None
 
     with pytest.raises(CloneError, match="not a member"):
@@ -64,7 +64,7 @@ def test_bot_not_in_target_is_rejected():
 
 
 def test_dry_run_changes_nothing():
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     bp = blueprint(roles=[role_bp("10", "Admin", 3)])
 
     c = cloner_for(bp, target, options=CloneOptions(dry_run=True))
@@ -90,7 +90,7 @@ def test_roles_are_created_from_highest_to_lowest():
             role_bp("10", "Admin", 3),
         ]
     )
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     c = cloner_for(bp, target)
     asyncio.run(c._apply_roles())
@@ -104,7 +104,7 @@ def test_roles_are_created_from_highest_to_lowest():
 def test_everyone_permissions_are_transferred():
     perms = discord.Permissions(send_messages=True)
     bp = blueprint(roles=[role_bp(EVERYONE_KEY, "@everyone", 0, default=True, permissions=perms.value)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     asyncio.run(cloner_for(bp, target)._apply_roles())
 
@@ -115,7 +115,7 @@ def test_everyone_permissions_are_transferred():
 def test_role_creation_falls_back_without_permissions():
     """If the bot cannot grant the permissions, the role is still created."""
     bp = blueprint(roles=[role_bp("10", "Admin", 1)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     calls: list[dict] = []
 
     async def create_role(**kw):
@@ -136,7 +136,7 @@ def test_role_creation_falls_back_without_permissions():
 
 def test_warns_when_bot_role_is_too_low():
     bp = blueprint(roles=[role_bp(str(i), f"R{i}", i) for i in range(1, 6)])
-    target = make_guild(2, "Ziel", bot_top_position=2)
+    target = make_guild(2, "Target", bot_top_position=2)
 
     c = cloner_for(bp, target)
     asyncio.run(c._validate())
@@ -148,7 +148,7 @@ def test_warns_when_bot_role_is_too_low():
 
 
 def test_overwrites_map_roles_and_default_role():
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     c = cloner_for(blueprint(), target)
 
     new_mod = make_role(77, "Mod", 1)
@@ -169,25 +169,25 @@ def test_overwrites_map_roles_and_default_role():
     assert result[new_mod].view_channel is True
 
 
-# ── Server-Einstellungen ──────────────────────────────────────────────────────
+# ── server settings ───────────────────────────────────────────────────────────
 
 
 def test_missing_icon_does_not_wipe_target_icon():
     """In the original script, `icon=None` deleted the target server's icon."""
-    target = make_guild(2, "Ziel")
-    asyncio.run(cloner_for(blueprint(name="Quelle"), target)._apply_settings())
+    target = make_guild(2, "Target")
+    asyncio.run(cloner_for(blueprint(name="Source"), target)._apply_settings())
 
     kwargs = target.edit.await_args.kwargs
     assert "icon" not in kwargs
     assert "banner" not in kwargs
-    assert kwargs["name"] == "Quelle"
+    assert kwargs["name"] == "Source"
 
 
 def test_icon_from_blueprint_is_applied():
     import base64
 
     bp = blueprint(icon=base64.b64encode(b"PNGDATA").decode())
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     asyncio.run(cloner_for(bp, target)._apply_settings())
 
@@ -199,7 +199,7 @@ def test_settings_retry_drops_boost_only_fields():
     import base64
 
     bp = blueprint(banner=base64.b64encode(b"BANNER").decode())
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     attempts: list[dict] = []
 
     async def edit(**kw):
@@ -225,12 +225,12 @@ def test_settings_retry_drops_boost_only_fields():
     "source_bitrate, target_limit, expected",
     [
         (256000, 384000, 256000),  # boosted target: quality is preserved
-        (256000, 64000, 64000),  # ungeboostetes Ziel: sauber gedeckelt
+        (256000, 64000, 64000),  # an unboosted target: cleanly capped
     ],
 )
 def test_bitrate_follows_target_limit(source_bitrate, target_limit, expected):
     """Fest verdrahtete 96 kbit/s waren in beide Richtungen falsch."""
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     target.bitrate_limit = target_limit
     target.create_voice_channel = AsyncMock(return_value=MagicMock())
 
@@ -245,7 +245,7 @@ def test_bitrate_follows_target_limit(source_bitrate, target_limit, expected):
 
 @pytest.mark.parametrize("kind", ["stage", "forum"])
 def test_community_channels_are_skipped_on_normal_servers(kind):
-    target = make_guild(2, "Ziel", features=[])
+    target = make_guild(2, "Target", features=[])
     c = cloner_for(blueprint(), target)
 
     result = asyncio.run(c._create_channel(channel_bp("7", "Stage", kind)))
@@ -262,7 +262,7 @@ def test_resume_skips_objects_that_still_exist():
         roles=[role_bp("10", "Admin", 2), role_bp("11", "Mod", 1)],
         channels=[channel_bp("20", "allgemein", KIND_TEXT)],
     )
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     existing_role = make_role(500, "Admin", 1)
     existing_channel = MagicMock(spec=discord.TextChannel)
@@ -285,7 +285,7 @@ def test_resume_skips_objects_that_still_exist():
 def test_resume_recreates_objects_that_vanished():
     """If an object was deleted in the meantime, it is created again."""
     bp = blueprint(roles=[role_bp("10", "Admin", 1)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     target.get_role = MagicMock(return_value=None)
 
     state = CloneState(target_id=2, roles={"10": 500})
@@ -298,7 +298,7 @@ def test_resume_recreates_objects_that_vanished():
 
 def test_resume_never_wipes_the_target():
     """On resume, wiping again would be the exact opposite of the goal."""
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     target.channels = [MagicMock(spec=discord.TextChannel)]
 
     state = CloneState(target_id=2, roles={"10": 500})
@@ -314,7 +314,7 @@ def test_resume_never_wipes_the_target():
 
 def test_state_is_saved_on_cancel_and_cleared_on_success():
     bp = blueprint(roles=[role_bp(str(i), f"R{i}", i) for i in range(1, 4)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     c = ServerCloner(bp, target, delay=0.01)
     original = target.create_role
@@ -332,7 +332,7 @@ def test_state_is_saved_on_cancel_and_cleared_on_success():
     assert CloneState.load(2) is not None
 
     # A clean run clears the checkpoint again.
-    target2 = make_guild(2, "Ziel")
+    target2 = make_guild(2, "Target")
     asyncio.run(ServerCloner(blueprint(), target2, delay=0).run())
     assert not CloneState.path_for(2).exists()
 
@@ -342,7 +342,7 @@ def test_state_is_saved_on_cancel_and_cleared_on_success():
 
 def test_skip_existing_reuses_channels_by_name():
     bp = blueprint(channels=[channel_bp("20", "allgemein", KIND_TEXT)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     existing = MagicMock(spec=discord.TextChannel)
     existing.id = 600
@@ -359,7 +359,7 @@ def test_skip_existing_reuses_channels_by_name():
 
 def test_skip_existing_reuses_categories_by_name():
     bp = blueprint(channels=[channel_bp("30", "INFO", KIND_CATEGORY)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     existing = MagicMock(spec=discord.CategoryChannel)
     existing.id = 700
@@ -379,7 +379,7 @@ def test_skip_existing_reuses_categories_by_name():
 
 def test_cancel_stops_the_run():
     bp = blueprint(roles=[role_bp(str(i), f"R{i}", i) for i in range(1, 6)])
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     c = ServerCloner(bp, target, delay=0.01)
     original = target.create_role
@@ -402,7 +402,7 @@ def test_cancel_stops_the_run():
 
 def test_extras_warn_when_restoring_from_a_file():
     """A file has neither messages nor members."""
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
     c = cloner_for(
         blueprint(),
         target,

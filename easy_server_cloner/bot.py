@@ -94,7 +94,7 @@ def _resolve_guild(bot: CloneBot, raw: str, label: str = "Server") -> discord.Gu
     if not raw.isdigit():
         raise CloneError(
             f"`{raw}` is not a valid server ID. Pick the server from the "
-            f"Vorschlagsliste aus, statt ihn zu tippen."
+            f"suggestion list instead of typing it."
         )
     guild = bot.get_guild(int(raw))
     if guild is None:
@@ -121,7 +121,7 @@ async def _authorize(
         return
 
     # Without the privileged members intent the member cache is empty,
-    # deshalb notfalls direkt bei Discord nachfragen.
+    # so fall back to asking Discord directly.
     member = target.get_member(user_id)
     if member is None:
         try:
@@ -136,7 +136,7 @@ async def _authorize(
 
     if not member.guild_permissions.administrator:
         raise CloneError(
-            f"Du brauchst **Administrator**-Rechte auf **{target.name}**, "
+            f"You need **administrator** rights on **{target.name}**, "
             f"to change anything there."
         )
 
@@ -256,10 +256,10 @@ def register_commands(bot: CloneBot) -> None:  # noqa: C901 - one registration s
         await interaction.response.defer(ephemeral=True)
         try:
             src = _resolve_guild(
-                bot, source or str(bot.config.default_source_id or ""), "Quell-Server"
+                bot, source or str(bot.config.default_source_id or ""), "source server"
             )
             tgt = _resolve_guild(
-                bot, target or str(bot.config.default_target_id or ""), "Ziel-Server"
+                bot, target or str(bot.config.default_target_id or ""), "target server"
             )
             await _authorize(bot, interaction, tgt)
             if src.id == tgt.id:
@@ -340,7 +340,7 @@ def register_commands(bot: CloneBot) -> None:  # noqa: C901 - one registration s
     @app_commands.describe(
         file="The file created by /backup",
         target=GUILD_HINT,
-        wipe_target="Ziel vorher komplett leeren (Standard: Ja)",
+        wipe_target="Wipe the target completely first (default: yes)",
     )
     @app_commands.autocomplete(target=guild_autocomplete)
     async def restore_cmd(
@@ -352,7 +352,7 @@ def register_commands(bot: CloneBot) -> None:  # noqa: C901 - one registration s
         await interaction.response.defer(ephemeral=True)
         try:
             tgt = _resolve_guild(
-                bot, target or str(bot.config.default_target_id or ""), "Ziel-Server"
+                bot, target or str(bot.config.default_target_id or ""), "target server"
             )
             await _authorize(bot, interaction, tgt)
             if tgt.id in bot.active:
@@ -424,12 +424,12 @@ def register_commands(bot: CloneBot) -> None:  # noqa: C901 - one registration s
     @app_commands.describe(
         source=GUILD_HINT,
         target=GUILD_HINT,
-        wipe_target="Ziel vorher komplett leeren (Standard: Ja)",
-        resume="Einen abgebrochenen Lauf fortsetzen statt neu zu beginnen",
+        wipe_target="Wipe the target completely first (default: yes)",
+        resume="Resume an interrupted run instead of starting over",
         roles="Copy roles as well (default: yes)",
         channels="Copy categories and channels as well (default: yes)",
-        emojis="Emojis mitkopieren (Standard: Ja)",
-        stickers="Sticker mitkopieren (Standard: Ja)",
+        emojis="Copy emojis as well (default: yes)",
+        stickers="Copy stickers as well (default: yes)",
         settings="Copy name, icon and server settings (default: yes)",
         messages="How many messages per channel to re-stage (0 = off)",
         member_roles="Give members present on both servers their roles",
@@ -521,14 +521,14 @@ async def _resolve_pair(
     target: str | None,
 ) -> tuple[discord.Guild, discord.Guild]:
     """Resolves source and target and checks every precondition."""
-    src = _resolve_guild(bot, source or str(bot.config.default_source_id or ""), "Quell-Server")
-    tgt = _resolve_guild(bot, target or str(bot.config.default_target_id or ""), "Ziel-Server")
+    src = _resolve_guild(bot, source or str(bot.config.default_source_id or ""), "source server")
+    tgt = _resolve_guild(bot, target or str(bot.config.default_target_id or ""), "target server")
     await _authorize(bot, interaction, tgt)
 
     if src.id == tgt.id:
         raise CloneError(
             "Source and target are the same. That would delete the server "
-            "statt ihn zu kopieren."
+            "instead of copying it."
         )
     if tgt.id in bot.active:
         raise CloneError(
@@ -661,7 +661,7 @@ async def _run_clone(
     except CloneError:
         final_stage = Stage.FAILED
     except Exception:  # pragma: no cover - Sicherheitsnetz
-        log.exception("Vorgang unerwartet abgebrochen")
+        log.exception("The run aborted unexpectedly")
         final_stage = Stage.FAILED
     finally:
         bot.active.pop(target.id, None)

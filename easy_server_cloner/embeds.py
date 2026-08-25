@@ -96,11 +96,11 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
         color=color,
     )
     embed.add_field(
-        name="📋 Befehle",
+        name="📋 Commands",
         value=(
             "**`/clone`** — copy one server onto another\n"
             "**`/sync`** — add only what is missing, delete nothing\n"
-            "**`/backup`** — Server als Datei sichern\n"
+            "**`/backup`** — save a server to a file\n"
             "**`/restore`** — apply a backup file to a server\n"
             "**`/preview`** — dry run, changes nothing\n"
             "**`/servers`** · **`/status`** · **`/help`**"
@@ -110,7 +110,7 @@ def help_embed(color: int = COLOR_INFO) -> discord.Embed:
     embed.add_field(
         name="🚀 Schnellstart",
         value=(
-            "1. Bot auf **beide** Server einladen (Quelle & Ziel)\n"
+            "1. Invite the bot to **both** servers (source & target)\n"
             "2. `/backup` on the source server — save it first\n"
             "3. `/preview` for the dry run\n"
             "4. run `/clone` and confirm\n\n"
@@ -149,8 +149,8 @@ def preview_embed(
     embed = discord.Embed(
         title="🔍 Preview — nothing is changed yet",
         description=(
-            f"**Quelle** → {blueprint.name}\n"
-            f"**Ziel** → {target.name} `{target.id}`"
+            f"**Source** → {blueprint.name}\n"
+            f"**Target** → {target.name} `{target.id}`"
         ),
         color=color,
     )
@@ -158,7 +158,7 @@ def preview_embed(
         embed.set_thumbnail(url=source_icon_url)
 
     embed.add_field(
-        name="📦 Wird kopiert",
+        name="📦 What gets copied",
         value="\n".join(f"`{value:>4}` × {label}" for label, value in blueprint.counts().items()),
         inline=True,
     )
@@ -175,7 +175,7 @@ def preview_embed(
     embed.add_field(
         name="🚫 Cannot be transferred",
         value=(
-            "Mitglieder · Bots · Webhooks · Server-Boosts · Audit-Log · "
+            "Members · bots · webhooks · server boosts · audit log · "
             "reactions and threads"
         ),
         inline=False,
@@ -204,19 +204,19 @@ def confirm_embed(
         color=COLOR_WARNING,
     )
     embed.add_field(
-        name="📥 Quelle",
-        value=f"{blueprint.name}\n{blueprint.total_objects} Objekte",
+        name="📥 Source",
+        value=f"{blueprint.name}\n{blueprint.total_objects} objects",
         inline=True,
     )
-    embed.add_field(name="📤 Ziel", value=f"{target.name}\n`{target.id}`", inline=True)
+    embed.add_field(name="📤 Target", value=f"{target.name}\n`{target.id}`", inline=True)
     embed.add_field(name="​", value="​", inline=True)
     embed.add_field(name="⚙️ Optionen", value="\n".join(options.summary()), inline=True)
 
     if resume_state is not None:
         embed.add_field(
-            name="♻️ Fortsetzung",
+            name="♻️ Resuming",
             value=(
-                f"**{resume_state.object_count} Objekte** aus einem abgebrochenen "
+                f"**{resume_state.object_count} objects** from an interrupted "
                 f"run are skipped. **Nothing is deleted.**"
             ),
             inline=True,
@@ -233,7 +233,7 @@ def confirm_embed(
     else:
         embed.add_field(
             name="➕ Modus",
-            value="Bestehende Inhalte im Ziel bleiben erhalten.",
+            value="Existing content on the target is left alone.",
             inline=True,
         )
 
@@ -277,7 +277,7 @@ def progress_embed(
 
     counter = f" · {progress.current}/{progress.total}" if progress.total else ""
     embed.add_field(
-        name=f"Schritt {progress.stage_index}/{len(STAGE_ORDER)}",
+        name=f"Step {progress.stage_index}/{len(STAGE_ORDER)}",
         value=f"**{progress.stage.value}**{counter}\n{progress.detail or '…'}",
         inline=False,
     )
@@ -290,7 +290,7 @@ def progress_embed(
         ("😀 Emojis", report.emojis_created),
         ("🏷️ Sticker", report.stickers_created),
         ("✉️ Messages", report.messages_copied),
-        ("👥 Mitglieder", report.members_updated),
+        ("👥 Members", report.members_updated),
     ]
     embed.add_field(
         name="✅ Bisher erledigt",
@@ -323,20 +323,20 @@ def result_embed(
     target: discord.Guild,
 ) -> discord.Embed:
     if stage is Stage.CANCELLED:
-        title, color = "🛑 Vorgang abgebrochen", COLOR_WARNING
+        title, color = "🛑 Run cancelled", COLOR_WARNING
     elif stage is Stage.FAILED:
-        title, color = "❌ Vorgang fehlgeschlagen", COLOR_DANGER
+        title, color = "❌ Run failed", COLOR_DANGER
     elif report.error_count:
         title, color = "⚠️ Finished with errors", COLOR_WARNING
     else:
-        title, color = "✅ Vorgang abgeschlossen", COLOR_SUCCESS
+        title, color = "✅ Run complete", COLOR_SUCCESS
 
     embed = discord.Embed(
         title=title,
         description=(
             f"**{source_name}** → **{target.name}**\n"
             f"Dauer: **{_fmt_duration(report.duration)}** · "
-            f"**{report.total_created}** Objekte erstellt"
+            f"**{report.total_created}** objects created"
         ),
         color=color,
     )
@@ -344,7 +344,7 @@ def result_embed(
         embed.set_thumbnail(url=target.icon.url)
 
     embed.add_field(
-        name="📊 Erstellt",
+        name="📊 Created",
         value=(
             f"🎭 Roles `{report.roles_created}`\n"
             f"📁 Kategorien `{report.categories_created}`\n"
@@ -365,7 +365,7 @@ def result_embed(
     if report.messages_copied:
         extra.append(f"Messages `{report.messages_copied}`")
     if report.members_updated:
-        extra.append(f"Mitglieder `{report.members_updated}`")
+        extra.append(f"Members `{report.members_updated}`")
     if report.throttle_events:
         extra.append(f"Rate-Limit `{report.throttle_events}×`")
     embed.add_field(name="🔧 Weiteres", value="\n".join(extra), inline=True)
@@ -415,7 +415,7 @@ def backup_embed(
     color: int = COLOR_INFO,
 ) -> discord.Embed:
     embed = discord.Embed(
-        title="💾 Backup erstellt",
+        title="💾 Backup created",
         description=(
             f"**{blueprint.name}** has been saved in full.\n"
             f"`/restore` can rebuild a server from it at any time."
@@ -430,7 +430,7 @@ def backup_embed(
         inline=True,
     )
     embed.add_field(
-        name="📄 Datei",
+        name="📄 File",
         value=(
             f"`{filename}`\n"
             f"Size: **{size_text}**\n"

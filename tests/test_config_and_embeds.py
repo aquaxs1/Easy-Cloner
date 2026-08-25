@@ -92,7 +92,7 @@ def test_invalid_owner_id_raises(monkeypatch):
 
 
 def test_clone_delay_has_a_floor(monkeypatch):
-    """Zu kleine Pausen provozieren nur Rate-Limits statt Tempo."""
+    """Pauses that are too short only provoke rate limits instead of speed."""
     _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", CLONE_DELAY="0.0")
     assert Config.load().clone_delay >= 0.25
 
@@ -126,12 +126,12 @@ def test_help_embed_is_within_limits():
 
 
 def test_preview_embed_is_within_limits():
-    assert_valid_embed(embeds.preview_embed(blueprint("Quelle"), fake_guild("Ziel"), 480))
+    assert_valid_embed(embeds.preview_embed(blueprint("Source"), fake_guild("Target"), 480))
 
 
 def test_confirm_embed_is_within_limits():
     assert_valid_embed(
-        embeds.confirm_embed(blueprint("Quelle"), fake_guild("Ziel"), CloneOptions())
+        embeds.confirm_embed(blueprint("Source"), fake_guild("Target"), CloneOptions())
     )
 
 
@@ -139,18 +139,18 @@ def test_confirm_embed_shows_resume_instead_of_deletion_warning():
     """Resuming deletes nothing — the prompt must not claim otherwise."""
     state = CloneState(target_id=2, roles={"a": 1}, channels={"b": 2})
     embed = embeds.confirm_embed(
-        blueprint("Quelle"), fake_guild("Ziel"), CloneOptions(wipe_target=True), resume_state=state
+        blueprint("Source"), fake_guild("Target"), CloneOptions(wipe_target=True), resume_state=state
     )
     names = [f.name for f in embed.fields]
 
-    assert any("Fortsetzung" in n for n in names)
+    assert any("Resuming" in n for n in names)
     assert not any("geleert" in n for n in names)
     assert_valid_embed(embed)
 
 
 def test_confirm_embed_flags_message_reconstruction():
     embed = embeds.confirm_embed(
-        blueprint("Quelle"), fake_guild("Ziel"), CloneOptions(messages_per_channel=50)
+        blueprint("Source"), fake_guild("Target"), CloneOptions(messages_per_channel=50)
     )
     text = " ".join(f.value for f in embed.fields)
 
@@ -163,12 +163,12 @@ def test_progress_embed_is_within_limits():
     progress = Progress(
         stage=Stage.CHANNELS, detail="#allgemein", current=17, total=42, report=report
     )
-    assert_valid_embed(embeds.progress_embed(progress, "Quelle", fake_guild("Ziel")))
+    assert_valid_embed(embeds.progress_embed(progress, "Source", fake_guild("Target")))
 
 
 def test_progress_embed_reports_throttling():
     progress = Progress(stage=Stage.ROLES, throttled=True, delay=1.28)
-    embed = embeds.progress_embed(progress, "Quelle", fake_guild("Ziel"))
+    embed = embeds.progress_embed(progress, "Source", fake_guild("Target"))
 
     assert "1.28s" in " ".join(f.value for f in embed.fields)
     assert_valid_embed(embed)
@@ -181,7 +181,7 @@ def test_result_embed_truncates_a_flood_of_messages():
         report.warn(f"Warning number {i} with a fairly verbose explanation after it")
         report.fail(f"Error number {i} with a fairly verbose explanation after it")
 
-    embed = embeds.result_embed(report, Stage.DONE, "Quelle", fake_guild("Ziel"))
+    embed = embeds.result_embed(report, Stage.DONE, "Source", fake_guild("Target"))
     assert_valid_embed(embed)
     # The counters stay correct despite the trimming.
     assert report.warning_count == 500
@@ -191,7 +191,7 @@ def test_result_embed_truncates_a_flood_of_messages():
 @pytest.mark.parametrize("stage", [Stage.DONE, Stage.FAILED, Stage.CANCELLED])
 def test_result_embed_for_every_end_state(stage):
     report = CloneReport(roles_created=3, text_channels_created=5, messages_copied=9)
-    assert_valid_embed(embeds.result_embed(report, stage, "Quelle", fake_guild("Ziel")))
+    assert_valid_embed(embeds.result_embed(report, stage, "Source", fake_guild("Target")))
 
 
 def test_cancelled_result_points_at_resume():
@@ -201,7 +201,7 @@ def test_cancelled_result_points_at_resume():
 
 def test_backup_embed_is_within_limits():
     assert_valid_embed(
-        embeds.backup_embed(blueprint("Quelle"), "quelle.esc.json.gz", "1.4 MB", True, "backups/x")
+        embeds.backup_embed(blueprint("Source"), "source.esc.json.gz", "1.4 MB", True, "backups/x")
     )
 
 

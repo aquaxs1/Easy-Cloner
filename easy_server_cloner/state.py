@@ -4,7 +4,7 @@ Fortsetzbarkeit.
 Cloning a large server takes minutes. If it breaks off — a dropped
 connection, a restart, the cancel button — the second attempt should not
 start from zero. So the cloner records what already exists after every
-bereits existiert.
+already exists.
 
 The state lives as JSON at `state/<target-id>.json` and is deleted once a
 run finishes cleanly.

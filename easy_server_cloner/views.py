@@ -20,7 +20,7 @@ class ConfirmView(discord.ui.View):
         if interaction.user.id != self.requester_id:
             await interaction.response.send_message(
                 embed=embeds.error(
-                    "Nicht dein Vorgang",
+                    "Not your run",
                     "Only the person who ran the command can confirm it.",
                 ),
                 ephemeral=True,
@@ -45,7 +45,7 @@ class ConfirmView(discord.ui.View):
         self.stop()
 
     @discord.ui.button(
-        label="Abbrechen", style=discord.ButtonStyle.secondary, emoji="✖️"
+        label="Cancel", style=discord.ButtonStyle.secondary, emoji="✖️"
     )
     async def cancel(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -55,7 +55,7 @@ class ConfirmView(discord.ui.View):
         self._disable_all()
         await interaction.response.edit_message(
             embed=embeds.info(
-                "✖️ Abgebrochen",
+                "✖️ Cancelled",
                 "Nothing was changed.",
                 color=embeds.COLOR_MUTED,
             ),
@@ -80,7 +80,7 @@ class CancelView(discord.ui.View):
         if interaction.user.id != self.requester_id:
             await interaction.response.send_message(
                 embed=embeds.error(
-                    "Nicht dein Vorgang",
+                    "Not your run",
                     "Only the person who started the clone can cancel it.",
                 ),
                 ephemeral=True,
@@ -89,13 +89,13 @@ class CancelView(discord.ui.View):
         return True
 
     @discord.ui.button(
-        label="Abbrechen", style=discord.ButtonStyle.danger, emoji="🛑"
+        label="Cancel", style=discord.ButtonStyle.danger, emoji="🛑"
     )
     async def stop_clone(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ) -> None:
         self.cloner.cancel()
         button.disabled = True
-        button.label = "Wird abgebrochen…"
+        button.label = "Cancelling…"
         await interaction.response.edit_message(view=self)
         self.stop()

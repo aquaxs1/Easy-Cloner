@@ -54,8 +54,8 @@ def build_cloner(target, source, channels=None):
 
 def test_messages_are_reposted_in_chronological_order():
     """Discord returns newest first — the order in the target must be right."""
-    source = make_guild(1, "Quelle")
-    target = make_guild(2, "Ziel")
+    source = make_guild(1, "Source")
+    target = make_guild(2, "Target")
 
     origin = make_history_channel([make_message("neu"), make_message("alt")])
     source.get_channel = MagicMock(return_value=origin)
@@ -79,7 +79,7 @@ def test_messages_are_reposted_in_chronological_order():
 
 def test_webhook_is_removed_afterwards():
     """A webhook left behind would be a permanent security hole."""
-    source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
+    source, target = make_guild(1, "Source"), make_guild(2, "Target")
     source.get_channel = MagicMock(return_value=make_history_channel([make_message()]))
 
     mirror = MagicMock(spec=discord.TextChannel)
@@ -97,7 +97,7 @@ def test_webhook_is_removed_afterwards():
 
 
 def test_webhook_is_removed_even_when_sending_fails():
-    source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
+    source, target = make_guild(1, "Source"), make_guild(2, "Target")
     source.get_channel = MagicMock(return_value=make_history_channel([make_message()]))
 
     mirror = MagicMock(spec=discord.TextChannel)
@@ -117,7 +117,7 @@ def test_webhook_is_removed_even_when_sending_fails():
 
 
 def test_mass_mentions_are_defused_and_nobody_is_pinged():
-    source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
+    source, target = make_guild(1, "Source"), make_guild(2, "Target")
     source.get_channel = MagicMock(
         return_value=make_history_channel([make_message("Heads up @everyone and @here!")])
     )
@@ -141,7 +141,7 @@ def test_mass_mentions_are_defused_and_nobody_is_pinged():
 
 
 def test_overlong_content_is_trimmed():
-    source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
+    source, target = make_guild(1, "Source"), make_guild(2, "Target")
     source.get_channel = MagicMock(
         return_value=make_history_channel([make_message("x" * 5000)])
     )
@@ -161,7 +161,7 @@ def test_overlong_content_is_trimmed():
 
 
 def test_voice_channels_are_not_considered():
-    source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
+    source, target = make_guild(1, "Source"), make_guild(2, "Target")
     cloner = build_cloner(target, source, channels=[channel_bp("30", "Talk", KIND_VOICE)])
     cloner.channel_map["30"] = MagicMock(spec=discord.VoiceChannel)
 
@@ -171,7 +171,7 @@ def test_voice_channels_are_not_considered():
 
 
 def test_unreadable_history_is_reported_not_fatal():
-    source, target = make_guild(1, "Quelle"), make_guild(2, "Ziel")
+    source, target = make_guild(1, "Source"), make_guild(2, "Target")
 
     origin = MagicMock(spec=discord.TextChannel)
     origin.name = "geheim"
@@ -209,7 +209,7 @@ def make_member(user_id, roles=(), bot=False):
 
 
 def target_with_members(members):
-    target = make_guild(2, "Ziel")
+    target = make_guild(2, "Target")
 
     def fetch_members(**kwargs):
         async def gen():
@@ -225,7 +225,7 @@ def target_with_members(members):
 def test_roles_are_assigned_to_shared_members():
     source_mod = make_role(11, "Mod", 2)
     everyone = make_role(1, "@everyone", 0, default=True)
-    source = make_guild(1, "Quelle")
+    source = make_guild(1, "Source")
     source_member = make_member(555, roles=[everyone, source_mod])
     source.get_member = MagicMock(return_value=source_member)
 
@@ -245,7 +245,7 @@ def test_roles_are_assigned_to_shared_members():
 
 
 def test_bots_and_strangers_are_skipped():
-    source = make_guild(1, "Quelle")
+    source = make_guild(1, "Source")
     source.get_member = MagicMock(return_value=None)  # nobody is on both servers
 
     bot_member = make_member(1, bot=True)
@@ -263,7 +263,7 @@ def test_bots_and_strangers_are_skipped():
 def test_roles_above_the_bot_are_not_attempted():
     """Discord forbids it anyway — trying would only add another error."""
     source_admin = make_role(11, "Admin", 5)
-    source = make_guild(1, "Quelle")
+    source = make_guild(1, "Source")
     source.get_member = MagicMock(return_value=make_member(555, roles=[source_admin]))
 
     target_member = make_member(555)
@@ -280,8 +280,8 @@ def test_roles_above_the_bot_are_not_attempted():
 
 
 def test_missing_members_intent_is_reported_clearly():
-    source = make_guild(1, "Quelle")
-    target = make_guild(2, "Ziel")
+    source = make_guild(1, "Source")
+    target = make_guild(2, "Target")
 
     def fetch_members(**kwargs):
         async def gen():
