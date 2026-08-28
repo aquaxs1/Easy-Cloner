@@ -15,6 +15,7 @@ never leaves your machine.
 [![discord.py](https://img.shields.io/badge/discord.py-v2-5865F2)](https://discordpy.readthedocs.io)
 [![Tests](https://img.shields.io/badge/tests-93%20passing-57F287)](tests)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED)](docker-compose.yml)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
 </div>
 
