@@ -38,6 +38,7 @@
     </button>
     <ul class="nav-links" id="nav-links">
       <li><a href="/index.html">Home</a></li>
+      <li><a href="/download.html">Download</a></li>
       <li><a href="/features.html">Features</a></li>
       <li><a href="/setup.html">Setup</a></li>
       <li><a href="/faq.html" aria-current="page">FAQ</a></li>
@@ -68,12 +69,8 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>It reads the complete structure of one Discord server — roles with their exact
-           permissions, categories, channels, per-channel overrides, emojis, stickers,
-           server settings — and rebuilds all of it on another server. It can also save
-           that structure to a file and rebuild from the file later.</p>
-        <p>It does <strong>not</strong> move members, messages or bots. Those are not
-           things the Discord API allows anyone to copy.</p>
+        <p>It reads one server's complete structure — roles with their exact permissions, categories, channels, per-channel overrides, emojis, stickers, settings — and rebuilds it on another, or saves it to a file to rebuild later.</p>
+        <p>It does <strong>not</strong> move members, messages or bots. The Discord API allows none of those.</p>
       </div></div></div>
     </div>
 
@@ -83,9 +80,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Free and MIT licensed. There is no hosted version and that is deliberate: a
-           tool with Administrator rights on your server should run on hardware you
-           control, with a token only you hold.</p>
+        <p>Free and MIT licensed. There is no hosted version by design: a tool with Administrator rights on your server should run on hardware you control.</p>
       </div></div></div>
     </div>
 
@@ -95,10 +90,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Nowhere. The bot talks to Discord and to nothing else. Backups and checkpoints
-           are written to the <code>backups/</code> and <code>state/</code> folders on
-           your own machine, and both are git-ignored.</p>
-        <p>This website is static and carries no analytics, no cookies and no trackers.</p>
+        <p>Nowhere. The bot talks to Discord and nothing else; backups and checkpoints go to <code>backups/</code> and <code>state/</code> on your machine, both git-ignored. This site is static — no analytics, no cookies.</p>
       </div></div></div>
     </div>
 
@@ -108,13 +100,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Copying <em>your own</em> servers — for backups, staging or templates — is
-           ordinary bot behaviour and what this tool is built for. The bot needs
-           Administrator on both sides, so it can only ever touch servers you were
-           granted access to.</p>
-        <p>Copying someone else's server without permission is a different matter, and
-           the <a href="/terms.html">Terms of Use</a> ask you not to. Discord's own
-           <a href="https://discord.com/terms">Terms of Service</a> apply either way.</p>
+        <p>Copying your own servers is ordinary bot behaviour. Copying someone else's without permission is not, and the <a href="/terms.html">Terms of Use</a> forbid it.</p>
       </div></div></div>
     </div>
 
@@ -124,12 +110,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Roughly one second per object, so a 40-channel server with 20 roles and 50
-           emojis lands somewhere around two minutes. <code>/preview</code> gives you an
-           estimate before you commit.</p>
-        <p>Discord's rate limits set the floor here. Turning <code>CLONE_DELAY</code> down
-           usually makes things <em>slower</em>, not faster, because you spend the time
-           waiting out 429s instead.</p>
+        <p>Roughly a second per object, so a 40-channel server lands around two minutes. Discord's rate limits set the floor — turning <code>CLONE_DELAY</code> down usually makes things slower, not faster.</p>
       </div></div></div>
     </div>
   </section>
@@ -144,13 +125,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Discord only lets a bot grant permissions it holds itself. To recreate a role
-           that can ban members, the bot must be able to ban members. With a narrower
-           permission set, your roles would arrive stripped of exactly the permissions
-           you cared about.</p>
-        <p>The bot does handle the refusal gracefully — a role it cannot fully recreate is
-           created without permissions rather than skipped — but the result needs fixing
-           by hand afterwards.</p>
+        <p>Discord only lets a bot grant permissions it already holds. Without Administrator, any role that can ban or manage channels comes out stripped. A role it cannot fully recreate is created without the missing bits and reported at the end.</p>
       </div></div></div>
     </div>
 
@@ -160,14 +135,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Yes, and you have three ways to do it:</p>
-        <ul>
-          <li><code>/clone</code> — clears the target first, then rebuilds. An exact copy.</li>
-          <li><code>/clone wipe_target:False</code> — adds on top without deleting.</li>
-          <li><code>/sync</code> — adds only what is missing, reuses same-named objects, leaves settings alone.</li>
-        </ul>
-        <p>Run <code>/preview</code> first either way. It tells you exactly how many
-           channels and roles would be deleted.</p>
+        <p>Yes, three ways: <code>/sync</code> adds only what is missing, <code>/clone</code> replaces, and <code>/preview</code> shows you the numbers first. Run <code>/preview</code> either way.</p>
       </div></div></div>
     </div>
 
@@ -177,13 +145,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>It can <strong>rebuild</strong> them, which is not the same thing.
-           <code>/clone messages:100</code> replays the last 100 messages per channel
-           through a webhook using each author's name and avatar. They look right, but
-           they are new messages posted by a webhook — reactions, threads, pins and edit
-           history do not come along.</p>
-        <p>This needs the Message Content intent. See
-           <a href="/setup.html#optional">optional extras</a>.</p>
+        <p>It can rebuild them, which is not the same thing. <code>/clone messages:100</code> replays the last 100 per channel through webhooks — same text and author name, new timestamps. Needs the Message Content intent.</p>
       </div></div></div>
     </div>
 
@@ -193,12 +155,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>No, and neither can anything else. Discord has no API for moving a user into a
-           server — people have to accept an invite themselves. Any tool claiming
-           otherwise is either lying or breaking the rules.</p>
-        <p>What it <em>can</em> do: once people have joined, <code>/clone
-           member_roles:True</code> gives everyone who is on both servers the same roles
-           in the new one.</p>
+        <p>No, and nor can anything else — Discord has no API for moving a user into a server. Once people have joined, <code>/clone member_roles:True</code> restores their roles.</p>
       </div></div></div>
     </div>
 
@@ -208,11 +165,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Emojis and stickers are what make backups big. Use
-           <code>/backup include_images:False</code> for a structure-only file — usually
-           a few dozen kilobytes.</p>
-        <p>The full version is still written to the <code>backups/</code> folder next to
-           the bot, so nothing is lost. You just cannot hand it over through Discord.</p>
+        <p>Emojis and stickers are the bulk. Use <code>/backup include_images:False</code> for a structure-only file. The full version still lands in <code>backups/</code> either way.</p>
       </div></div></div>
     </div>
   </section>
@@ -227,11 +180,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Global commands take up to an hour to propagate. To get them immediately, set
-           <code>DEV_GUILD_ID</code> in your <code>.env</code> to the server you are
-           testing on and restart.</p>
-        <p>Also check the bot was invited with the <code>applications.commands</code>
-           scope, not just <code>bot</code>. If it was not, re-run the invite link.</p>
+        <p>Global commands take up to an hour to propagate; set <code>DEV_GUILD_ID</code> in <code>.env</code> for instant registration. Also check the bot was invited with the <code>applications.commands</code> scope.</p>
       </div></div></div>
     </div>
 
@@ -241,10 +190,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Discord rejected the token. Either it is mistyped, or it was reset since you
-           copied it — pressing <em>Reset Token</em> invalidates the old one immediately.</p>
-        <p>Generate a fresh one in the Developer Portal and paste it into <code>.env</code>.
-           Watch for stray spaces or quotes around the value.</p>
+        <p>Discord rejected the token — mistyped, or reset since you copied it. Generate a fresh one in the Developer Portal and watch for stray spaces.</p>
       </div></div></div>
     </div>
 
@@ -254,11 +200,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>You set <code>ENABLE_MESSAGE_CLONE</code> or <code>ENABLE_MEMBER_ROLES</code> to
-           <code>true</code>, but the matching intent is still switched off in the
-           Developer Portal. Discord then refuses the login outright.</p>
-        <p>Either enable the intent under <strong>Bot → Privileged Gateway Intents</strong>,
-           or set the variable back to <code>false</code>. The two always move together.</p>
+        <p>You set <code>ENABLE_MESSAGE_CLONE</code> or <code>ENABLE_MEMBER_ROLES</code> to true without enabling the matching intent. Turn it on under <em>Bot → Privileged Gateway Intents</em>, or set the variable back to false.</p>
       </div></div></div>
     </div>
 
@@ -268,9 +210,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>The bot's role on the target server does not have Administrator. Go to
-           <strong>Server Settings → Roles</strong>, open the bot's role and switch it on.</p>
-        <p>The check runs <em>before</em> anything is deleted, so nothing has happened yet.</p>
+        <p>The bot's role on the target lacks Administrator. The check runs before anything is deleted, so nothing has happened yet.</p>
       </div></div></div>
     </div>
 
@@ -280,12 +220,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>The bot's own role was sitting too low. Discord never allows a bot to create a
-           role above its own, so everything it makes lands underneath — and if the bot
-           is near the bottom, that leaves no room for a hierarchy.</p>
-        <p>Drag the bot's role to the top of the list in <strong>Server Settings →
-           Roles</strong> and clone again. The bot warns you about this up front when it
-           spots the problem.</p>
+        <p>The bot's own role sat too low — Discord never lets a bot create a role above its own. Drag it to the top under <em>Server Settings → Roles</em> and clone again.</p>
       </div></div></div>
     </div>
 
@@ -295,11 +230,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Both only exist on Community servers. Enable Community in
-           <strong>Server Settings → Enable Community</strong> on the target, then run
-           <code>/sync</code> to add what was skipped.</p>
-        <p>The same applies to announcement channels — on a non-Community server they are
-           created as normal text channels, and the report tells you so.</p>
+        <p>Stage channels and forums only exist on Community servers. Enable Community first; announcement channels are created as normal text channels without it.</p>
       </div></div></div>
     </div>
 
@@ -309,8 +240,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Server banners need Boost level 2. The bot notices the rejection, warns you and
-           carries on with everything else rather than aborting the run.</p>
+        <p>Server banners need Boost level 2. The bot warns and carries on with everything else.</p>
       </div></div></div>
     </div>
 
@@ -320,10 +250,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Nothing is lost. Run <code>/clone resume:True</code> and it continues from the
-           checkpoint — skipping what already exists, recreating anything that vanished,
-           and never wiping the target a second time.</p>
-        <p><code>/status</code> shows you what is waiting. Checkpoints expire after 24 hours.</p>
+        <p>Nothing is lost. <code>/clone resume:True</code> continues from the checkpoint. <code>/status</code> shows what is waiting; checkpoints expire after 24 hours.</p>
       </div></div></div>
     </div>
 
@@ -333,9 +260,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>Normal on large servers. The bot detects the slowdown, widens the pause between
-           calls automatically and narrows it again once things settle. Nothing to do —
-           just let it run.</p>
+        <p>Normal on large servers. The bot widens the pause between calls automatically and speeds back up afterwards.</p>
       </div></div></div>
     </div>
 
@@ -345,9 +270,7 @@
         <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
       <div class="faq-a"><div><div class="inner">
-        <p>On macOS and Linux the command is <code>python3</code>. On Windows, this usually
-           means Python was installed without <strong>“Add Python to PATH”</strong> — the
-           quickest fix is to reinstall and tick that box.</p>
+        <p>On macOS and Linux the command is <code>python3</code>. On Windows it usually means Python was installed without "Add to PATH".</p>
       </div></div></div>
     </div>
   </section>
@@ -404,7 +327,7 @@
           <li><a href="/setup.html">Setup guide</a></li>
           <li><a href="/setup.html#token">Bot token</a></li>
           <li><a href="/setup.html#docker">Docker</a></li>
-          <li><a href="/index.html#how-it-works">How it works</a></li>
+          <li><a href="/download.html">Download</a></li>
         </ul>
       </div>
 
@@ -423,6 +346,7 @@
       <span>© <span data-year>2026</span> Easy Server Cloner · MIT licensed</span>
       <nav aria-label="Quick links">
         <a href="/terms.html">Terms of Use</a>
+        <a href="/download.html">Download</a>
         <a href="/faq.html">FAQ</a>
         <a href="/features.html">Features</a>
         <a href="/setup.html">Setup</a>
