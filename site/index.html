@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
 <title>Easy Server Cloner — Clone any Discord server in minutes</title>
 <meta name="description" content="A Discord bot that copies a server's full structure — roles, categories, channels, permissions, emojis and stickers — with backups, live progress and resume after interruption.">
 <meta name="theme-color" content="#070A16">
@@ -11,7 +12,9 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Easy Server Cloner">
 <meta property="og:description" content="Copy a Discord server's full structure — roles, channels, permissions, emojis — with backups, live progress and resume.">
-<meta property="og:image" content="/assets/img/og-image.png">
+<meta property="og:image" content="https://easy-cloner.vercel.app/assets/img/og-image.png">
+<meta property="og:url" content="https://easy-cloner.vercel.app/">
+<link rel="canonical" href="https://easy-cloner.vercel.app/">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -37,6 +40,7 @@
     </button>
     <ul class="nav-links" id="nav-links">
       <li><a href="/index.html" aria-current="page">Home</a></li>
+      <li><a href="/download.html">Download</a></li>
       <li><a href="/features.html">Features</a></li>
       <li><a href="/setup.html">Setup</a></li>
       <li><a href="/faq.html">FAQ</a></li>
@@ -53,12 +57,7 @@
     <div>
       <span class="eyebrow"><span class="dot"></span> Open source · v2.1</span>
       <h1>Clone a Discord server<br><span class="grad-text">in minutes, not hours</span></h1>
-      <p class="hero-lead">
-        Easy Server Cloner copies a server's entire structure — roles, categories,
-        channels, permissions, emojis and stickers — onto another server. With a
-        confirmation step before anything is touched, live progress you can cancel,
-        and a backup file you can restore from at any time.
-      </p>
+      <p class="hero-lead">Easy Server Cloner copies a server's whole structure — roles, channels, overwrites, emojis and settings — onto another server, or into a file you restore from later. Self-hosted, with your own bot token.</p>
       <div class="btn-row">
         <a class="btn" href="/setup.html">
           Set Up
@@ -115,15 +114,7 @@
         <div class="slide active" role="tabpanel">
           <div class="slide-copy">
             <h3>Invite the bot to both servers</h3>
-            <p>
-              The bot needs to stand on both sides: it reads from the source server
-              and writes to the target. One OAuth link, used twice — once per server.
-            </p>
-            <p>
-              It asks for <strong>Administrator</strong> for one reason: Discord only
-              lets a bot hand out permissions it holds itself. With anything less,
-              your roles would arrive incomplete.
-            </p>
+            <p>It reads from the source and writes to the target, so it has to be on both — with Administrator on the target and its role at the top of the list.</p>
             <div class="slide-note">
               <strong>Tip</strong>
               <span>Drag the bot's role to the top of the target server's role list — Discord never lets a bot create roles above its own.</span>
@@ -196,16 +187,9 @@
           <div class="slide-copy">
             <h3>The bot reads a blueprint</h3>
             <p>
-              Before writing anything, the bot walks the source server and turns it
-              into a <strong>blueprint</strong>: every role with its exact permission
-              bits, every category, every channel with its overrides, plus emojis
-              and stickers.
+              Before writing anything the bot walks the source server and turns it into a <strong>blueprint</strong>: every role with its permission bits, every channel with its overrides, plus emojis and stickers.
             </p>
-            <p>
-              That blueprint is the heart of the whole thing. It can come from a live
-              server or from a saved file — which is why cloning, backing up and
-              restoring are all the same operation underneath.
-            </p>
+            <p>The engine does not care whether a blueprint came from a live server or a saved file.</p>
             <div class="slide-note">
               <strong>/preview</strong>
               <span>Runs this step alone and shows you the numbers. Nothing is written, nothing is deleted.</span>
@@ -275,10 +259,6 @@
               stops and shows you exactly what it is about to do: how many objects
               come in, how many channels and roles go out, and which options are on.
             </p>
-            <p>
-              Only the person who ran the command can press the button, and the
-              prompt expires after 60 seconds on its own.
-            </p>
             <div class="slide-note warn">
               <strong>Safety</strong>
               <span>If source and target are the same server, the bot refuses outright — that mistake would delete the original.</span>
@@ -333,14 +313,7 @@
           <div class="slide-copy">
             <h3>Watch it build, live</h3>
             <p>
-              The bot posts a progress message and keeps it updated: which stage it is
-              on, how far along, and how many roles, channels and emojis exist so far.
-              A cancel button sits right underneath.
-            </p>
-            <p>
-              Roles are created from the highest down — Discord inserts every new role
-              at the bottom, so building the other way around would flip your whole
-              hierarchy upside down.
+              A progress message updates as it goes: current stage, how far along, how many objects exist so far. A cancel button sits underneath.
             </p>
             <div class="slide-note">
               <strong>Self-pacing</strong>
@@ -400,17 +373,7 @@
         <div class="slide" role="tabpanel">
           <div class="slide-copy">
             <h3>Save the whole server to a file</h3>
-            <p>
-              <code>/backup</code> hands you a single file containing the complete
-              blueprint. Keep it, version it, hand it to a co-owner. Above one
-              megabyte it is gzip-compressed automatically so it stays under
-              Discord's upload limit.
-            </p>
-            <p>
-              <code>/restore</code> takes that file and builds the server back —
-              on a brand new server, months later, without the original needing to
-              exist any more.
-            </p>
+            <p><code>/backup</code> gives you one file holding the whole blueprint. It restores onto any server the bot can reach.</p>
             <div class="slide-note warn">
               <strong>Treat it like a key</strong>
               <span>The file holds your full permission structure. Share it as carefully as you would the server itself.</span>
@@ -480,15 +443,9 @@
           <div class="slide-copy">
             <h3>Interrupted? Pick up where it stopped</h3>
             <p>
-              Big servers take minutes, and minutes are long enough for a dropped
-              connection or a restart. Every object the bot creates is written to a
-              local checkpoint the moment it exists.
+              Big servers take minutes, and minutes are long enough to drop a connection. Every object created is written to a local checkpoint the moment it exists.
             </p>
-            <p>
-              Run <code>/clone resume:True</code> and it skips everything already
-              there and carries on. It will never wipe the target a second time —
-              that would destroy exactly what the first attempt achieved.
-            </p>
+            <p><code>/clone resume:True</code> skips what already exists and carries on. It never wipes what it just built.</p>
             <div class="slide-note">
               <strong>/status</strong>
               <span>Lists running jobs and any unfinished run waiting to be resumed.</span>
@@ -504,7 +461,7 @@
                 <clipPath id="s6c2"><rect x="60" y="188" width="300" height="16" rx="8"/></clipPath>
               </defs>
 
-              <!-- Erster Versuch -->
+              <!-- the first attempt -->
               <text x="60" y="34" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">First attempt</text>
               <rect x="60" y="46" width="300" height="16" rx="8" fill="#151B36"/>
               <g clip-path="url(#s6c1)">
@@ -516,7 +473,7 @@
                 <animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.3;0.36;0.95;1"/>
               </text>
 
-              <!-- Zwischenstand: Rahmen steht immer, nur der Haken kommt dazu -->
+              <!-- Intermediate state: the frame is always there, only the check is added -->
               <rect x="60" y="100" width="300" height="40" rx="10" fill="#9B8AFF" fill-opacity="0.07" stroke="#2A2350" stroke-width="1"/>
               <text x="78" y="118" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9.5">state/staging.json</text>
               <text x="78" y="132" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">47 objects checkpointed</text>
@@ -526,11 +483,11 @@
                 <animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.36;0.44;0.95;1"/>
               </g>
 
-              <!-- Fortgesetzter Lauf -->
+              <!-- a resumed run -->
               <text x="60" y="176" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">Resumed run</text>
               <rect x="60" y="188" width="300" height="16" rx="8" fill="#151B36"/>
               <g clip-path="url(#s6c2)">
-                <!-- Der bereits erledigte Teil wird übersprungen, nicht neu gebaut. -->
+                <!-- The part already done is skipped, not rebuilt. -->
                 <rect x="60" y="188" width="168" height="16" fill="#6C58F0" fill-opacity="0.4"/>
                 <rect x="60" y="188" width="0" height="16" rx="8" fill="url(#s6bar)">
                   <animate attributeName="width" values="0;0;168;300;300" dur="6s" repeatCount="indefinite" keyTimes="0;0.5;0.56;0.9;1"/>
@@ -632,9 +589,8 @@
         <span class="eyebrow">Quick start</span>
         <h2>Four commands to running</h2>
         <p>
-          Python 3.10 or newer is all you need. The full walkthrough — including
-          the Developer Portal steps and the one setting almost everyone forgets —
-          lives on the setup page.
+          Python 3.10 or newer. The setup page covers the Developer Portal steps and the one
+          setting almost everyone forgets.
         </p>
         <div class="btn-row">
           <a class="btn" href="/setup.html">
@@ -723,7 +679,7 @@
           <li><a href="/setup.html">Setup guide</a></li>
           <li><a href="/setup.html#token">Bot token</a></li>
           <li><a href="/setup.html#docker">Docker</a></li>
-          <li><a href="/index.html#how-it-works">How it works</a></li>
+          <li><a href="/download.html">Download</a></li>
         </ul>
       </div>
 
@@ -742,6 +698,7 @@
       <span>© <span data-year>2026</span> Easy Server Cloner · MIT licensed</span>
       <nav aria-label="Quick links">
         <a href="/terms.html">Terms of Use</a>
+        <a href="/download.html">Download</a>
         <a href="/faq.html">FAQ</a>
         <a href="/features.html">Features</a>
         <a href="/setup.html">Setup</a>

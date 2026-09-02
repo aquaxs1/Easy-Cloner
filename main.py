@@ -3,7 +3,7 @@
 Easy Server Cloner — Startpunkt.
 
     pip install -r requirements.txt
-    cp .env.example .env      # dann Token eintragen
+    cp .env.example .env      # then fill in the token
     python main.py
 """
 
@@ -44,8 +44,8 @@ def main() -> int:
 
     if not config.owner_ids:
         log.warning(
-            "OWNER_IDS ist leer — jeder Server-Administrator darf den Bot bedienen. "
-            "Für den produktiven Einsatz solltest du dort deine User-ID eintragen."
+            "OWNER_IDS is empty — any server administrator can operate the bot. "
+            "For production use, put your own user ID there."
         )
 
     bot = CloneBot(config)
@@ -54,15 +54,15 @@ def main() -> int:
         bot.run(config.token, log_handler=None)
     except discord.LoginFailure:
         log.error(
-            "Login fehlgeschlagen: der Token in DISCORD_TOKEN wird von Discord "
-            "abgelehnt. Erzeuge im Developer Portal einen neuen Token "
-            "('Reset Token') und trage ihn in die .env ein."
+            "Login failed: Discord rejected the token in DISCORD_TOKEN. "
+            "Generate a new one in the Developer Portal ('Reset Token') "
+            "and put it in .env."
         )
         return 1
     except discord.PrivilegedIntentsRequired:
         log.error(
             "Discord verlangt privilegierte Intents. Aktiviere sie im Developer "
-            "Portal unter 'Bot' → 'Privileged Gateway Intents'."
+            "portal under 'Bot' → 'Privileged Gateway Intents'."
         )
         return 1
     except KeyboardInterrupt:

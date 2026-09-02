@@ -1,14 +1,14 @@
 """
-Der Bauplan eines Servers — unabhängig davon, woher er stammt.
+A server's blueprint, independent of where it came from.
 
-Ein `GuildBlueprint` beschreibt vollständig, wie ein Server aussieht: Rollen,
-Kategorien, Channels, Rechte, Emojis, Sticker. Er lässt sich aus einem
-Live-Server auslesen (`from_guild`) *oder* aus einer JSON-Datei laden
+A `GuildBlueprint` fully describes what a server looks like: roles,
+categories, channels, permissions, emojis, stickers. It can be read from a
+live server (`from_guild`) *or* loaded from a JSON file
 (`from_dict`).
 
-Dadurch benutzen `/clone`, `/backup` und `/restore` dieselbe Engine: Klonen ist
-"Bauplan aus Server A lesen und auf Server B anwenden", Restore ist "Bauplan aus
-Datei lesen und auf Server B anwenden".
+That way `/clone`, `/backup` and `/restore` share one engine: cloning is
+"read the blueprint from server A and apply it to server B", restore is
+"read the blueprint from a file and apply it to server B".
 """
 
 from __future__ import annotations
@@ -23,15 +23,15 @@ import discord
 
 log = logging.getLogger(__name__)
 
-# Dateiformat-Version. Wird beim Laden geprüft, damit alte Backups nicht
-# stillschweigend falsch interpretiert werden.
+# File format version. Checked on load so old backups are not silently
+# misinterpreted.
 FORMAT_VERSION = 1
 
-# Schlüssel der @everyone-Rolle. Sie hat auf jedem Server eine andere ID,
-# deshalb bekommt sie im Bauplan einen festen, sprechenden Schlüssel.
+# Key for the @everyone role. Its ID differs on every server, so it gets a
+# fixed, descriptive key in the blueprint.
 EVERYONE_KEY = "@everyone"
 
-# Channel-Typen, die der Bauplan kennt.
+# Channel types the blueprint knows about.
 KIND_CATEGORY = "category"
 KIND_TEXT = "text"
 KIND_NEWS = "news"
@@ -48,22 +48,22 @@ def _b64(data: bytes | None) -> str | None:
 
 
 def decode_image(text: str | None) -> bytes | None:
-    """Wandelt ein base64-Feld des Bauplans zurück in Rohbytes."""
+    """Turns a base64 field of the blueprint back into raw bytes."""
     return base64.b64decode(text) if text else None
 
 
-# Kurzform für den internen Gebrauch in diesem Modul.
+# Shorthand for internal use in this module.
 _unb64 = decode_image
 
 
 async def _read_asset(asset: discord.Asset | None) -> str | None:
-    """Lädt ein Discord-Asset als base64 — Fehler sind hier nie fatal."""
+    """Loads a Discord asset as base64 — failures here are never fatal."""
     if asset is None:
         return None
     try:
         return _b64(await asset.read())
     except discord.HTTPException as exc:
-        log.warning("Asset nicht lesbar: %s", exc)
+        log.warning("Asset not readable: %s", exc)
         return None
 
 
@@ -72,7 +72,7 @@ async def _read_asset(asset: discord.Asset | None) -> str | None:
 
 @dataclass(slots=True)
 class OverwriteData:
-    """Ein Berechtigungs-Override für eine Rolle."""
+    """A permission override for one role."""
 
     role_key: str
     allow: int
@@ -139,7 +139,7 @@ class ForumTagData:
 
 @dataclass(slots=True)
 class ChannelBlueprint:
-    """Ein Channel jeder Bauart — nicht zutreffende Felder bleiben leer."""
+    """A channel of any kind — fields that do not apply stay empty."""
 
     key: str
     name: str
@@ -170,8 +170,8 @@ class ChannelBlueprint:
                 EVERYONE_KEY if entity.is_default() else str(entity.id), overwrite
             )
             for entity, overwrite in channel.overwrites.items()
-            # Rechte einzelner Mitglieder ergeben auf einem anderen Server
-            # keinen Sinn — dort existieren diese Nutzer nicht zwingend.
+            # per-member overwrites make no sense on a different server
+            # make no sense there — those users need not exist on the target.
             if isinstance(entity, discord.Role)
         ]
         common = {
@@ -183,7 +183,7 @@ class ChannelBlueprint:
         }
 
         if isinstance(channel, discord.CategoryChannel):
-            common["category_key"] = None  # eine Kategorie hat selbst keine Kategorie
+            common["category_key"] = None  # a category has no category of its own
             return cls(kind=KIND_CATEGORY, **common)
         if isinstance(channel, discord.TextChannel):
             return cls(
@@ -269,7 +269,7 @@ class StickerBlueprint:
         return _unb64(self.image)
 
 
-# ── Der komplette Bauplan ─────────────────────────────────────────────────────
+# ── the complete blueprint ────────────────────────────────────────────────────
 
 
 @dataclass(slots=True)
@@ -292,7 +292,7 @@ class GuildBlueprint:
     system_channel_key: str | None = None
     system_channel_flags: int = 0
 
-    # Herkunftsangaben — rein informativ, für Anzeige und Fehlersuche.
+    # Provenance — purely informational, for display and debugging.
     source_id: str | None = None
     source_name: str | None = None
     created_at: str = ""
@@ -305,12 +305,12 @@ class GuildBlueprint:
     async def from_guild(
         cls, guild: discord.Guild, *, include_images: bool = True
     ) -> "GuildBlueprint":
-        """Liest einen Live-Server vollständig aus."""
+        """Reads a live server in full."""
         roles = [
             await RoleBlueprint.from_role(role, include_images=include_images)
             for role in guild.roles
-            # Von Integrationen verwaltete Rollen (Bot-Rollen, Booster-Rolle)
-            # lassen sich nicht nachbauen — sie entstehen mit dem jeweiligen Bot.
+            # Roles managed by integrations (bot roles, the booster role) cannot
+            # be recreated — they appear with the bot they belong to.
             if not role.managed
         ]
 
@@ -375,11 +375,11 @@ class GuildBlueprint:
         version = data.get("format_version", 0)
         if version > FORMAT_VERSION:
             raise ValueError(
-                f"Diese Backup-Datei hat Format-Version {version}, dieser Bot kennt "
-                f"nur bis {FORMAT_VERSION}. Aktualisiere den Bot."
+                f"This backup file is format version {version}; this bot only knows "
+                f"up to {FORMAT_VERSION}. Update the bot."
             )
         if "name" not in data:
-            raise ValueError("Die Datei enthält keinen Server-Namen — kein gültiges Backup.")
+            raise ValueError("The file has no server name — it is not a valid backup.")
 
         def build_channel(raw: dict[str, Any]) -> ChannelBlueprint:
             raw = dict(raw)
@@ -403,10 +403,10 @@ class GuildBlueprint:
 
     @property
     def creatable_roles(self) -> list[RoleBlueprint]:
-        """Alle Rollen außer @everyone, von der höchsten zur niedrigsten.
+        """Every role except @everyone, highest to lowest.
 
-        Die Reihenfolge ist entscheidend: Discord legt jede neue Rolle ganz
-        unten an. Wer aufsteigend erstellt, dreht die Hierarchie um.
+        The order matters: Discord inserts every new role at the very bottom.
+        Creating them in ascending order inverts the hierarchy.
         """
         return sorted(
             (r for r in self.roles if not r.is_default),
@@ -422,7 +422,7 @@ class GuildBlueprint:
 
     @property
     def non_categories(self) -> list[ChannelBlueprint]:
-        """Channels in der Reihenfolge, in der sie angelegt werden sollen."""
+        """Channels in the order they should be created."""
         by_key = {c.key: c for c in self.channels}
 
         def sort_key(channel: ChannelBlueprint) -> tuple[int, int]:
@@ -436,11 +436,11 @@ class GuildBlueprint:
     def counts(self) -> dict[str, int]:
         kinds = [c.kind for c in self.channels]
         return {
-            "Rollen": len(self.creatable_roles),
+            "Roles": len(self.creatable_roles),
             "Kategorien": kinds.count(KIND_CATEGORY),
             "Text-Channels": kinds.count(KIND_TEXT) + kinds.count(KIND_NEWS),
             "Voice-Channels": kinds.count(KIND_VOICE),
-            "Bühnen-Channels": kinds.count(KIND_STAGE),
+            "Stage channels": kinds.count(KIND_STAGE),
             "Foren": kinds.count(KIND_FORUM),
             "Emojis": len(self.emojis),
             "Sticker": len(self.stickers),
@@ -455,5 +455,5 @@ async def _safe_read(obj: Any) -> bytes | None:
     try:
         return await obj.read()
     except (discord.HTTPException, discord.NotFound) as exc:
-        log.warning("Konnte %s nicht laden: %s", getattr(obj, "name", obj), exc)
+        log.warning("Could not load %s: %s", getattr(obj, "name", obj), exc)
         return None

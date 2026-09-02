@@ -41,6 +41,6 @@ def configure(level: str = "INFO") -> None:
     root.addHandler(handler)
     root.setLevel(getattr(logging, level, logging.INFO))
 
-    # discord.py ist im Normalbetrieb sehr gesprächig.
+    # discord.py is very chatty in normal operation.
     logging.getLogger("discord").setLevel(logging.WARNING)
     logging.getLogger("discord.http").setLevel(logging.WARNING)

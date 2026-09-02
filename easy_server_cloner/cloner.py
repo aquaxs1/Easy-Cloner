@@ -1,12 +1,12 @@
 """
 Die Klon-Engine.
 
-Wendet einen `GuildBlueprint` auf einen Ziel-Server an. Woher der Bauplan
-stammt — Live-Server oder Backup-Datei — ist der Engine egal; damit teilen sich
-`/clone`, `/restore` und `/sync` denselben Code.
+Applies a `GuildBlueprint` to a target server. Where the blueprint came from
+— a live server or a backup file — is irrelevant to the engine, which is how
+`/clone`, `/restore` and `/sync` share the same code.
 
-Die Klasse kennt Discord, aber weder Slash-Commands noch Embeds: die Anbindung
-läuft über einen Progress-Callback.
+The class knows Discord, but neither slash commands nor embeds: the binding
+runs through a progress callback.
 """
 
 from __future__ import annotations
@@ -38,16 +38,16 @@ log = logging.getLogger(__name__)
 
 ProgressCallback = Callable[[Progress], Awaitable[None]]
 
-# Permissions, ohne die ein Klon garantiert scheitert.
+# Permissions without which a clone is guaranteed to fail.
 REQUIRED_PERMISSIONS = ("manage_roles", "manage_channels", "manage_guild")
 
 
 class CloneError(RuntimeError):
-    """Abbruchbedingung, die dem Nutzer direkt angezeigt werden kann."""
+    """An abort condition that can be shown to the user directly."""
 
 
 class ServerCloner:
-    """Baut einen Bauplan auf einem Ziel-Server nach."""
+    """Rebuilds a blueprint on a target server."""
 
     def __init__(
         self,
@@ -63,8 +63,8 @@ class ServerCloner:
     ) -> None:
         self.blueprint = blueprint
         self.target = target
-        # Nur für Nachrichten-Nachbau und Rollen-Zuweisung nötig; beim
-        # Wiederherstellen aus einer Datei gibt es keinen Quell-Server.
+        # Only needed for message re-staging and role assignment; when
+        # restoring from a file there is no source server.
         self.source_guild = source_guild
         self.options = options or CloneOptions()
         self.reason = reason
@@ -75,25 +75,25 @@ class ServerCloner:
         self.progress = Progress()
         self.report = self.progress.report
 
-        # Zwischenstand: leer bei einem frischen Lauf, gefüllt beim Fortsetzen.
+        # Checkpoint: empty on a fresh run, populated when resuming.
         self.state = state or CloneState(
             target_id=target.id, source_name=blueprint.source_name or blueprint.name
         )
         self.resuming = bool(state and not state.is_empty)
 
-        # Bauplan-Schlüssel → erzeugtes Objekt im Ziel-Server
+        # Blueprint key -> the object created in the target server
         self.role_map: dict[str, discord.Role] = {}
         self.channel_map: dict[str, discord.abc.GuildChannel] = {}
 
     # ── Steuerung ─────────────────────────────────────────────────────────────
 
     def set_progress_callback(self, callback: ProgressCallback | None) -> None:
-        """Hängt die Fortschrittsanzeige ein — meist erst, wenn die
-        Status-Nachricht steht, deren Objekt der Callback braucht."""
+        """Attaches the progress display — usually only once the status
+        message exists, whose object the callback needs."""
         self._on_progress = callback
 
     def cancel(self) -> None:
-        """Bricht den laufenden Vorgang beim nächsten Zwischenschritt ab."""
+        """Cancels the running job at the next intermediate step."""
         self._cancel.set()
 
     @property
@@ -105,11 +105,11 @@ class ServerCloner:
             raise asyncio.CancelledError
 
     async def _tick(self) -> None:
-        """Pause nach einem API-Aufruf, mit sofortiger Abbruch-Reaktion."""
+        """Pause after an API call, reacting to a cancellation at once."""
         await self.pacer.wait()
 
     async def _call(self, coro):
-        """API-Aufruf mit Zeitmessung für die adaptive Taktung."""
+        """An API call, timed to feed the adaptive pacer."""
         self._check_cancel()
         return await self.pacer.call(coro)
 
@@ -132,13 +132,13 @@ class ServerCloner:
         if self._on_progress is not None:
             try:
                 await self._on_progress(self.progress)
-            except Exception:  # Anzeige darf den Klon niemals stoppen
-                log.exception("Progress-Callback ist fehlgeschlagen")
+            except Exception:  # the display must never stop the clone
+                log.exception("Progress callback failed")
 
     # ── Einstiegspunkt ────────────────────────────────────────────────────────
 
     async def run(self) -> CloneReport:
-        """Führt den kompletten Vorgang aus."""
+        """Runs the whole job."""
         try:
             await self._validate()
             self._restore_maps_from_state()
@@ -147,8 +147,8 @@ class ServerCloner:
                 self.progress.stage = Stage.DONE
                 return self.report
 
-            # Beim Fortsetzen darf nicht erneut geleert werden — sonst wäre
-            # genau das weg, was der erste Anlauf schon geschafft hat.
+            # Resuming must not wipe again — that would remove exactly what
+            # the first attempt already achieved.
             if self.options.wipe_target and not self.resuming:
                 await self._wipe_target()
             if self.options.settings or self.options.icon:
@@ -167,19 +167,19 @@ class ServerCloner:
 
             if self.pacer.was_throttled:
                 self.report.warn(
-                    f"Discord hat {self.pacer.throttle_events}× gebremst — die Pause "
-                    f"wurde automatisch auf {self.pacer.delay:.2f}s angehoben."
+                    f"Discord throttled {self.pacer.throttle_events}× — the pause "
+                    f"was raised automatically to {self.pacer.delay:.2f}s."
                 )
 
             await self._emit(Stage.DONE, "Fertig")
-            # Sauber durchgelaufen: der Zwischenstand wird nicht mehr gebraucht.
+            # Finished cleanly: the checkpoint is no longer needed.
             self.state.clear()
         except asyncio.CancelledError:
             self.progress.stage = Stage.CANCELLED
             self.state.save()
             self.report.warn(
-                "Vorgang abgebrochen. Der Zwischenstand wurde gespeichert — "
-                "`/clone resume:True` setzt dort fort."
+                "Job cancelled. The checkpoint has been saved — "
+                "`/clone resume:True` picks up there."
             )
             raise
         except CloneError as exc:
@@ -188,10 +188,10 @@ class ServerCloner:
             self.report.fail(str(exc))
             raise
         except Exception as exc:  # pragma: no cover - Sicherheitsnetz
-            log.exception("Unerwarteter Fehler beim Klonen")
+            log.exception("Unexpected error while cloning")
             self.progress.stage = Stage.FAILED
             self.state.save()
-            self.report.fail(f"Unerwarteter Fehler: {exc}")
+            self.report.fail(f"Unexpected error: {exc}")
             raise CloneError(str(exc)) from exc
         finally:
             self.report.finished_at = time.monotonic()
@@ -199,22 +199,22 @@ class ServerCloner:
 
         return self.report
 
-    # ── 0. Vorabprüfungen ─────────────────────────────────────────────────────
+    # ── 0. Preflight checks ───────────────────────────────────────────────────
 
     async def _validate(self) -> None:
-        await self._emit(Stage.VALIDATING, "Prüfe Server und Berechtigungen")
+        await self._emit(Stage.VALIDATING, "Checking servers and permissions")
 
-        # Der mit Abstand teuerste Bedienfehler: sich selbst überschreiben.
+        # By far the most expensive mistake: overwriting yourself.
         if self.blueprint.source_id and self.blueprint.source_id == str(self.target.id):
             raise CloneError(
-                "Quell- und Ziel-Server sind identisch. Das würde den Server "
-                "löschen statt ihn zu kopieren — Vorgang abgebrochen."
+                "Source and target server are the same. That would delete the "
+                "server instead of copying it — job aborted."
             )
 
         me = self.target.me
         if me is None:
             raise CloneError(
-                "Der Bot ist kein Mitglied des Ziel-Servers. Lade ihn zuerst ein."
+                "The bot is not a member of the target server. Invite it first."
             )
 
         perms = me.guild_permissions
@@ -223,8 +223,8 @@ class ServerCloner:
             if missing:
                 pretty = ", ".join(p.replace("_", " ").title() for p in missing)
                 raise CloneError(
-                    f"Dem Bot fehlen auf dem Ziel-Server folgende Rechte: {pretty}.\n"
-                    f"Am einfachsten gibst du ihm die Rolle „Administrator“."
+                    f"The bot is missing these permissions on the target: {pretty}.\n"
+                    f"The simplest fix is to give it the Administrator role."
                 )
 
         if self.options.roles:
@@ -232,21 +232,21 @@ class ServerCloner:
             room = me.top_role.position - 1
             if wanted > room:
                 self.report.warn(
-                    f"Der Bauplan enthält {wanted} Rollen, oberhalb der Bot-Rolle ist "
-                    f"aber nur Platz für {max(room, 0)}. Die Rangfolge wird gestaucht "
-                    f"— schiebe die Bot-Rolle weiter nach oben."
+                    f"The blueprint has {wanted} roles, but there is only room for "
+                    f"{max(room, 0)} above the bot's role. The hierarchy will be "
+                    f"compressed — move the bot's role further up."
                 )
 
         if not self.blueprint.has_images and (self.options.emojis or self.options.icon):
             self.report.warn(
-                "Dieser Bauplan wurde ohne Bilder erstellt. Icon, Banner, Emojis "
-                "und Sticker fehlen deshalb."
+                "This blueprint was created without images, so icon, banner, "
+                "emojis and stickers are missing."
             )
 
-        await self._emit(detail="Voraussetzungen erfüllt")
+        await self._emit(detail="Prerequisites met")
 
     def _restore_maps_from_state(self) -> None:
-        """Baut nach einem Abbruch die Zuordnungen aus dem Zwischenstand auf."""
+        """Rebuilds the mappings from the checkpoint after an interruption."""
         if not self.resuming:
             return
 
@@ -254,7 +254,7 @@ class ServerCloner:
         for key, role_id in list(self.state.roles.items()):
             role = self.target.get_role(role_id)
             if role is None:
-                # Zwischenzeitlich gelöscht — dann eben neu anlegen.
+                # Deleted in the meantime — just create it again.
                 self.state.roles.pop(key, None)
                 continue
             self.role_map[key] = role
@@ -270,12 +270,12 @@ class ServerCloner:
             recovered_channels += 1
 
         self.report.warn(
-            f"Fortsetzung eines abgebrochenen Laufs: {recovered_roles} Rollen und "
-            f"{recovered_channels} Channels waren bereits vorhanden und wurden "
-            f"übersprungen."
+            f"Resuming an interrupted run: {recovered_roles} roles and "
+            f"{recovered_channels} channels already existed and were "
+            f"skipped."
         )
 
-    # ── 1. Ziel-Server leeren ─────────────────────────────────────────────────
+    # ── 1. wipe the target server ─────────────────────────────────────────────
 
     async def _wipe_target(self) -> None:
         channels = list(self.target.channels)
@@ -285,7 +285,7 @@ class ServerCloner:
             if not r.is_default() and not r.managed and r < self.target.me.top_role
         ]
         total = len(channels) + len(roles)
-        await self._emit(Stage.WIPING, "Lösche alte Inhalte", 0, total)
+        await self._emit(Stage.WIPING, "Deleting existing content", 0, total)
 
         done = 0
         for channel in channels:
@@ -293,9 +293,9 @@ class ServerCloner:
                 await self._call(channel.delete(reason=self.reason))
                 self.report.channels_deleted += 1
             except discord.Forbidden:
-                self.report.warn(f"Keine Rechte zum Löschen von #{channel.name}.")
+                self.report.warn(f"No permission to delete #{channel.name}.")
             except discord.HTTPException as exc:
-                self.report.warn(f"#{channel.name} nicht gelöscht: {exc.text or exc}")
+                self.report.warn(f"#{channel.name} not deleted: {exc.text or exc}")
             done += 1
             await self._emit(detail=f"#{channel.name}", current=done)
             await self._tick()
@@ -305,17 +305,17 @@ class ServerCloner:
                 await self._call(role.delete(reason=self.reason))
                 self.report.roles_deleted += 1
             except discord.Forbidden:
-                self.report.warn(f"Keine Rechte zum Löschen der Rolle @{role.name}.")
+                self.report.warn(f"No permission to delete the role @{role.name}.")
             except discord.HTTPException as exc:
-                self.report.warn(f"@{role.name} nicht gelöscht: {exc.text or exc}")
+                self.report.warn(f"@{role.name} not deleted: {exc.text or exc}")
             done += 1
             await self._emit(detail=f"@{role.name}", current=done)
             await self._tick()
 
-    # ── 2. Server-Einstellungen ───────────────────────────────────────────────
+    # ── 2. server settings ────────────────────────────────────────────────────
 
     async def _apply_settings(self) -> None:
-        await self._emit(Stage.SETTINGS, "Name, Icon und Grundeinstellungen", 0, 1)
+        await self._emit(Stage.SETTINGS, "Name, icon and base settings", 0, 1)
         bp = self.blueprint
         payload: dict[str, object] = {}
 
@@ -331,8 +331,8 @@ class ServerCloner:
                 payload["description"] = bp.description
 
         if self.options.icon:
-            # Wichtig: Assets nur setzen, wenn der Bauplan wirklich eines
-            # enthält. Ein `icon=None` würde das Ziel-Icon sonst aktiv löschen.
+            # Important: only set assets the blueprint actually has. An
+            # `icon=None` would actively delete the target's icon.
             for attr, encoded in (("icon", bp.icon), ("banner", bp.banner), ("splash", bp.splash)):
                 data = decode_image(encoded)
                 if data:
@@ -345,33 +345,33 @@ class ServerCloner:
             await self._call(self.target.edit(reason=self.reason, **payload))  # type: ignore[arg-type]
         except discord.Forbidden:
             self.report.warn(
-                "Server-Einstellungen konnten nicht geändert werden "
+                "Server settings could not be changed "
                 "(fehlendes 'Server verwalten')."
             )
         except discord.HTTPException as exc:
-            # Banner und Splash brauchen ein Boost-Level. Statt komplett
-            # aufzugeben, ohne die optionalen Assets noch einmal versuchen.
+            # Banner and splash need a boost level. Rather than giving up
+            # entirely, retry without the optional assets.
             fallback = {
                 k: v for k, v in payload.items() if k not in ("banner", "splash", "description")
             }
             self.report.warn(
-                f"Einige Server-Einstellungen wurden abgelehnt ({exc.text or exc}). "
-                f"Banner und Splash benötigen ein Server-Boost-Level."
+                f"Some server settings were rejected ({exc.text or exc}). "
+                f"Banner and splash require a server boost level."
             )
             if fallback:
                 try:
                     await self._call(self.target.edit(reason=self.reason, **fallback))  # type: ignore[arg-type]
                 except discord.HTTPException as exc2:
-                    self.report.fail(f"Server-Einstellungen fehlgeschlagen: {exc2.text or exc2}")
+                    self.report.fail(f"The server settings failed: {exc2.text or exc2}")
 
         await self._emit(detail=bp.name, current=1)
         await self._tick()
 
-    # ── 3. Rollen ─────────────────────────────────────────────────────────────
+    # ── 3. Roles ──────────────────────────────────────────────────────────────
 
     async def _apply_roles(self) -> None:
         roles = self.blueprint.creatable_roles
-        await self._emit(Stage.ROLES, "Lege Rollen an", 0, len(roles))
+        await self._emit(Stage.ROLES, "Creating roles", 0, len(roles))
 
         await self._apply_default_role()
 
@@ -393,8 +393,8 @@ class ServerCloner:
         default_bp = self.blueprint.default_role
         if default_bp is None:
             return
-        # @everyone existiert auf jedem Server bereits — nur die Rechte
-        # werden übernommen.
+        # @everyone already exists on every server — only the permissions
+        # are copied.
         self.role_map[default_bp.key] = self.target.default_role
         try:
             await self._call(
@@ -404,9 +404,9 @@ class ServerCloner:
                 )
             )
         except discord.Forbidden:
-            self.report.warn("Rechte der @everyone-Rolle konnten nicht gesetzt werden.")
+            self.report.warn("Could not set the permissions of the @everyone role.")
         except discord.HTTPException as exc:
-            self.report.warn(f"@everyone nicht aktualisiert: {exc.text or exc}")
+            self.report.warn(f"@everyone not updated: {exc.text or exc}")
 
     async def _create_role(self, role_bp: RoleBlueprint) -> discord.Role | None:
         kwargs: dict[str, object] = {
@@ -417,7 +417,7 @@ class ServerCloner:
             "mentionable": role_bp.mentionable,
             "reason": self.reason,
         }
-        # Rollen-Icons gibt es erst ab Boost-Level 2.
+        # Role icons need boost level 2.
         if "ROLE_ICONS" in self.target.features:
             if role_bp.unicode_emoji:
                 kwargs["display_icon"] = role_bp.unicode_emoji
@@ -427,8 +427,8 @@ class ServerCloner:
         try:
             return await self._call(self.target.create_role(**kwargs))  # type: ignore[arg-type]
         except discord.Forbidden:
-            # Ein Bot kann keine Rechte vergeben, die er selbst nicht besitzt.
-            # Lieber eine rechtelose Rolle als gar keine.
+            # A bot cannot grant permissions it does not hold itself.
+            # A role without permissions beats no role at all.
             try:
                 return await self._call(
                     self.target.create_role(
@@ -440,9 +440,9 @@ class ServerCloner:
                     )
                 )
             except discord.HTTPException as exc:
-                self.report.fail(f"Rolle @{role_bp.name}: {exc.text or exc}")
+                self.report.fail(f"Role @{role_bp.name}: {exc.text or exc}")
         except discord.HTTPException as exc:
-            self.report.fail(f"Rolle @{role_bp.name}: {exc.text or exc}")
+            self.report.fail(f"Role @{role_bp.name}: {exc.text or exc}")
         return None
 
     # ── 4. Kategorien ─────────────────────────────────────────────────────────
@@ -464,9 +464,9 @@ class ServerCloner:
                     continue
 
             try:
-                # Kein explizites `position`: die Positionen des Bauplans passen
-                # nicht zum leeren Ziel-Server. Die Erstellungsreihenfolge
-                # sortiert zuverlässiger.
+                # No explicit `position`: the blueprint's positions do not fit
+                # an empty target server. Creation order sorts more reliably.
+
                 new_cat = await self._call(
                     self.target.create_category(
                         name=cat.name,
@@ -509,7 +509,7 @@ class ServerCloner:
             await self._tick()
 
     def _find_existing_channel(self, channel: ChannelBlueprint):
-        """Sucht im Ziel nach einem gleichnamigen Channel in derselben Kategorie."""
+        """Finds a channel of the same name in the same category in the target."""
         parent = self.channel_map.get(channel.category_key or "")
         candidates = (
             parent.channels if isinstance(parent, discord.CategoryChannel) else self.target.channels
@@ -526,10 +526,10 @@ class ServerCloner:
         }
 
         if channel.needs_community and "COMMUNITY" not in self.target.features:
-            label = "Bühnen-Channel" if channel.kind == KIND_STAGE else "Forum-Channel"
+            label = "Stage channel" if channel.kind == KIND_STAGE else "Forum channel"
             self.report.warn(
-                f"{label} „{channel.name}“ übersprungen: der Ziel-Server muss dafür "
-                f"ein Community-Server sein."
+                f"{label} \"{channel.name}\" skipped: the target server has to be "
+                f"a Community server for that."
             )
             return None
 
@@ -543,17 +543,17 @@ class ServerCloner:
             if channel.kind == KIND_FORUM:
                 return await self._create_forum_channel(channel, common)
             self.report.warn(
-                f"Channel-Typ „{channel.kind}“ von #{channel.name} wird nicht "
-                f"unterstützt und wurde übersprungen."
+                f"Channel type \"{channel.kind}\" of #{channel.name} is not "
+                f"supported and was skipped."
             )
         except discord.Forbidden:
-            self.report.fail(f"#{channel.name}: keine Berechtigung.")
+            self.report.fail(f"#{channel.name}: no permission.")
         except discord.HTTPException as exc:
             self.report.fail(f"#{channel.name}: {exc.text or exc}")
         return None
 
     async def _create_text_channel(self, channel: ChannelBlueprint, common: dict):
-        # Ankündigungs-Channels gibt es nur auf Community-Servern.
+        # Announcement channels only exist on Community servers.
         is_news = channel.kind == KIND_NEWS and "NEWS" in self.target.features
         created = await self._call(
             self.target.create_text_channel(
@@ -567,8 +567,8 @@ class ServerCloner:
         )
         if channel.kind == KIND_NEWS and not is_news:
             self.report.warn(
-                f"#{channel.name} war ein Ankündigungs-Channel — der Ziel-Server ist "
-                f"kein Community-Server, daher wurde ein normaler Text-Channel angelegt."
+                f"#{channel.name} was an announcement channel — the target is not a "
+                f"Community server, so a normal text channel was created instead."
             )
         self.report.text_channels_created += 1
         return created
@@ -576,8 +576,8 @@ class ServerCloner:
     async def _create_voice_channel(self, channel: ChannelBlueprint, common: dict):
         created = await self._call(
             self.target.create_voice_channel(
-                # Das Bitrate-Limit hängt am Boost-Level des ZIEL-Servers, nicht
-                # an einem festen Wert. So bleibt Qualität erhalten, wo möglich.
+                # The bitrate limit depends on the TARGET server's boost level,
+                # not on a fixed value. This keeps quality where possible.
                 bitrate=min(channel.bitrate, self.target.bitrate_limit),
                 user_limit=channel.user_limit,
                 rtc_region=channel.rtc_region,
@@ -601,13 +601,13 @@ class ServerCloner:
         return created
 
     async def _create_forum_channel(self, channel: ChannelBlueprint, common: dict):
-        # Tags werden neu aufgebaut — die Originale tragen IDs des Quell-Servers.
+        # Tags are rebuilt — the originals carry source-server IDs.
         tags = [
             discord.ForumTag(name=tag.name, emoji=tag.emoji, moderated=tag.moderated)
             for tag in channel.available_tags
         ]
         extra: dict[str, object] = {}
-        # Der Enum-Wert 0 ist falsy, deshalb explizit auf None prüfen.
+        # The enum value 0 is falsy, so check against None explicitly.
         if channel.default_sort_order is not None:
             extra["default_sort_order"] = discord.ForumOrderType(channel.default_sort_order)
 
@@ -626,11 +626,11 @@ class ServerCloner:
         self.report.forum_channels_created += 1
         return created
 
-    # ── 6. Server-weite Channel-Verweise ──────────────────────────────────────
+    # ── 6. server-wide channel references ─────────────────────────────────────
 
     async def _apply_guild_channel_links(self) -> None:
-        """AFK-, System- und Regel-Channel nachträglich verknüpfen."""
-        await self._emit(Stage.FINALIZING, "Verknüpfe Spezial-Channels", 0, 1)
+        """Links the AFK, system and rules channels afterwards."""
+        await self._emit(Stage.FINALIZING, "Linking special channels", 0, 1)
 
         payload: dict[str, object] = {}
         afk = self.channel_map.get(self.blueprint.afk_channel_key or "")
@@ -648,7 +648,7 @@ class ServerCloner:
             try:
                 await self._call(self.target.edit(reason=self.reason, **payload))  # type: ignore[arg-type]
             except discord.HTTPException as exc:
-                self.report.warn(f"Spezial-Channels nicht gesetzt: {exc.text or exc}")
+                self.report.warn(f"Special channels not set: {exc.text or exc}")
 
         await self._emit(detail="erledigt", current=1)
         await self._tick()
@@ -662,8 +662,8 @@ class ServerCloner:
 
         if len(emojis) > limit:
             self.report.warn(
-                f"Der Bauplan enthält {len(emojis)} Emojis, der Ziel-Server fasst nur "
-                f"{limit}. Die überzähligen wurden ausgelassen."
+                f"The blueprint has {len(emojis)} emojis but the target only holds "
+                f"{limit}. The surplus was left out."
             )
 
         existing = {e.name for e in self.target.emojis}
@@ -676,7 +676,7 @@ class ServerCloner:
                 continue
             data = emoji.image_bytes
             if not data:
-                await self._emit(detail=f":{emoji.name}: (kein Bild)", current=index)
+                await self._emit(detail=f":{emoji.name}: (no image)", current=index)
                 continue
             try:
                 await self._call(
@@ -700,8 +700,8 @@ class ServerCloner:
 
         if len(stickers) > limit:
             self.report.warn(
-                f"Der Bauplan enthält {len(stickers)} Sticker, der Ziel-Server fasst "
-                f"nur {limit}. Die überzähligen wurden ausgelassen."
+                f"The blueprint has {len(stickers)} stickers but the target only "
+                f"holds {limit}. The surplus was left out."
             )
 
         existing = {s.name for s in self.target.stickers}
@@ -714,7 +714,7 @@ class ServerCloner:
                 continue
             data = sticker.image_bytes
             if not data:
-                await self._emit(detail=f"{sticker.name} (kein Bild)", current=index)
+                await self._emit(detail=f"{sticker.name} (no image)", current=index)
                 continue
             try:
                 suffix = "gif" if sticker.file_format == "gif" else "png"
@@ -738,23 +738,23 @@ class ServerCloner:
             await self._emit(detail=sticker.name, current=index)
             await self._tick()
 
-    # ── 8. Nachrichten & Rollen-Zuweisungen ───────────────────────────────────
+    # ── 8. Messages & role assignments ────────────────────────────────────────
 
     async def _apply_extras(self) -> None:
-        """Schritte, die einen echten Quell-Server voraussetzen."""
+        """Steps that require a real source server."""
         wants_extras = self.options.messages_per_channel > 0 or self.options.member_roles
         if not wants_extras:
             return
 
         if self.source_guild is None:
             self.report.warn(
-                "Nachrichten-Nachbau und Rollen-Zuweisung brauchen einen echten "
-                "Quell-Server und stehen beim Wiederherstellen aus einer Datei "
-                "nicht zur Verfügung."
+                "Message re-staging and role assignment need a real source "
+                "server and are not available when restoring from a file."
+
             )
             return
 
-        # Import bewusst hier: `extras` importiert seinerseits aus diesem Modul.
+        # imported here on purpose: `extras` imports from this module in turn.
         from . import extras
 
         if self.options.messages_per_channel > 0:
@@ -770,10 +770,10 @@ class ServerCloner:
         self, overwrites: list[OverwriteData]
     ) -> dict[discord.Role, discord.PermissionOverwrite]:
         """
-        Übersetzt die Overrides des Bauplans auf die Rollen des Ziel-Servers.
+        Translates the blueprint's overrides onto the target server's roles.
 
-        Rollen ohne Gegenstück im Ziel werden still ausgelassen — sie existieren
-        dort schlicht nicht.
+        Roles with no counterpart in the target are silently skipped — they
+        simply do not exist there.
         """
         result: dict[discord.Role, discord.PermissionOverwrite] = {}
         for entry in overwrites:
@@ -784,5 +784,5 @@ class ServerCloner:
 
 
 def estimate_duration(blueprint: GuildBlueprint, delay: float, *, wipe: int = 0) -> float:
-    """Grobe Laufzeitschätzung in Sekunden."""
+    """A rough runtime estimate in seconds."""
     return (blueprint.total_objects + wipe) * (delay + 0.25)

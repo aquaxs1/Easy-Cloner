@@ -1,4 +1,4 @@
-"""Tests für Konfiguration und Embed-Aufbau."""
+"""Tests for the configuration and embed construction."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from easy_server_cloner.state import CloneState
 
 from helpers import blueprint
 
-# Discord-Grenzwerte, die ein Embed nicht überschreiten darf.
+# Discord limits an embed must not exceed.
 LIMIT_TITLE = 256
 LIMIT_DESCRIPTION = 4096
 LIMIT_FIELD_NAME = 256
@@ -70,12 +70,12 @@ def _env(monkeypatch, **values):
 
 def test_token_is_required(monkeypatch):
     _env(monkeypatch)
-    with pytest.raises(ConfigError, match="kein Bot-Token"):
+    with pytest.raises(ConfigError, match="No bot token"):
         Config.load()
 
 
 def test_placeholder_token_is_rejected(monkeypatch):
-    _env(monkeypatch, DISCORD_TOKEN="hier.deinen.bot-token.eintragen")
+    _env(monkeypatch, DISCORD_TOKEN="put.your.bot-token.here")
     with pytest.raises(ConfigError):
         Config.load()
 
@@ -86,20 +86,20 @@ def test_owner_ids_are_parsed(monkeypatch):
 
 
 def test_invalid_owner_id_raises(monkeypatch):
-    _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", OWNER_IDS="123,nicht-numerisch")
-    with pytest.raises(ConfigError, match="ungültigen Eintrag"):
+    _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", OWNER_IDS="123,not-numeric")
+    with pytest.raises(ConfigError, match="invalid entry"):
         Config.load()
 
 
 def test_clone_delay_has_a_floor(monkeypatch):
-    """Zu kleine Pausen provozieren nur Rate-Limits statt Tempo."""
+    """Pauses that are too short only provoke rate limits instead of speed."""
     _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", CLONE_DELAY="0.0")
     assert Config.load().clone_delay >= 0.25
 
 
 @pytest.mark.parametrize(
     "value, expected",
-    [("true", True), ("JA", True), ("1", True), ("false", False), ("nein", False), ("", False)],
+    [("true", True), ("YES", True), ("1", True), ("false", False), ("no", False), ("", False)],
 )
 def test_privileged_flags_are_parsed(monkeypatch, value, expected):
     _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", ENABLE_MESSAGE_CLONE=value)
@@ -108,7 +108,7 @@ def test_privileged_flags_are_parsed(monkeypatch, value, expected):
 
 def test_invalid_boolean_raises(monkeypatch):
     _env(monkeypatch, DISCORD_TOKEN="abc.def.ghi", ENABLE_MEMBER_ROLES="vielleicht")
-    with pytest.raises(ConfigError, match="Wahrheitswert"):
+    with pytest.raises(ConfigError, match="not a boolean"):
         Config.load()
 
 
@@ -126,35 +126,35 @@ def test_help_embed_is_within_limits():
 
 
 def test_preview_embed_is_within_limits():
-    assert_valid_embed(embeds.preview_embed(blueprint("Quelle"), fake_guild("Ziel"), 480))
+    assert_valid_embed(embeds.preview_embed(blueprint("Source"), fake_guild("Target"), 480))
 
 
 def test_confirm_embed_is_within_limits():
     assert_valid_embed(
-        embeds.confirm_embed(blueprint("Quelle"), fake_guild("Ziel"), CloneOptions())
+        embeds.confirm_embed(blueprint("Source"), fake_guild("Target"), CloneOptions())
     )
 
 
 def test_confirm_embed_shows_resume_instead_of_deletion_warning():
-    """Beim Fortsetzen wird nichts gelöscht — das darf die Abfrage nicht behaupten."""
+    """Resuming deletes nothing — the prompt must not claim otherwise."""
     state = CloneState(target_id=2, roles={"a": 1}, channels={"b": 2})
     embed = embeds.confirm_embed(
-        blueprint("Quelle"), fake_guild("Ziel"), CloneOptions(wipe_target=True), resume_state=state
+        blueprint("Source"), fake_guild("Target"), CloneOptions(wipe_target=True), resume_state=state
     )
     names = [f.name for f in embed.fields]
 
-    assert any("Fortsetzung" in n for n in names)
+    assert any("Resuming" in n for n in names)
     assert not any("geleert" in n for n in names)
     assert_valid_embed(embed)
 
 
 def test_confirm_embed_flags_message_reconstruction():
     embed = embeds.confirm_embed(
-        blueprint("Quelle"), fake_guild("Ziel"), CloneOptions(messages_per_channel=50)
+        blueprint("Source"), fake_guild("Target"), CloneOptions(messages_per_channel=50)
     )
     text = " ".join(f.value for f in embed.fields)
 
-    assert "nachgestellt" in text and "nicht migriert" in text
+    assert "re-staged" in text and "not migrated" in text
     assert_valid_embed(embed)
 
 
@@ -163,27 +163,27 @@ def test_progress_embed_is_within_limits():
     progress = Progress(
         stage=Stage.CHANNELS, detail="#allgemein", current=17, total=42, report=report
     )
-    assert_valid_embed(embeds.progress_embed(progress, "Quelle", fake_guild("Ziel")))
+    assert_valid_embed(embeds.progress_embed(progress, "Source", fake_guild("Target")))
 
 
 def test_progress_embed_reports_throttling():
     progress = Progress(stage=Stage.ROLES, throttled=True, delay=1.28)
-    embed = embeds.progress_embed(progress, "Quelle", fake_guild("Ziel"))
+    embed = embeds.progress_embed(progress, "Source", fake_guild("Target"))
 
     assert "1.28s" in " ".join(f.value for f in embed.fields)
     assert_valid_embed(embed)
 
 
 def test_result_embed_truncates_a_flood_of_messages():
-    """Ein kaputter Server darf das Ergebnis-Embed nicht sprengen."""
+    """A broken server must not blow up the result embed."""
     report = CloneReport()
     for i in range(500):
-        report.warn(f"Warnung Nummer {i} mit einem recht ausführlichen Text dahinter")
-        report.fail(f"Fehler Nummer {i} mit einem recht ausführlichen Text dahinter")
+        report.warn(f"Warning number {i} with a fairly verbose explanation after it")
+        report.fail(f"Error number {i} with a fairly verbose explanation after it")
 
-    embed = embeds.result_embed(report, Stage.DONE, "Quelle", fake_guild("Ziel"))
+    embed = embeds.result_embed(report, Stage.DONE, "Source", fake_guild("Target"))
     assert_valid_embed(embed)
-    # Die Zähler bleiben trotz Kürzung korrekt.
+    # The counters stay correct despite the trimming.
     assert report.warning_count == 500
     assert report.error_count == 500
 
@@ -191,7 +191,7 @@ def test_result_embed_truncates_a_flood_of_messages():
 @pytest.mark.parametrize("stage", [Stage.DONE, Stage.FAILED, Stage.CANCELLED])
 def test_result_embed_for_every_end_state(stage):
     report = CloneReport(roles_created=3, text_channels_created=5, messages_copied=9)
-    assert_valid_embed(embeds.result_embed(report, stage, "Quelle", fake_guild("Ziel")))
+    assert_valid_embed(embeds.result_embed(report, stage, "Source", fake_guild("Target")))
 
 
 def test_cancelled_result_points_at_resume():
@@ -201,7 +201,7 @@ def test_cancelled_result_points_at_resume():
 
 def test_backup_embed_is_within_limits():
     assert_valid_embed(
-        embeds.backup_embed(blueprint("Quelle"), "quelle.esc.json.gz", "1.4 MB", True, "backups/x")
+        embeds.backup_embed(blueprint("Source"), "source.esc.json.gz", "1.4 MB", True, "backups/x")
     )
 
 
@@ -227,6 +227,6 @@ def test_servers_embed_handles_no_guilds():
 def test_progress_bar_endpoints():
     assert "0%" in embeds.progress_bar(0.0)
     assert "100%" in embeds.progress_bar(1.0)
-    # Werte außerhalb von 0..1 dürfen die Leiste nicht verformen.
+    # Values outside 0..1 must not deform the bar.
     assert "100%" in embeds.progress_bar(5.0)
     assert "0%" in embeds.progress_bar(-1.0)

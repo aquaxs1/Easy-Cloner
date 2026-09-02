@@ -11,6 +11,7 @@
 /* ── 1. Tokens ─────────────────────────────────────────────────────────── */
 
 :root {
+  color-scheme: dark;
   --bg:            #070A16;
   --bg-elevated:   #0B1022;
   --surface:       rgba(255, 255, 255, 0.028);
@@ -22,8 +23,8 @@
   --brand-deep: #6C58F0;
   --brand-lite: #C2B2FF;
 
-  /* Flächen, die weissen Text tragen. Bewusst dunkler als --brand:
-     Weiss auf #9B8AFF käme nur auf 2.8:1, hier sind es 4.84:1. */
+  /* Surfaces that carry white text. Deliberately darker than --brand:
+     white on #9B8AFF would only reach 2.8:1, here it is 4.84:1. */
   --on-solid:   linear-gradient(135deg, #6F5BE8 0%, #5238C6 100%);
 
   --text:   #EAE8FB;
@@ -68,7 +69,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Weiches Nordlicht hinter allem — rein dekorativ, kostet kein Layout. */
+/* Soft aurora behind everything — purely decorative, costs no layout. */
 body::before {
   content: "";
   position: fixed;
@@ -194,9 +195,9 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   margin: 0;
 }
 
-/* Auftauchen beim Scrollen. Der Versteck-Zustand hängt an `.js`, das ein
-   Inline-Skript im <head> setzt — ohne JavaScript wird nie etwas versteckt
-   und die Seite ist vollständig lesbar. */
+/* Reveal on scroll. The hidden state hangs off `.js`, which an inline script
+   in the <head> sets — without JavaScript nothing is ever hidden and the page
+   stays fully readable. */
 .js .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -234,7 +235,7 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
 }
 .btn:active { transform: translateY(0); }
 
-/* Lichtreflex, der beim Hover über den Knopf wandert. */
+/* Sheen that travels across the button on hover. */
 .btn::after {
   content: "";
   position: absolute;
@@ -328,8 +329,8 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   width: 42px; height: 42px;
   cursor: pointer;
   padding: 0;
-  /* Flex statt Grid: im Grid bekommt jeder Balken eine eigene Zeile, deren
-     Höhe beim Drehen mitwächst — das X klaffte dadurch auseinander. */
+  /* Flex rather than grid: in a grid each bar gets its own row whose height
+     grows as it rotates — which pulled the X apart. */
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -436,9 +437,8 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   50% { transform: translateY(-16px); }
 }
 
-/* Kreisende Umlaufbahnen um das Logo. `inset` auf einer nicht-quadratischen
-   Box ergäbe eine Ellipse — ein zentriertes Quadrat bleibt rund und lässt
-   `transform` frei für die Drehung. */
+/* Orbits circling the logo. `inset` on a non-square box would give an ellipse
+   — a centred square stays round and leaves `transform` free for the spin. */
 .orbit {
   position: absolute;
   inset: 0;
@@ -616,11 +616,11 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   .slide-tab { flex: 1; justify-content: center; padding: 11px; }
 }
 
-/* ── 8. Cards, Steps, Tabellen ─────────────────────────────────────────── */
+/* ── 8. Cards, steps, tables ───────────────────────────────────────────── */
 
 .grid { display: grid; gap: 1.15rem; }
 .grid-3 { grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); }
-.grid-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
 
 .card {
   position: relative;
@@ -636,7 +636,7 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   border-color: var(--border-strong);
   background: var(--surface-hover);
 }
-/* Lichtschein, der dem Mauszeiger folgt (Position kommt aus dem JS). */
+/* Glow that follows the cursor (position comes from the JS). */
 .card::before {
   content: "";
   position: absolute;
@@ -674,7 +674,7 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
 }
 .tag.opt { background: rgba(255, 215, 111, 0.1); border-color: rgba(255, 215, 111, 0.24); color: var(--warning); }
 
-/* Nummerierte Schritte mit durchgehender Linie */
+/* Numbered steps joined by a continuous line */
 .steps { list-style: none; padding: 0; margin: 0; counter-reset: step; }
 .step {
   position: relative;
@@ -703,12 +703,12 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   background: linear-gradient(180deg, var(--border-strong), transparent);
 }
 .step:last-child { padding-bottom: 0; }
-/* Schritte tragen beide Klassen — sonst addieren sich zwei Abstände. */
+/* Steps carry both classes — otherwise two margins would stack. */
 .step.doc-section { margin-bottom: 0; }
 .step:last-child::after { display: none; }
 .step h3 { margin-bottom: 0.35em; }
 
-/* Code-Blöcke mit Kopier-Knopf */
+/* Code blocks with a copy button */
 .code {
   position: relative;
   margin: 1.1rem 0;
@@ -742,10 +742,10 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
   line-height: 1.75;
   color: #D6D3F5;
 }
-.code pre .c { color: var(--faint); }        /* Kommentar */
-.code pre .p { color: var(--brand); }        /* Prompt / Befehl */
-.code pre .s { color: var(--success); }      /* Erfolg */
-.code pre .v { color: var(--warning); }      /* Wert */
+.code pre .c { color: var(--faint); }        /* comment */
+.code pre .p { color: var(--brand); }        /* prompt / command */
+.code pre .s { color: var(--success); }      /* success */
+.code pre .v { color: var(--warning); }      /* value */
 .copy {
   position: absolute;
   top: 6px; right: 6px;
@@ -767,7 +767,7 @@ section { padding: clamp(4rem, 9vw, 7.5rem) 0; }
 .copy:hover { color: var(--text); border-color: var(--border-strong); }
 .copy.done { color: var(--success); border-color: rgba(87, 242, 135, 0.4); opacity: 1; }
 
-/* Tabellen */
+/* Tables */
 .table-wrap {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -790,7 +790,7 @@ tr:last-child td { border-bottom: 0; }
 tbody tr { transition: background 0.15s; }
 tbody tr:hover { background: rgba(155, 138, 255, 0.045); }
 
-/* Ja/Nein-Listen */
+/* Yes/no lists */
 .check-list { list-style: none; padding: 0; }
 .check-list li {
   display: flex;
@@ -822,7 +822,7 @@ tbody tr:hover { background: rgba(155, 138, 255, 0.045); }
 .callout.ok { background: rgba(87, 242, 135, 0.06); border-color: rgba(87, 242, 135, 0.24); }
 .callout strong { color: var(--text); }
 
-/* Schluss-Aufruf */
+/* Closing call to action */
 .cta-band {
   position: relative;
   text-align: center;
@@ -838,7 +838,7 @@ tbody tr:hover { background: rgba(155, 138, 255, 0.045); }
 .cta-band p { max-width: 52ch; margin-inline: auto; margin-bottom: 2rem; }
 .cta-band .btn-row { justify-content: center; }
 
-/* ── 9. Docs & Akkordeon ───────────────────────────────────────────────── */
+/* ── 9. Docs & accordion ───────────────────────────────────────────────── */
 
 .page-head {
   padding: clamp(3rem, 7vw, 5rem) 0 clamp(1.5rem, 3vw, 2.5rem);
@@ -875,9 +875,9 @@ tbody tr:hover { background: rgba(155, 138, 255, 0.045); }
 .toc a:hover { color: var(--text); background: var(--surface-hover); }
 .toc a.active { color: var(--brand-lite); border-left-color: var(--brand); background: rgba(155, 138, 255, 0.08); }
 
-.docs-layout { display: grid; grid-template-columns: 232px 1fr; gap: 2.6rem; align-items: start; }
+.docs-layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 2.6rem; align-items: start; }
 @media (max-width: 900px) {
-  .docs-layout { grid-template-columns: 1fr; }
+  .docs-layout { grid-template-columns: minmax(0, 1fr); }
   .toc { position: static; }
 }
 
@@ -992,7 +992,7 @@ tbody tr:hover { background: rgba(155, 138, 255, 0.045); }
   .footer-about { grid-column: 1 / -1; }
 }
 
-/* ── Bewegung reduzieren ───────────────────────────────────────────────── */
+/* ── Reduce motion ─────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

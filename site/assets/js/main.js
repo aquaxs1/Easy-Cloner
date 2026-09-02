@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Easy Server Cloner — Website-Interaktionen
+   Easy Server Cloner — website interactions
 
-   Alles hier ist Beiwerk: die Seite funktioniert vollständig ohne JavaScript.
-   Kein Framework, keine Abhängigkeiten — läuft als statische Datei auf Vercel.
+   Everything here is trimming: the page works completely without JavaScript.
+   No framework, no dependencies — runs as a static file on Vercel.
    ═══════════════════════════════════════════════════════════════════════ */
 
 (() => {
@@ -44,7 +44,7 @@
       if (e.key === "Escape") close();
     });
 
-    // Wird das Fenster breit genug, verschwindet das Menü ohnehin per CSS.
+    // Once the window is wide enough the menu disappears via CSS anyway.
     window.addEventListener("resize", () => {
       if (window.innerWidth > 860) close();
     });
@@ -66,7 +66,7 @@
 
     let index = 0;
     let timer = null;
-    // Nach einem Klick soll die Show nicht weiterspringen — der Nutzer führt.
+    // After a click the show should stop advancing — the reader leads.
     let userTookOver = false;
 
     function show(i, { fromUser = false } = {}) {
@@ -84,13 +84,13 @@
       restartVisualAnimations();
     }
 
-    // Die Illustrationen sind SMIL-Animationen; ohne Neustart würde eine
-    // erneut geöffnete Folie eingefroren wirken.
+    // The illustrations are SMIL animations; without a restart a slide opened
+    // a second time would look frozen.
     function restartVisualAnimations() {
       if (reduceMotion) return;
       const svg = $(".slide.active .slide-visual svg", root);
       if (svg && typeof svg.setCurrentTime === "function") {
-        try { svg.setCurrentTime(0); } catch { /* ältere Browser: egal */ }
+        try { svg.setCurrentTime(0); } catch { /* older browsers: never mind */ }
       }
     }
 
@@ -112,14 +112,14 @@
     prev?.addEventListener("click", () => show(index - 1, { fromUser: true }));
     next?.addEventListener("click", () => show(index + 1, { fromUser: true }));
 
-    // Pfeiltasten, sobald die Tab-Leiste den Fokus hat
+    // Arrow keys, once the tab bar has focus
     root.addEventListener("keydown", (e) => {
       if (!e.target.closest(".slide-tabs")) return;
       if (e.key === "ArrowRight") { e.preventDefault(); show(index + 1, { fromUser: true }); tabs[index]?.focus(); }
       if (e.key === "ArrowLeft") { e.preventDefault(); show(index - 1, { fromUser: true }); tabs[index]?.focus(); }
     });
 
-    // Wischen auf dem Handy
+    // Swiping on mobile
     let touchX = null;
     root.addEventListener("touchstart", (e) => { touchX = e.changedTouches[0].clientX; }, { passive: true });
     root.addEventListener("touchend", (e) => {
@@ -131,7 +131,7 @@
 
     show(0);
 
-    // Erst loslaufen, wenn die Show tatsächlich zu sehen ist.
+    // Only start once the show is actually on screen.
     if ("IntersectionObserver" in window) {
       new IntersectionObserver((entries) => {
         entries.forEach((entry) => (entry.isIntersecting ? startAuto() : timer && stopAutoQuietly()));
@@ -145,7 +145,7 @@
     }
   }
 
-  /* ── Kopieren ────────────────────────────────────────────────────────── */
+  /* ── copy to clipboard ─────────────────────────────────────────────── */
 
   function initCopy() {
     $$(".code").forEach((block) => {
@@ -159,7 +159,7 @@
       btn.setAttribute("aria-label", "Copy code to clipboard");
 
       btn.addEventListener("click", async () => {
-        // Kommentarzeilen und der Prompt gehören nicht in die Zwischenablage.
+        // Comment lines and the prompt do not belong on the clipboard.
         const text = [...pre.childNodes]
           .filter((n) => !(n.nodeType === 1 && n.classList.contains("c")))
           .map((n) => n.textContent)
@@ -191,7 +191,7 @@
     });
   }
 
-  /* ── Auftauchen beim Scrollen ────────────────────────────────────────── */
+  /* ── revealing on scroll ───────────────────────────────────────────── */
 
   function initReveal() {
     const items = $$(".reveal");
@@ -205,7 +205,7 @@
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        // Kleiner Versatz je Element, damit Gruppen gestaffelt erscheinen.
+        // A small offset per element, so groups appear staggered.
         const delay = Number(entry.target.dataset.delay || 0);
         setTimeout(() => entry.target.classList.add("in"), delay);
         io.unobserve(entry.target);
@@ -215,7 +215,7 @@
     items.forEach((el) => io.observe(el));
   }
 
-  /* ── Lichtschein auf Karten ──────────────────────────────────────────── */
+  /* ── Glow on cards ───────────────────────────────────────────────────── */
 
   function initCardGlow() {
     if (reduceMotion || !window.matchMedia("(hover: hover)").matches) return;
@@ -244,11 +244,11 @@
       });
     });
 
-    // Direktlink auf eine einzelne Frage: /faq.html#frage-id
-    // Ohne Hash liefert `location.hash` einen leeren String — der ist zwar
-    // falsy, aber nicht nullish, würde `?.` also passieren. Deshalb explizit
-    // prüfen. Ein von Hand eingetippter Hash kann zudem ein ungültiger
-    // Selektor sein, was querySelector werfen lässt.
+    // Deep link to a single question: /faq.html#question-id
+    // Without a hash `location.hash` returns an empty string — falsy but not
+    // nullish, so `?.` would let it through. Hence the explicit check. A
+    // hand-typed hash can also be an invalid selector, which makes
+    // querySelector throw.
     if (!location.hash) return;
 
     let target = null;
@@ -264,7 +264,7 @@
     }
   }
 
-  /* ── Inhaltsverzeichnis mitlaufen lassen ─────────────────────────────── */
+  /* ── keeping the table of contents in step ──────────────────────────── */
 
   function initTocSpy() {
     const links = $$(".toc a");
@@ -300,8 +300,8 @@
     let raf = null;
 
     function resize() {
-      // Auf Retina-Displays doppelt so viele Gerätepixel, aber gedeckelt:
-      // mehr als 2× bringt optisch nichts und kostet spürbar Leistung.
+      // Twice the device pixels on retina displays, but capped: beyond 2× it
+      // buys nothing visually and costs noticeable performance.
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = canvas.clientWidth;
       height = canvas.clientHeight;
@@ -319,7 +319,7 @@
         x: Math.random() * width,
         y: Math.random() * height,
         size,
-        // Größere Pixel driften schneller — das erzeugt Tiefe.
+        // Larger pixels drift faster — that creates depth.
         vx: (0.08 + Math.random() * 0.28) * (size / 4),
         vy: (Math.random() - 0.5) * 0.12,
         alpha: 0.08 + Math.random() * 0.3,
@@ -334,7 +334,7 @@
         p.x += p.vx;
         p.y += p.vy;
 
-        // Am rechten Rand hinaus, links wieder herein — wie im Logo.
+        // Out at the right edge, back in at the left — as in the logo.
         if (p.x > width + 10) {
           p.x = -10;
           p.y = Math.random() * height;
@@ -366,7 +366,7 @@
       resizeTimer = setTimeout(resize, 180);
     });
 
-    // Im Hintergrund-Tab nicht weiterrechnen.
+    // Stop computing while the tab is in the background.
     document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
   }
 

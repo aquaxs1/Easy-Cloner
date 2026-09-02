@@ -4,16 +4,16 @@ services:
     container_name: easy-server-cloner
     restart: unless-stopped
 
-    # Der Token kommt aus der .env und landet nie im Image.
+    # The token comes from .env and never ends up in the image.
     env_file:
       - .env
 
     volumes:
-      # Backups und abgebrochene Läufe überleben so jeden Neustart.
+      # Backups and interrupted runs survive every restart this way.
       - ./backups:/app/backups
       - ./state:/app/state
 
-    # Der Bot baut nur ausgehende Verbindungen auf — keine Ports nach außen.
+    # The bot only makes outbound connections — no ports exposed.
     logging:
       driver: json-file
       options:

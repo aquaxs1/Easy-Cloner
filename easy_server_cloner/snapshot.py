@@ -1,10 +1,10 @@
 """
-Backups: Bauplan ↔ Datei.
+Backups: blueprint ↔ file.
 
-Ein Backup ist eine JSON-Datei mit dem kompletten Bauplan eines Servers. Weil
-Icons, Emojis und Sticker als base64 mit drin stecken, wird ab einer gewissen
-Größe automatisch gzip-komprimiert — das drückt die Datei typischerweise auf
-ein Bruchteil und hält sie unter Discords Upload-Limit.
+A backup is a JSON file holding a server's complete blueprint. Because icons,
+emojis and stickers are embedded as base64, anything past a certain size is
+gzip-compressed automatically — which typically shrinks the file to a fraction
+and keeps it under Discord's upload limit.
 """
 
 from __future__ import annotations
@@ -23,22 +23,22 @@ log = logging.getLogger(__name__)
 
 BACKUP_DIR = Path(__file__).resolve().parent.parent / "backups"
 
-# Ab dieser Größe wird komprimiert statt als Klartext ausgeliefert.
+# Past this size it is compressed rather than shipped as plain text.
 GZIP_THRESHOLD = 1 * 1024 * 1024
 
-# Discords Upload-Limit für Bots ohne Server-Boost.
+# Discord's upload limit for bots without a server boost.
 DISCORD_UPLOAD_LIMIT = 10 * 1024 * 1024
 
 GZIP_MAGIC = b"\x1f\x8b"
 
 
 class SnapshotError(RuntimeError):
-    """Beim Lesen oder Schreiben eines Backups ist etwas schiefgegangen."""
+    """Something went wrong reading or writing a backup."""
 
 
 @dataclass(slots=True)
 class Snapshot:
-    """Ein serialisierter Bauplan samt Metadaten zur Datei."""
+    """A serialised blueprint plus metadata about the file."""
 
     blueprint: GuildBlueprint
     data: bytes
@@ -58,7 +58,7 @@ class Snapshot:
 
 
 def _safe_name(name: str) -> str:
-    """Macht aus einem Server-Namen einen brauchbaren Dateinamen."""
+    """Turns a server name into a usable filename."""
     keep = [c if (c.isalnum() or c in "-_ ") else "-" for c in name]
     cleaned = "".join(keep).strip().replace(" ", "-")
     while "--" in cleaned:
@@ -67,7 +67,7 @@ def _safe_name(name: str) -> str:
 
 
 def dump(blueprint: GuildBlueprint) -> Snapshot:
-    """Serialisiert einen Bauplan, komprimiert bei Bedarf."""
+    """Serialises a blueprint, compressing when needed."""
     raw = json.dumps(blueprint.to_dict(), ensure_ascii=False, separators=(",", ":")).encode(
         "utf-8"
     )
@@ -80,15 +80,15 @@ def dump(blueprint: GuildBlueprint) -> Snapshot:
 
 
 def load(data: bytes) -> GuildBlueprint:
-    """Liest ein Backup — egal ob komprimiert oder als Klartext."""
+    """Reads a backup, compressed or plain."""
     if data[:2] == GZIP_MAGIC:
         try:
             data = gzip.decompress(data)
-        # Eine abgeschnittene Datei liefert EOFError, eine verfälschte
-        # zlib.error — beides ist kein OSError und würde sonst durchschlagen.
+        # A truncated file raises EOFError, a corrupted one zlib.error —
+        # neither is an OSError, so both would otherwise slip through.
         except (OSError, EOFError, zlib.error) as exc:
             raise SnapshotError(
-                f"Die Datei ist beschädigt oder unvollständig ({exc}). "
+                f"The file is damaged or incomplete ({exc}). "
                 f"Lade sie erneut hoch."
             ) from exc
 
@@ -96,30 +96,30 @@ def load(data: bytes) -> GuildBlueprint:
         payload = json.loads(data.decode("utf-8"))
     except UnicodeDecodeError as exc:
         raise SnapshotError(
-            "Die Datei ist keine gültige Textdatei. Erwartet wird ein Backup, "
-            "das mit `/backup` erstellt wurde."
+            "That is not a valid text file. A backup created with `/backup` "
+            "is expected."
         ) from exc
     except json.JSONDecodeError as exc:
-        raise SnapshotError(f"Die Datei enthält kein gültiges JSON: {exc}") from exc
+        raise SnapshotError(f"The file does not contain valid JSON: {exc}") from exc
 
     if not isinstance(payload, dict):
-        raise SnapshotError("Die Datei enthält kein Backup-Objekt.")
+        raise SnapshotError("The file does not contain a backup object.")
 
     try:
         return GuildBlueprint.from_dict(payload)
     except (TypeError, ValueError) as exc:
-        raise SnapshotError(f"Backup nicht lesbar: {exc}") from exc
+        raise SnapshotError(f"Backup is not readable: {exc}") from exc
 
 
 def save_to_disk(snapshot: Snapshot) -> Path | None:
-    """Legt zusätzlich eine Kopie neben dem Bot ab. Fehler sind nicht fatal."""
+    """Also drops a copy next to the bot. Failures here are not fatal."""
     try:
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
         path = BACKUP_DIR / snapshot.filename
         path.write_bytes(snapshot.data)
         return path
     except OSError as exc:
-        log.warning("Backup konnte nicht lokal gespeichert werden: %s", exc)
+        log.warning("Could not save the backup locally: %s", exc)
         return None
 
 

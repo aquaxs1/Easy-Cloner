@@ -1,9 +1,9 @@
 """
-Konfiguration für Easy Server Cloner.
+Configuration for Easy Server Cloner.
 
-Sämtliche Einstellungen kommen aus Umgebungsvariablen bzw. aus einer lokalen
-`.env`-Datei. Im Code selbst steht bewusst KEIN Token — so kann das Repository
-öffentlich sein, ohne dass Zugangsdaten mitwandern.
+Every setting comes from environment variables or a local `.env` file. There
+is deliberately NO token in the code itself, so the repository can be public
+without credentials travelling with it.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-try:  # python-dotenv ist optional, aber empfohlen
+try:  # python-dotenv is optional but recommended
     from dotenv import load_dotenv
 except ImportError:  # pragma: no cover - reiner Komfortpfad
     def load_dotenv(*_args, **_kwargs) -> bool:
@@ -24,7 +24,7 @@ ENV_FILE = PROJECT_ROOT / ".env"
 
 
 class ConfigError(RuntimeError):
-    """Wird geworfen, wenn die Konfiguration unvollständig oder ungültig ist."""
+    """Raised when the configuration is incomplete or invalid."""
 
 
 def _get_str(key: str, default: str = "") -> str:
@@ -39,8 +39,8 @@ def _get_int(key: str, default: int | None = None) -> int | None:
         return int(raw)
     except ValueError as exc:
         raise ConfigError(
-            f"{key}='{raw}' ist keine gültige Zahl. "
-            f"Discord-IDs bestehen nur aus Ziffern."
+            f"{key}='{raw}' is not a valid number. "
+            f"Discord IDs consist of digits only."
         ) from exc
 
 
@@ -48,12 +48,12 @@ def _get_bool(key: str, default: bool = False) -> bool:
     raw = _get_str(key).lower()
     if not raw:
         return default
-    if raw in ("1", "true", "yes", "ja", "on"):
+    if raw in ("1", "true", "yes", "on"):
         return True
-    if raw in ("0", "false", "no", "nein", "off"):
+    if raw in ("0", "false", "no", "off"):
         return False
     raise ConfigError(
-        f"{key}='{raw}' ist kein Wahrheitswert. Erlaubt sind true/false bzw. ja/nein."
+        f"{key}='{raw}' is not a boolean. Allowed: true/false or yes/no."
     )
 
 
@@ -64,7 +64,7 @@ def _get_float(key: str, default: float) -> float:
     try:
         return float(raw)
     except ValueError as exc:
-        raise ConfigError(f"{key}='{raw}' ist keine gültige Kommazahl.") from exc
+        raise ConfigError(f"{key}='{raw}' is not a valid decimal number.") from exc
 
 
 def _get_id_set(key: str) -> set[int]:
@@ -80,8 +80,8 @@ def _get_id_set(key: str) -> set[int]:
             ids.add(int(part))
         except ValueError as exc:
             raise ConfigError(
-                f"{key} enthält den ungültigen Eintrag '{part}'. "
-                f"Erwartet wird eine Komma-getrennte Liste von Discord-IDs."
+                f"{key} contains the invalid entry '{part}'. "
+                f"A comma-separated list of Discord IDs is expected."
             ) from exc
     return ids
 
@@ -97,22 +97,22 @@ def _get_color(key: str, default: int) -> int:
             return int(raw)
         except ValueError as exc:
             raise ConfigError(
-                f"{key}='{raw}' ist keine gültige Farbe. Beispiel: 0x5865F2"
+                f"{key}='{raw}' is not a valid colour. Example: 0x5865F2"
             ) from exc
 
 
-# Discord erlaubt maximal 500 Rollen und 500 Channels pro Server.
+# Discord allows at most 500 roles and 500 channels per server.
 MAX_ROLES = 250
 MAX_CHANNELS = 500
 
-# Untergrenze für die Pause zwischen API-Calls. Alles darunter provoziert
-# unnötig viele 429er und macht den Klon am Ende langsamer, nicht schneller.
+# Lower bound for the pause between API calls. Anything below provokes
+# needless 429s and makes the clone slower overall, not faster.
 MIN_CLONE_DELAY = 0.25
 
 
 @dataclass(slots=True)
 class Config:
-    """Eingelesene und validierte Laufzeit-Konfiguration."""
+    """The parsed and validated runtime configuration."""
 
     token: str
     owner_ids: set[int] = field(default_factory=set)
@@ -122,25 +122,25 @@ class Config:
     clone_delay: float = 0.6
     embed_color: int = 0x5865F2
     log_level: str = "INFO"
-    # Beide schalten privilegierte Intents ein, die im Developer Portal
-    # zusätzlich freigeschaltet werden müssen.
+    # Both enable privileged intents that also have to be switched on in the
+    # Developer Portal.
     enable_message_clone: bool = False
     enable_member_roles: bool = False
 
     @classmethod
     def load(cls) -> "Config":
-        """Liest die Konfiguration aus `.env` bzw. der Umgebung."""
+        """Reads the configuration from `.env` or the environment."""
         load_dotenv(ENV_FILE)
 
         token = _get_str("DISCORD_TOKEN") or _get_str("BOT_TOKEN")
-        if not token or token.startswith("hier."):
+        if not token or token.startswith("put."):
             raise ConfigError(
-                "Es ist kein Bot-Token hinterlegt.\n\n"
-                "  1. Kopiere die Vorlage:  cp .env.example .env\n"
-                "  2. Öffne die .env und trage bei DISCORD_TOKEN deinen Token ein\n"
-                "  3. Den Token findest du unter "
+                "No bot token is configured.\n\n"
+                "  1. Copy the template:  cp .env.example .env\n"
+                "  2. Open .env and put your token in DISCORD_TOKEN\n"
+                "  3. You will find the token under "
                 "https://discord.com/developers/applications "
-                "→ dein Bot → 'Bot' → 'Reset Token'\n\n"
+                "→ your bot → 'Bot' → 'Reset Token'\n\n"
                 "Alternativ als Umgebungsvariable:  export DISCORD_TOKEN=...",
             )
 
@@ -166,5 +166,5 @@ class Config:
         )
 
     def is_owner(self, user_id: int) -> bool:
-        """Ist keine Owner-Liste gesetzt, gilt die Prüfung als bestanden."""
+        """With no owner list configured, the check passes."""
         return not self.owner_ids or user_id in self.owner_ids

@@ -1,16 +1,16 @@
 """
-Zusatzschritte, die einen echten Quell-Server brauchen.
+Extra steps that need a real source server.
 
-Beides funktioniert nur mit privilegierten Intents und deshalb nur beim direkten
-Klonen von Server zu Server — aus einer Backup-Datei lassen sich weder
-Nachrichten noch Mitglieder wiederherstellen.
+Both need privileged intents and therefore only work when cloning directly
+from server to server — a backup file can restore neither messages nor
+members.
 
-* **Nachrichten-Nachbau** – die letzten N Nachrichten je Text-Channel werden per
-  Webhook nachgestellt, mit Original-Name und -Avatar. Das ist eine
-  Rekonstruktion, keine Migration: Reaktionen, Threads, Bearbeitungsverläufe und
-  die echten Autoren bleiben zurück.
-* **Rollen-Zuweisung** – Mitglieder, die auf beiden Servern sind, bekommen im
-  Ziel die Rollen, die sie in der Quelle hatten.
+* **Message re-staging** - the last N messages per text channel are recreated
+  through a webhook with the original name and avatar. This is a
+  reconstruction, not a migration: reactions, threads, edit history and the
+  real authors stay behind.
+* **Role assignment** - members present on both servers get the roles in the
+  target that they had in the source.
 """
 
 from __future__ import annotations
@@ -27,26 +27,26 @@ if TYPE_CHECKING:  # pragma: no cover
 
 log = logging.getLogger(__name__)
 
-# Discord erlaubt 2000 Zeichen je Nachricht.
+# Discord allows 2000 characters per message.
 MAX_CONTENT = 2000
 
-# Anhänge werden nur bis zu dieser Größe mitkopiert — alles darüber würde den
-# Vorgang unverhältnismäßig ausbremsen.
+# Attachments are only copied up to this size — anything larger would slow the
+# run down disproportionately.
 MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024
 
-# Obergrenze je Channel, unabhängig davon, was angefordert wurde.
+# Hard cap per channel, regardless of what was requested.
 HARD_MESSAGE_CAP = 500
 
 WEBHOOK_NAME = "Easy Server Cloner"
 
 
 def _clean(content: str) -> str:
-    """Entschärft Massen-Erwähnungen im nachgebauten Text."""
+    """Defuses mass mentions in the re-staged text."""
     return content.replace("@everyone", "@​everyone").replace("@here", "@​here")
 
 
 async def copy_messages(cloner: "ServerCloner", source: discord.Guild, limit: int) -> None:
-    """Baut die letzten `limit` Nachrichten je Text-Channel per Webhook nach."""
+    """Re-stages the last `limit` messages per text channel via webhook."""
     from .models import Stage
 
     limit = min(limit, HARD_MESSAGE_CAP)
@@ -60,7 +60,7 @@ async def copy_messages(cloner: "ServerCloner", source: discord.Guild, limit: in
         if isinstance(origin, discord.TextChannel) and isinstance(mirror, discord.TextChannel):
             pairs.append((origin, mirror))
 
-    await cloner._emit(Stage.MESSAGES, "Baue Nachrichten nach", 0, len(pairs))
+    await cloner._emit(Stage.MESSAGES, "Re-staging messages", 0, len(pairs))
 
     for index, (origin, mirror) in enumerate(pairs, start=1):
         await _copy_channel_messages(cloner, origin, mirror, limit)
@@ -74,16 +74,16 @@ async def _copy_channel_messages(
     limit: int,
 ) -> None:
     try:
-        # oldest_first, damit der Verlauf im Ziel in der richtigen Reihenfolge steht.
+        # oldest_first so the history lands in the right order in the target.
         history = [
             message
             async for message in origin.history(limit=limit, oldest_first=False)
         ]
     except discord.Forbidden:
-        cloner.report.warn(f"Kein Zugriff auf den Verlauf von #{origin.name}.")
+        cloner.report.warn(f"No access to the history of #{origin.name}.")
         return
     except discord.HTTPException as exc:
-        cloner.report.warn(f"Verlauf von #{origin.name} nicht lesbar: {exc.text or exc}")
+        cloner.report.warn(f"History of #{origin.name} not readable: {exc.text or exc}")
         return
 
     history.reverse()
@@ -95,7 +95,7 @@ async def _copy_channel_messages(
             mirror.create_webhook(name=WEBHOOK_NAME, reason=cloner.reason)
         )
     except discord.HTTPException as exc:
-        cloner.report.warn(f"Webhook für #{mirror.name} fehlgeschlagen: {exc.text or exc}")
+        cloner.report.warn(f"Webhook for #{mirror.name} failed: {exc.text or exc}")
         return
 
     try:
@@ -103,8 +103,8 @@ async def _copy_channel_messages(
             await _send_one(cloner, webhook, message)
             await cloner._tick()
     finally:
-        # Der Webhook hat seinen Zweck erfüllt und würde sonst dauerhaft
-        # in den Channel-Einstellungen stehen bleiben.
+        # The webhook has served its purpose and would otherwise stay in the
+        # channel settings forever.
         try:
             await webhook.delete(reason=cloner.reason)
         except discord.HTTPException:
@@ -119,7 +119,7 @@ async def _send_one(
     files: list[discord.File] = []
     for attachment in message.attachments[:5]:
         if attachment.size > MAX_ATTACHMENT_BYTES:
-            content = f"{content}\n*[Anhang {attachment.filename} zu groß]*"[:MAX_CONTENT]
+            content = f"{content}\n*[attachment {attachment.filename} too large]*"[:MAX_CONTENT]
             continue
         try:
             files.append(await attachment.to_file())
@@ -135,31 +135,31 @@ async def _send_one(
         await cloner._call(
             webhook.send(
                 content=content or discord.utils.MISSING,
-                username=message.author.display_name[:80] or "Unbekannt",
+                username=message.author.display_name[:80] or "Unknown",
                 avatar_url=message.author.display_avatar.url,
                 files=files or discord.utils.MISSING,
                 embeds=embeds or discord.utils.MISSING,
-                # Der Nachbau darf niemanden anpingen.
+                # the re-staged message must not ping anyone.
                 allowed_mentions=discord.AllowedMentions.none(),
                 wait=False,
             )
         )
         cloner.report.messages_copied += 1
     except discord.HTTPException as exc:
-        cloner.report.warn(f"Nachricht nicht übertragbar: {exc.text or exc}")
+        cloner.report.warn(f"Message could not be transferred: {exc.text or exc}")
 
 
 async def assign_member_roles(cloner: "ServerCloner", source: discord.Guild) -> None:
-    """Gibt Mitgliedern im Ziel die Rollen, die sie in der Quelle hatten."""
+    """Gives members in the target the roles they had in the source."""
     from .models import Stage
 
-    await cloner._emit(Stage.MEMBER_ROLES, "Weise Rollen zu", 0, 0)
+    await cloner._emit(Stage.MEMBER_ROLES, "Assigning roles", 0, 0)
 
     try:
         target_members = [m async for m in cloner.target.fetch_members(limit=None)]
     except discord.HTTPException as exc:
         cloner.report.warn(
-            f"Mitgliederliste nicht abrufbar ({exc.text or exc}). Ist der "
+            f"Member list unavailable ({exc.text or exc}). Is the "
             f"Members-Intent im Developer Portal aktiviert?"
         )
         return
@@ -180,7 +180,7 @@ async def assign_member_roles(cloner: "ServerCloner", source: discord.Guild) -> 
                 continue
             key = EVERYONE_KEY if role.is_default() else str(role.id)
             mapped = cloner.role_map.get(key)
-            # Rollen über der eigenen Rolle kann der Bot nicht vergeben.
+            # The bot cannot grant roles above its own.
             if mapped is not None and mapped < cloner.target.me.top_role:
                 wanted.append(mapped)
 
@@ -192,9 +192,9 @@ async def assign_member_roles(cloner: "ServerCloner", source: discord.Guild) -> 
             await cloner._call(member.add_roles(*new_roles, reason=cloner.reason))
             cloner.report.members_updated += 1
         except discord.Forbidden:
-            cloner.report.warn(f"Rollen für {member} nicht vergebbar (Rangfolge).")
+            cloner.report.warn(f"Roles for {member} cannot be granted (hierarchy).")
         except discord.HTTPException as exc:
-            cloner.report.warn(f"Rollen für {member}: {exc.text or exc}")
+            cloner.report.warn(f"Roles for {member}: {exc.text or exc}")
 
         await cloner._emit(detail=str(member), current=index)
         await cloner._tick()
