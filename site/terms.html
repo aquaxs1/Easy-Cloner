@@ -5,22 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Terms of Use — Easy Server Cloner</title>
-<meta name="description" content="Terms of use for the Easy Server Cloner software and this website.">
+<meta name="description" content="Terms of use and privacy notice for the Easy Server Cloner software and this website.">
 <meta name="theme-color" content="#070A16">
 <link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/img/logo.png">
 <meta property="og:title" content="Terms of Use — Easy Server Cloner">
 <meta property="og:type" content="website">
-<meta property="og:description" content="Terms of use for the Easy Server Cloner software and this website.">
+<meta property="og:description" content="Terms of use and privacy notice for the Easy Server Cloner software and this website.">
 <meta property="og:image" content="https://easy-cloner.vercel.app/assets/img/og-image.png">
 <meta property="og:url" content="https://easy-cloner.vercel.app/terms.html">
 <link rel="canonical" href="https://easy-cloner.vercel.app/terms.html">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/style.css">
 <script>document.documentElement.classList.add("js");</script>
 </head>
@@ -54,7 +52,7 @@
   <div class="narrow">
     <span class="eyebrow">Legal</span>
     <h1>Terms of <span class="grad-text">Use</span></h1>
-    <p class="meta">Last updated: 23 August 2026</p>
+    <p class="meta">Last updated: 16 October 2026</p>
   </div>
 </div>
 
@@ -62,9 +60,9 @@
 
   <div class="callout">
     <span class="ic">📄</span>
-    <p><strong>In short:</strong> the software is free and MIT licensed, it runs on your
-       own machine, it collects nothing, and it comes with no warranty. Use it on servers
-       you are allowed to administer, and follow Discord's rules while you do.</p>
+    <p><strong>In short:</strong> the software is free and MIT licensed, runs on your own
+       machine, sends us nothing and comes with no warranty. Use it on servers you are
+       allowed to administer, and follow Discord's rules while you do.</p>
   </div>
 
   <h2>1. What these terms cover</h2>
@@ -88,7 +86,8 @@
   </p>
   <p>
     Everything the software produces — backup files, checkpoints, logs — stays on your
-    own storage.
+    own storage, apart from the copy of each backup that <code>/backup</code> sends you
+    in Discord.
   </p>
 
   <h2>3. Acceptable use</h2>
@@ -134,22 +133,58 @@
     Applicable data-protection law may apply to you when copying user content.
   </p>
 
-  <h2>6. Privacy</h2>
+  <h2 id="privacy">6. Privacy</h2>
   <p>
-    <strong>This website</strong> is static. It sets no cookies, runs no analytics and
-    contains no trackers. Web fonts are loaded from Google Fonts, which means your
-    browser contacts <code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code>
-    and those requests carry your IP address, as with any external resource.
+    <strong>Who is responsible.</strong> Easy Server Cloner and this site are run by
+    Sebi. For anything about your data, message
+    <a href="https://t.me/aquaxs">@aquaxs on Telegram</a>.
   </p>
   <p>
-    <strong>The software</strong> communicates only with Discord's API. It sends no
-    telemetry, contacts no analytics endpoint and phones no home. Any data it writes —
-    backups, checkpoints, logs — is written locally.
+    <strong>This website</strong> is static and hosted by Vercel Inc. (USA). To deliver
+    the pages and protect them against abuse, Vercel processes connection data: your IP
+    address, the time, the requested file and your browser. Legal basis: legitimate
+    interest in a working, secure website (Art. 6(1)(f) GDPR). Vercel is certified under
+    the EU-US Data Privacy Framework.
   </p>
   <p>
-    Where a backup file contains personal data (for example, custom emoji names or
-    channel topics referring to individuals), you are the controller of that data and
-    responsible for handling it lawfully.
+    Beyond that, the site sets no cookies, stores nothing in your browser and runs no
+    analytics or trackers. Its fonts are served from this site, so your browser contacts
+    no one else. The source code is downloaded from GitHub (GitHub Inc., USA, also
+    certified under the EU-US Data Privacy Framework), which sees your IP address when
+    you open the repository or clone it. Links to GitHub and Discord lead to those
+    services, where their own privacy policies apply.
+  </p>
+  <p>
+    <strong>The software</strong> runs on your machine and talks to Discord's API only.
+    It sends no telemetry, contacts no analytics endpoint and sends nothing to us. What
+    it keeps:
+  </p>
+  <ul>
+    <li><strong>Your bot token</strong> stays in the local <code>.env</code> file.</li>
+    <li><strong>Backups</strong> (<code>/backup</code>) hold a server's structure: name,
+        description and images, roles, channels with their topics, role permissions,
+        emojis and stickers. No members and no messages. They are saved in
+        <code>backups/</code>, and the bot also hands you the file in Discord, in a reply
+        only you can see.</li>
+    <li><strong>Checkpoints</strong> in <code>state/</code> note what a running clone has
+        already created. They are deleted when the run finishes; one older than 24 hours
+        is thrown away instead of resumed.</li>
+    <li><strong>Optional extras:</strong> message re-staging reads the latest messages of
+        each channel and reposts them through a webhook with the author's name and
+        avatar; role assignment reads both member lists. Both happen live through Discord
+        and none of it is written to disk.</li>
+  </ul>
+  <p>
+    Because you run the software, you are the controller of the server data it handles —
+    for example the names in re-staged messages, or channel topics that mention people in
+    a backup — and responsible for handling it lawfully.
+  </p>
+  <p>
+    <strong>Your rights.</strong> You can ask for access to your data, correction,
+    deletion, restriction, a copy, and object to processing based on legitimate interest
+    (Art. 15–21 GDPR) — message <a href="https://t.me/aquaxs">@aquaxs on Telegram</a>.
+    You can also complain to a data protection authority; in Austria that is the
+    Datenschutzbehörde (<a href="https://www.dsb.gv.at">dsb.gv.at</a>).
   </p>
 
   <h2>7. No warranty</h2>
@@ -201,12 +236,13 @@
     the software after a change means you accept the updated terms.
   </p>
 
-  <h2>12. Contact</h2>
+  <h2 id="contact">12. Contact</h2>
   <p>
-    Questions, bug reports and security concerns belong in the
-    <a href="https://github.com/aquaxs1/Easy-Cloner/issues">issue tracker</a>. For
-    anything sensitive, open a private security advisory on the repository rather than a
-    public issue.
+    Easy Server Cloner is run by Sebi. Questions, bug reports and security concerns
+    belong in the <a href="https://github.com/aquaxs1/Easy-Cloner/issues">issue
+    tracker</a>. For anything sensitive, open a private security advisory on the
+    repository rather than a public issue. Privacy questions and data requests go to
+    <a href="https://t.me/aquaxs">@aquaxs on Telegram</a>.
   </p>
 
   <hr class="divider" style="margin:3rem 0">
@@ -266,6 +302,7 @@
           <li><a href="/faq.html#troubleshooting">Troubleshooting</a></li>
           <li><a href="https://github.com/aquaxs1/Easy-Cloner/issues">Report an issue</a></li>
           <li><a href="/terms.html">Terms of Use</a></li>
+          <li><a href="/terms.html#privacy">Privacy</a></li>
         </ul>
       </div>
     </div>
@@ -274,6 +311,7 @@
       <span>© <span data-year>2026</span> Easy Server Cloner · MIT licensed</span>
       <nav aria-label="Quick links">
         <a href="/terms.html">Terms of Use</a>
+        <a href="/terms.html#privacy">Privacy</a>
         <a href="/download.html">Download</a>
         <a href="/faq.html">FAQ</a>
         <a href="/features.html">Features</a>
