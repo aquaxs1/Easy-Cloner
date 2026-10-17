@@ -68,6 +68,8 @@ site/
 ├── index.html · setup.html · features.html · faq.html · terms.html · 404.html
 ├── assets/
 │   ├── css/style.css        One stylesheet, tokens at the top
+│   ├── css/fonts.css        @font-face rules for the self-hosted fonts
+│   ├── fonts/               Inter + JetBrains Mono (woff2, latin + latin-ext, OFL)
 │   ├── js/main.js           Slideshow, copy buttons, reveals, pixel canvas
 │   └── img/
 │       ├── logo.svg         The mark, rebuilt as vector — used everywhere
@@ -86,7 +88,10 @@ site/
 - **JavaScript is optional.** Without it the slideshow shows its first step, the
   accordion stays closed and everything else works normally.
 - **`prefers-reduced-motion`** disables the pixel canvas and every animation.
-- **No cookies, no analytics, no trackers.** The only external request is Google Fonts.
+- **No cookies, no analytics, no trackers, no external requests.** The fonts (Inter,
+  JetBrains Mono) are self-hosted in `assets/fonts/` and declared in
+  `assets/css/fonts.css`, so no visitor's IP address goes to Google. Keep it that way:
+  the privacy section in `terms.html` says so, and the CSP blocks other font hosts.
 
 ## Editing content
 
