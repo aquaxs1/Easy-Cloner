@@ -73,7 +73,7 @@ python main.py
 
 Needs **Python 3.10+** and administrator rights on both servers — the one you
 copy from and the one you copy to. The full walkthrough, including the Discord
-Developer Portal steps, is in the [setup guide](https://easy-cloner.vercel.app/setup.html).
+Developer Portal steps, is in the [setup guide](https://easy-cloner.vercel.app/setup).
 
 ### Docker
 
@@ -141,6 +141,6 @@ site/             Static landing page, setup guide and FAQ
 ## Links
 
 - **Website** — <https://easy-cloner.vercel.app>
-- **Setup guide** — <https://easy-cloner.vercel.app/setup.html>
-- **FAQ & troubleshooting** — <https://easy-cloner.vercel.app/faq.html>
-- **Terms of Use** — <https://easy-cloner.vercel.app/terms.html>
+- **Setup guide** — <https://easy-cloner.vercel.app/setup>
+- **FAQ & troubleshooting** — <https://easy-cloner.vercel.app/faq>
+- **Terms of Use** — <https://easy-cloner.vercel.app/terms>

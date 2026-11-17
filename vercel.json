@@ -1,38 +1,76 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-
-
   "framework": null,
   "installCommand": "echo 'Statische Seite - keine Abhängigkeiten zu installieren.'",
   "buildCommand": "echo 'Statische Seite - nichts zu bauen.'",
   "outputDirectory": "site",
-
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/assets/aqx/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'sha256-WZRJfWvsnNCPcxzZwvyhovnZGqhZaC+8gPGPRbx6wTk='; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
       ]
     },
     {
-      "source": "/assets/(.*)",
+      "source": "/assets/aqx/fonts/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), browsing-topics=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; img-src 'self' data: blob:; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+        }
       ]
     }
   ],
-
   "redirects": [
-    { "source": "/docs", "destination": "/features.html", "permanent": false },
-    { "source": "/commands", "destination": "/features.html#commands", "permanent": false },
-    { "source": "/install", "destination": "/setup.html", "permanent": false },
-    { "source": "/help", "destination": "/faq.html", "permanent": false }
-  ],
-
-  "cleanUrls": false,
-  "trailingSlash": false
+    {
+      "source": "/docs",
+      "destination": "/features",
+      "permanent": false
+    },
+    {
+      "source": "/commands",
+      "destination": "/features#commands",
+      "permanent": false
+    },
+    {
+      "source": "/install",
+      "destination": "/setup",
+      "permanent": false
+    },
+    {
+      "source": "/help",
+      "destination": "/faq",
+      "permanent": false
+    }
+  ]
 }

@@ -1,0 +1,12 @@
+/* Easy Server Cloner — the violet of its mark. Everything else is assets/aqx/aqx.css. */
+
+:root {
+  --ac: #8b78ff;
+  --ac-hi: #cdc3ff;
+  --ac-ink: #0c0626;
+}
+
+/* The headline is a whole sentence: one size down. */
+.hero h1 {
+  font-size: clamp(2.4rem, 3.9vw + 0.9rem, 4.6rem);
+}

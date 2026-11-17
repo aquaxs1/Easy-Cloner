@@ -1,362 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>FAQ — Easy Server Cloner</title>
-<meta name="description" content="Answers to the questions people actually ask about Easy Server Cloner — plus fixes for the errors you are most likely to hit.">
-<meta name="theme-color" content="#070A16">
-<link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/assets/img/logo.png">
-<meta property="og:title" content="FAQ — Easy Server Cloner">
-<meta property="og:type" content="website">
-<meta property="og:description" content="Common questions and fixes for the errors you are most likely to hit.">
-<meta property="og:image" content="https://easy-cloner.vercel.app/assets/img/og-image.png">
-<meta property="og:url" content="https://easy-cloner.vercel.app/faq.html">
-<link rel="canonical" href="https://easy-cloner.vercel.app/faq.html">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/assets/css/fonts.css">
-<link rel="stylesheet" href="/assets/css/style.css">
-<script>document.documentElement.classList.add("js");</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FAQ — Easy Server Cloner</title>
+  <meta name="description" content="Answers to the questions people actually ask about Easy Server Cloner — plus fixes for the errors you are most likely to hit.">
+  <link rel="canonical" href="https://easy-cloner.vercel.app/faq">
+  <meta name="theme-color" content="#050806">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Easy Server Cloner">
+  <meta property="og:title" content="FAQ — Easy Server Cloner">
+  <meta property="og:description" content="Answers to the questions people actually ask about Easy Server Cloner — plus fixes for the errors you are most likely to hit.">
+  <meta property="og:url" content="https://easy-cloner.vercel.app/faq">
+  <meta property="og:image" content="https://easy-cloner.vercel.app/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.png">
+  <link rel="preload" href="assets/aqx/fonts/bodoni-moda-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/aqx/fonts/inter-tight-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/aqx/aqx.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/aqx/boot.js"></script>
+  <script type="module" src="assets/aqx/aqx.js"></script>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
-<canvas id="pixelfield" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+  <canvas class="aqx-sky" aria-hidden="true"></canvas>
+  <div class="aqx-aura" aria-hidden="true"></div>
+  <div class="aqx-progress" aria-hidden="true"></div>
 
-<header class="nav">
-  <div class="wrap">
-    <a class="brand" href="/index.html">
-      <img src="/assets/img/logo.svg" alt="" width="30" height="30">
-      Easy Server Cloner
-    </a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Toggle menu" aria-controls="nav-links">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="/index.html">Home</a></li>
-      <li><a href="/download.html">Download</a></li>
-      <li><a href="/features.html">Features</a></li>
-      <li><a href="/setup.html">Setup</a></li>
-      <li><a href="/faq.html" aria-current="page">FAQ</a></li>
-      <li class="nav-cta"><a class="btn btn-sm" href="https://github.com/aquaxs1/Easy-Cloner">GitHub</a></li>
-    </ul>
-  </div>
-</header>
-
-<main id="main">
-
-<div class="page-head">
-  <div class="narrow">
-    <span class="eyebrow">Questions</span>
-    <h1>Frequently asked <span class="grad-text">questions</span></h1>
-    <p>The things people actually ask — and the errors they actually hit.</p>
-  </div>
-</div>
-
-<div class="narrow" style="padding-bottom:5rem">
-
-  <!-- ── General ────────────────────────────────────────────────────────── -->
-  <section class="doc-section" id="general">
-    <h2>General</h2>
-
-    <div class="faq-item" id="what-is-it">
-      <button class="faq-q" type="button" aria-expanded="false">
-        What exactly does this bot do?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>It reads one server's complete structure — roles with their exact permissions, categories, channels, per-channel overrides, emojis, stickers, settings — and rebuilds it on another, or saves it to a file to rebuild later.</p>
-        <p>It does <strong>not</strong> move members, messages or bots. The Discord API allows none of those.</p>
-      </div></div></div>
+  <header class="nav" data-stuck="false" data-open="false">
+    <div class="nav-inner">
+      <a class="brand" href="./" aria-label="Easy Server Cloner home"><img src="assets/img/logo.svg" alt="" width="32" height="32"><span>Easy Server Cloner</span></a>
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="features">Features</a></li>
+        <li><a href="setup">Setup</a></li>
+        <li><a href="faq" aria-current="page">FAQ</a></li>
+        <li><a href="https://github.com/aquaxs1/Easy-Cloner" rel="noopener">GitHub</a></li>
+        <li><a class="btn btn-primary btn-sm" href="download">Download</a></li>
+      </ul>
     </div>
+  </header>
 
-    <div class="faq-item" id="cost">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Is it free? Is there a hosted version?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Free and MIT licensed. There is no hosted version by design: a tool with Administrator rights on your server should run on hardware you control.</p>
-      </div></div></div>
-    </div>
+  <main id="main">
+<header class="page-head">
+      <div class="stage" data-scene="assets/scene.js" data-mode="mini" aria-hidden="true"><canvas></canvas></div>
+      <div class="page-head-inner">
+        <span class="eyebrow">Questions</span>
+        <h1>Frequently asked <em>questions</em></h1>
+        <p class="lead">The things people actually ask — and the errors they actually hit.</p>
+      </div>
+    </header>
 
-    <div class="faq-item" id="data">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Where does my data go?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Only to Discord. The bot talks to Discord and nothing else — no telemetry, nothing reaches us. Backups and checkpoints go to <code>backups/</code> and <code>state/</code> on your machine, both git-ignored, and <code>/backup</code> also hands you the file in Discord. This site is static — no analytics, no cookies. The details are in the <a href="/terms.html#privacy">privacy section</a>.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="allowed">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Is cloning a server against Discord's rules?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Copying your own servers is ordinary bot behaviour. Copying someone else's without permission is not, and the <a href="/terms.html">Terms of Use</a> forbid it.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="how-long">
-      <button class="faq-q" type="button" aria-expanded="false">
-        How long does a clone take?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Roughly a second per object, so a 40-channel server lands around two minutes. Discord's rate limits set the floor — turning <code>CLONE_DELAY</code> down usually makes things slower, not faster.</p>
-      </div></div></div>
-    </div>
-  </section>
-
-  <!-- ── Usage ──────────────────────────────────────────────────────────── -->
-  <section class="doc-section" id="usage">
-    <h2>Using it</h2>
-
-    <div class="faq-item" id="administrator">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Why does it need Administrator?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Discord only lets a bot grant permissions it already holds. Without Administrator, any role that can ban or manage channels comes out stripped. A role it cannot fully recreate is created without the missing bits and reported at the end.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="existing-server">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Can I clone onto a server that already has content?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Yes, three ways: <code>/sync</code> adds only what is missing, <code>/clone</code> replaces, and <code>/preview</code> shows you the numbers first. Run <code>/preview</code> either way.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="messages">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Can it copy messages?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>It can rebuild them, which is not the same thing. <code>/clone messages:100</code> replays the last 100 per channel through webhooks — same text and author name, new timestamps. Needs the Message Content intent.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="members">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Can it bring my members over?
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>No, and nor can anything else — Discord has no API for moving a user into a server. Once people have joined, <code>/clone member_roles:True</code> restores their roles.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="backup-size">
-      <button class="faq-q" type="button" aria-expanded="false">
-        My backup is too large to upload
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Emojis and stickers are the bulk. Use <code>/backup include_images:False</code> for a structure-only file. The full version still lands in <code>backups/</code> either way.</p>
-      </div></div></div>
-    </div>
-  </section>
-
-  <!-- ── Troubleshooting ────────────────────────────────────────────────── -->
-  <section class="doc-section" id="troubleshooting">
-    <h2>Troubleshooting</h2>
-
-    <div class="faq-item" id="no-commands">
-      <button class="faq-q" type="button" aria-expanded="false">
-        The slash commands don't show up
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Global commands take up to an hour to propagate; set <code>DEV_GUILD_ID</code> in <code>.env</code> for instant registration. Also check the bot was invited with the <code>applications.commands</code> scope.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="login-failed">
-      <button class="faq-q" type="button" aria-expanded="false">
-        “Login failed” on startup
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Discord rejected the token — mistyped, or reset since you copied it. Generate a fresh one in the Developer Portal and watch for stray spaces.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="intents">
-      <button class="faq-q" type="button" aria-expanded="false">
-        “PrivilegedIntentsRequired”
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>You set <code>ENABLE_MESSAGE_CLONE</code> or <code>ENABLE_MEMBER_ROLES</code> to true without enabling the matching intent. Turn it on under <em>Bot → Privileged Gateway Intents</em>, or set the variable back to false.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="missing-rights">
-      <button class="faq-q" type="button" aria-expanded="false">
-        “The bot is missing the following rights”
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>The bot's role on the target lacks Administrator. The check runs before anything is deleted, so nothing has happened yet.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="roles-bottom">
-      <button class="faq-q" type="button" aria-expanded="false">
-        All my roles ended up at the bottom
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>The bot's own role sat too low — Discord never lets a bot create a role above its own. Drag it to the top under <em>Server Settings → Roles</em> and clone again.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="missing-channels">
-      <button class="faq-q" type="button" aria-expanded="false">
-        Stage channels or forums are missing
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Stage channels and forums only exist on Community servers. Enable Community first; announcement channels are created as normal text channels without it.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="banner">
-      <button class="faq-q" type="button" aria-expanded="false">
-        The banner didn't come across
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Server banners need Boost level 2. The bot warns and carries on with everything else.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="interrupted">
-      <button class="faq-q" type="button" aria-expanded="false">
-        The clone stopped halfway
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Nothing is lost. <code>/clone resume:True</code> continues from the checkpoint. <code>/status</code> shows what is waiting; checkpoints expire after 24 hours.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="slow">
-      <button class="faq-q" type="button" aria-expanded="false">
-        It says “Discord is throttling”
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>Normal on large servers. The bot widens the pause between calls automatically and speeds back up afterwards.</p>
-      </div></div></div>
-    </div>
-
-    <div class="faq-item" id="python-not-found">
-      <button class="faq-q" type="button" aria-expanded="false">
-        “command not found: python”
-        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
-      <div class="faq-a"><div><div class="inner">
-        <p>On macOS and Linux the command is <code>python3</code>. On Windows it usually means Python was installed without "Add to PATH".</p>
-      </div></div></div>
-    </div>
-  </section>
-
-  <div class="cta-band reveal">
-    <h2>Still stuck?</h2>
-    <p>Open an issue with the error message and what you were running. That is usually
-       enough to sort it out.</p>
-    <div class="btn-row">
-      <a class="btn" href="https://github.com/aquaxs1/Easy-Cloner/issues">
-        Open an issue
-        <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-      <a class="btn btn-ghost" href="/setup.html">Back to setup</a>
-    </div>
-  </div>
-</div>
-
-</main>
-
-<footer class="footer">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div class="footer-about">
-        <a class="brand" href="/index.html">
-          <img src="/assets/img/logo.svg" alt="" width="30" height="30">
-          Easy Server Cloner
-        </a>
-        <p>An open-source Discord bot that copies a server's full structure — and
-           gives you a backup file you actually own.</p>
-        <div class="footer-social">
-          <a href="https://github.com/aquaxs1/Easy-Cloner" aria-label="GitHub repository">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
-          </a>
-          <a href="https://discord.com/developers/applications" aria-label="Discord Developer Portal">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.32 4.44A19.8 19.8 0 0 0 15.43 3l-.25.46a13.6 13.6 0 0 1 4.02 2.03 18.9 18.9 0 0 0-14.4 0A13.6 13.6 0 0 1 8.82 3.5L8.57 3a19.8 19.8 0 0 0-4.89 1.44C.87 8.62.1 12.7.48 16.72a19.9 19.9 0 0 0 6.04 3.06l.8-1.37c-.66-.25-1.3-.55-1.9-.9l.47-.36a14.2 14.2 0 0 0 12.22 0l.47.36c-.6.35-1.24.65-1.9.9l.8 1.37a19.9 19.9 0 0 0 6.04-3.06c.44-4.65-.75-8.7-3.2-12.28zM8.68 14.4c-1.18 0-2.15-1.08-2.15-2.4 0-1.34.95-2.42 2.15-2.42 1.2 0 2.17 1.09 2.15 2.41 0 1.33-.95 2.41-2.15 2.41zm6.64 0c-1.18 0-2.15-1.08-2.15-2.4 0-1.34.95-2.42 2.15-2.42 1.2 0 2.17 1.09 2.15 2.41 0 1.33-.95 2.41-2.15 2.41z"/></svg>
-          </a>
+    <section class="sec" id="general">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2>General</h2>
+        </div>
+        <div class="faq">
+          <details class="reveal" id="what-is-it">
+            <summary>What exactly does this bot do?</summary>
+            <p>It reads one server's complete structure — roles with their exact permissions, categories, channels, per-channel overrides, emojis, stickers, settings — and rebuilds it on another, or saves it to a file to rebuild later.</p>
+            <p>It does <strong>not</strong> move members, messages or bots. The Discord API allows none of those.</p>
+          </details>
+          <details class="reveal" id="cost">
+            <summary>Is it free? Is there a hosted version?</summary>
+            <p>Free and MIT licensed. There is no hosted version by design: a tool with Administrator rights on your server should run on hardware you control.</p>
+          </details>
+          <details class="reveal" id="data">
+            <summary>Where does my data go?</summary>
+            <p>Only to Discord. The bot talks to Discord and nothing else — no telemetry, nothing reaches us. Backups and checkpoints go to <code>backups/</code> and <code>state/</code> on your machine, both git-ignored, and <code>/backup</code> also hands you the file in Discord. This site is static — no analytics, no cookies. The details are in the <a href="terms#privacy">privacy section</a>.</p>
+          </details>
+          <details class="reveal" id="allowed">
+            <summary>Is cloning a server against Discord's rules?</summary>
+            <p>Copying your own servers is ordinary bot behaviour. Copying someone else's without permission is not, and the <a href="terms">Terms of Use</a> forbid it.</p>
+          </details>
+          <details class="reveal" id="how-long">
+            <summary>How long does a clone take?</summary>
+            <p>Roughly a second per object, so a 40-channel server lands around two minutes. Discord's rate limits set the floor — turning <code>CLONE_DELAY</code> down usually makes things slower, not faster.</p>
+          </details>
         </div>
       </div>
+    </section>
 
-      <div class="footer-col">
-        <h4>Product</h4>
+    <section class="sec" id="usage">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2>Using it</h2>
+        </div>
+        <div class="faq">
+          <details class="reveal" id="administrator">
+            <summary>Why does it need Administrator?</summary>
+            <p>Discord only lets a bot grant permissions it already holds. Without Administrator, any role that can ban or manage channels comes out stripped. A role it cannot fully recreate is created without the missing bits and reported at the end.</p>
+          </details>
+          <details class="reveal" id="existing-server">
+            <summary>Can I clone onto a server that already has content?</summary>
+            <p>Yes, three ways: <code>/sync</code> adds only what is missing, <code>/clone</code> replaces, and <code>/preview</code> shows you the numbers first. Run <code>/preview</code> either way.</p>
+          </details>
+          <details class="reveal" id="messages">
+            <summary>Can it copy messages?</summary>
+            <p>It can rebuild them, which is not the same thing. <code>/clone messages:100</code> replays the last 100 per channel through webhooks — same text and author name, new timestamps. Needs the Message Content intent.</p>
+          </details>
+          <details class="reveal" id="members">
+            <summary>Can it bring my members over?</summary>
+            <p>No, and nor can anything else — Discord has no API for moving a user into a server. Once people have joined, <code>/clone member_roles:True</code> restores their roles.</p>
+          </details>
+          <details class="reveal" id="backup-size">
+            <summary>My backup is too large to upload</summary>
+            <p>Emojis and stickers are the bulk. Use <code>/backup include_images:False</code> for a structure-only file. The full version still lands in <code>backups/</code> either way.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="troubleshooting">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <h2>Troubleshooting</h2>
+        </div>
+        <div class="faq">
+          <details class="reveal" id="no-commands">
+            <summary>The slash commands don't show up</summary>
+            <p>Global commands take up to an hour to propagate; set <code>DEV_GUILD_ID</code> in <code>.env</code> for instant registration. Also check the bot was invited with the <code>applications.commands</code> scope.</p>
+          </details>
+          <details class="reveal" id="login-failed">
+            <summary>“Login failed” on startup</summary>
+            <p>Discord rejected the token — mistyped, or reset since you copied it. Generate a fresh one in the Developer Portal and watch for stray spaces.</p>
+          </details>
+          <details class="reveal" id="intents">
+            <summary>“PrivilegedIntentsRequired”</summary>
+            <p>You set <code>ENABLE_MESSAGE_CLONE</code> or <code>ENABLE_MEMBER_ROLES</code> to true without enabling the matching intent. Turn it on under <em>Bot → Privileged Gateway Intents</em>, or set the variable back to false.</p>
+          </details>
+          <details class="reveal" id="missing-rights">
+            <summary>“The bot is missing the following rights”</summary>
+            <p>The bot's role on the target lacks Administrator. The check runs before anything is deleted, so nothing has happened yet.</p>
+          </details>
+          <details class="reveal" id="roles-bottom">
+            <summary>All my roles ended up at the bottom</summary>
+            <p>The bot's own role sat too low — Discord never lets a bot create a role above its own. Drag it to the top under <em>Server Settings → Roles</em> and clone again.</p>
+          </details>
+          <details class="reveal" id="missing-channels">
+            <summary>Stage channels or forums are missing</summary>
+            <p>Stage channels and forums only exist on Community servers. Enable Community first; announcement channels are created as normal text channels without it.</p>
+          </details>
+          <details class="reveal" id="banner">
+            <summary>The banner didn't come across</summary>
+            <p>Server banners need Boost level 2. The bot warns and carries on with everything else.</p>
+          </details>
+          <details class="reveal" id="interrupted">
+            <summary>The clone stopped halfway</summary>
+            <p>Nothing is lost. <code>/clone resume:True</code> continues from the checkpoint. <code>/status</code> shows what is waiting; checkpoints expire after 24 hours.</p>
+          </details>
+          <details class="reveal" id="slow">
+            <summary>It says “Discord is throttling”</summary>
+            <p>Normal on large servers. The bot widens the pause between calls automatically and speeds back up afterwards.</p>
+          </details>
+          <details class="reveal" id="python-not-found">
+            <summary>“command not found: python”</summary>
+            <p>On macOS and Linux the command is <code>python3</code>. On Windows it usually means Python was installed without "Add to PATH".</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="wrap">
+        <div class="cta reveal">
+          <h2>Still <em>stuck?</em></h2>
+          <p class="lead">Open an issue with the error message and what you were running. That is usually enough to sort it out.</p>
+          <div class="btn-row"><a class="btn btn-primary btn-lg" href="https://github.com/aquaxs1/Easy-Cloner/issues">Open an issue<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-lg" href="setup">Back to setup</a></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-about">
+          <a class="brand" href="./"><img src="assets/img/logo.svg" alt="" width="32" height="32" loading="lazy"><span>Easy Server Cloner</span></a>
+          <p>An open-source Discord bot that copies a server's full structure — and gives you a backup file you actually own.</p>
+        </div>
+        <nav class="footer-col" aria-label="Product">
+          <h2>Product</h2>
+          <ul>
+            <li><a href="features">All features</a></li>
+            <li><a href="features#commands">Commands</a></li>
+            <li><a href="features#backup">Backup &amp; restore</a></li>
+            <li><a href="features#limits">What can&#x27;t be copied</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Get started">
+          <h2>Get started</h2>
+          <ul>
+            <li><a href="setup">Setup guide</a></li>
+            <li><a href="setup#token">Bot token</a></li>
+            <li><a href="setup#docker">Docker</a></li>
+            <li><a href="download">Download</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Resources">
+          <h2>Resources</h2>
+          <ul>
+            <li><a href="faq">FAQ</a></li>
+            <li><a href="faq#troubleshooting">Troubleshooting</a></li>
+            <li><a href="https://github.com/aquaxs1/Easy-Cloner/issues" rel="noopener">Report an issue</a></li>
+            <li><a href="https://github.com/aquaxs1/Easy-Cloner" rel="noopener">GitHub</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Legal">
+          <h2>Legal</h2>
+          <ul>
+            <li><a href="terms">Terms of Use</a></li>
+            <li><a href="terms#privacy">Privacy</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="family">
+        <span class="family-label">More by AquAxs</span>
         <ul>
-          <li><a href="/features.html">All features</a></li>
-          <li><a href="/features.html#commands">Commands</a></li>
-          <li><a href="/features.html#backup">Backup &amp; restore</a></li>
-          <li><a href="/features.html#limits">What can't be copied</a></li>
+          <li><a href="https://aqua.is-a.dev/portfolio" data-home rel="noopener">All projects</a></li>
+          <li><a href="https://pfpair.app/" rel="noopener">Pfpair</a></li>
+          <li><a href="https://handled-market.vercel.app/" rel="noopener">Handled</a></li>
+          <li><a href="https://larpcorddc.vercel.app/" rel="noopener">Larpcord</a></li>
+          <li><a href="https://mybluejarvis.vercel.app/" rel="noopener">My Jarvis</a></li>
+          <li><a href="https://guardiantus-av.vercel.app/" rel="noopener">Guardiantus AV</a></li>
+          <li><a href="https://explorer-manager.vercel.app/" rel="noopener">Explorer Manager</a></li>
+          <li><a href="https://cipher-box-file-encrypter.vercel.app/" rel="noopener">CipherBox</a></li>
+          <li><a href="https://simple-skin.vercel.app/" rel="noopener">Simple Skin</a></li>
+          <li><a href="https://autobuild-gui.vercel.app/" rel="noopener">Autobuild GUI</a></li>
+          <li><a href="https://timetrackerextension.vercel.app/" rel="noopener">WebsiteTimeTrack</a></li>
+          <li><a href="https://wave-uninstaller.vercel.app/" rel="noopener">Wave Uninstaller</a></li>
+          <li><a href="https://discord-sakurabot.vercel.app/" rel="noopener">Sakura Bot</a></li>
+          <li><a href="https://revox-client.vercel.app/" rel="noopener">Revox Client</a></li>
+          <li><a href="https://chesstrainer.cc.cd/" rel="noopener">Chess Trainer</a></li>
         </ul>
       </div>
-
-      <div class="footer-col">
-        <h4>Get started</h4>
-        <ul>
-          <li><a href="/setup.html">Setup guide</a></li>
-          <li><a href="/setup.html#token">Bot token</a></li>
-          <li><a href="/setup.html#docker">Docker</a></li>
-          <li><a href="/download.html">Download</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="/faq.html">FAQ</a></li>
-          <li><a href="/faq.html#troubleshooting">Troubleshooting</a></li>
-          <li><a href="https://github.com/aquaxs1/Easy-Cloner/issues">Report an issue</a></li>
-          <li><a href="/terms.html">Terms of Use</a></li>
-          <li><a href="/terms.html#privacy">Privacy</a></li>
-        </ul>
+      <div class="footer-legal">
+        <p>© 2026 Easy Server Cloner · MIT licensed</p>
+        <p>Not affiliated with, endorsed by or sponsored by Discord Inc.</p>
       </div>
     </div>
-
-    <div class="footer-bottom">
-      <span>© <span data-year>2026</span> Easy Server Cloner · MIT licensed</span>
-      <nav aria-label="Quick links">
-        <a href="/terms.html">Terms of Use</a>
-        <a href="/terms.html#privacy">Privacy</a>
-        <a href="/download.html">Download</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/features.html">Features</a>
-        <a href="/setup.html">Setup</a>
-        <a href="https://github.com/aquaxs1/Easy-Cloner">GitHub</a>
-      </nav>
-    </div>
-  </div>
-</footer>
-
-<script src="/assets/js/main.js" defer></script>
+  </footer>
 </body>
 </html>
