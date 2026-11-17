@@ -1,713 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>Easy Server Cloner — Clone any Discord server in minutes</title>
-<meta name="description" content="A Discord bot that copies a server's full structure — roles, categories, channels, permissions, emojis and stickers — with backups, live progress and resume after interruption.">
-<meta name="theme-color" content="#070A16">
-<link rel="icon" href="/assets/img/logo.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/assets/img/logo.png">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Easy Server Cloner">
-<meta property="og:description" content="Copy a Discord server's full structure — roles, channels, permissions, emojis — with backups, live progress and resume.">
-<meta property="og:image" content="https://easy-cloner.vercel.app/assets/img/og-image.png">
-<meta property="og:url" content="https://easy-cloner.vercel.app/">
-<link rel="canonical" href="https://easy-cloner.vercel.app/">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/assets/css/fonts.css">
-<link rel="stylesheet" href="/assets/css/style.css">
-<script>document.documentElement.classList.add("js");</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Easy Server Cloner — Clone any Discord server in minutes</title>
+  <meta name="description" content="A Discord bot that copies a server&#x27;s full structure — roles, categories, channels, permissions, emojis and stickers — with backups, live progress and resume after interruption.">
+  <link rel="canonical" href="https://easy-cloner.vercel.app/">
+  <meta name="theme-color" content="#050806">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Easy Server Cloner">
+  <meta property="og:title" content="Easy Server Cloner — Clone any Discord server in minutes">
+  <meta property="og:description" content="A Discord bot that copies a server&#x27;s full structure — roles, categories, channels, permissions, emojis and stickers — with backups, live progress and resume after interruption.">
+  <meta property="og:url" content="https://easy-cloner.vercel.app/">
+  <meta property="og:image" content="https://easy-cloner.vercel.app/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.png">
+  <link rel="preload" href="assets/aqx/fonts/bodoni-moda-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/aqx/fonts/inter-tight-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/aqx/aqx.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/aqx/boot.js"></script>
+  <script type="module" src="assets/aqx/aqx.js"></script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Easy Server Cloner", "description": "A Discord bot that copies a server's full structure — roles, categories, channels, permissions, emojis and stickers — with backups, live progress and resume after interruption.", "url": "https://easy-cloner.vercel.app/", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows, macOS, Linux", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "author": {"@type": "Person", "name": "AquAxs", "url": "https://aqua.is-a.dev/"}, "image": "https://easy-cloner.vercel.app/assets/img/og-image.png", "softwareVersion": "2.1.0", "license": "https://opensource.org/licenses/MIT", "sameAs": ["https://github.com/aquaxs1/Easy-Cloner"]}</script>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
-<canvas id="pixelfield" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+  <canvas class="aqx-sky" aria-hidden="true"></canvas>
+  <div class="aqx-aura" aria-hidden="true"></div>
+  <div class="aqx-progress" aria-hidden="true"></div>
 
-<!-- ── Navigation ──────────────────────────────────────────────────────── -->
-<header class="nav">
-  <div class="wrap">
-    <a class="brand" href="/index.html">
-      <img src="/assets/img/logo.svg" alt="" width="30" height="30">
-      Easy Server Cloner
-    </a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Toggle menu" aria-controls="nav-links">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="/index.html" aria-current="page">Home</a></li>
-      <li><a href="/download.html">Download</a></li>
-      <li><a href="/features.html">Features</a></li>
-      <li><a href="/setup.html">Setup</a></li>
-      <li><a href="/faq.html">FAQ</a></li>
-      <li class="nav-cta"><a class="btn btn-sm" href="https://github.com/aquaxs1/Easy-Cloner">GitHub</a></li>
-    </ul>
-  </div>
-</header>
-
-<main id="main">
-
-<!-- ── Hero ────────────────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <span class="eyebrow"><span class="dot"></span> Open source · v2.1</span>
-      <h1>Clone a Discord server<br><span class="grad-text">in minutes, not hours</span></h1>
-      <p class="hero-lead">Easy Server Cloner copies a server's whole structure — roles, channels, overwrites, emojis and settings — onto another server, or into a file you restore from later. Self-hosted, with your own bot token.</p>
-      <div class="btn-row">
-        <a class="btn" href="/setup.html">
-          Set Up
-          <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a class="btn btn-ghost" href="/features.html">
-          View More
-          <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-      </div>
-
-      <div class="hero-stats">
-        <div><strong>8</strong><span>slash commands</span></div>
-        <div><strong>93</strong><span>automated tests</span></div>
-        <div><strong>0</strong><span>data sent to us</span></div>
-      </div>
+  <header class="nav" data-stuck="false" data-open="false">
+    <div class="nav-inner">
+      <a class="brand" href="./" aria-label="Easy Server Cloner home"><img src="assets/img/logo.svg" alt="" width="32" height="32"><span>Easy Server Cloner</span></a>
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="features">Features</a></li>
+        <li><a href="setup">Setup</a></li>
+        <li><a href="faq">FAQ</a></li>
+        <li><a href="https://github.com/aquaxs1/Easy-Cloner" rel="noopener">GitHub</a></li>
+        <li><a class="btn btn-primary btn-sm" href="download">Download</a></li>
+      </ul>
     </div>
+  </header>
 
-    <div class="hero-art" aria-hidden="true">
-      <div class="glow"></div>
-      <div class="orbit"><i></i></div>
-      <div class="orbit two"><i></i></div>
-      <img class="mark" src="/assets/img/logo.svg" alt="" width="300" height="300">
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<!-- ── Slideshow: How it works ─────────────────────────────────────────── -->
-<section id="how-it-works">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">How it works</span>
-      <h2>Six steps from empty server to exact copy</h2>
-      <p>Click through each step — or let it play. Every stage is something you
-         trigger yourself, and nothing is ever deleted without asking first.</p>
-    </div>
-
-    <div class="slideshow reveal" data-slideshow>
-      <!-- Tabs -->
-      <div class="slide-tabs" role="tablist" aria-label="How the bot works">
-        <button class="slide-tab" role="tab" type="button" aria-selected="true"><span class="num">1</span><span class="label">Invite</span></button>
-        <button class="slide-tab" role="tab" type="button" aria-selected="false"><span class="num">2</span><span class="label">Read</span></button>
-        <button class="slide-tab" role="tab" type="button" aria-selected="false"><span class="num">3</span><span class="label">Confirm</span></button>
-        <button class="slide-tab" role="tab" type="button" aria-selected="false"><span class="num">4</span><span class="label">Clone</span></button>
-        <button class="slide-tab" role="tab" type="button" aria-selected="false"><span class="num">5</span><span class="label">Back up</span></button>
-        <button class="slide-tab" role="tab" type="button" aria-selected="false"><span class="num">6</span><span class="label">Resume</span></button>
+  <main id="main">
+    <section class="hero">
+      <div class="stage" data-scene="assets/scene.js" data-mode="hero" aria-hidden="true"><canvas></canvas></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">Open source · v2.1</span>
+          <h1>Clone a Discord server <em>in minutes, not hours</em></h1>
+          <p class="lead">Easy Server Cloner copies a server's whole structure — roles, channels, overwrites, emojis and settings — onto another server, or into a file you restore from later. Self-hosted, with your own bot token.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary btn-lg" href="setup">Set Up<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-lg" href="features">View More</a>
+          </div>
+        </div>
       </div>
+      <span class="hero-hint">Click to interrupt, click to resume</span>
+    </section>
 
-      <div class="slide-stage">
+    <section class="sec">
+      <div class="wrap">
+        <div class="stats reveal">
+          <div class="stat"><b data-count="8">8</b><span>slash commands</span></div>
+          <div class="stat"><b data-count="93">93</b><span>automated tests</span></div>
+          <div class="stat"><b>0</b><span>data sent to us</span></div>
+        </div>
+      </div>
+    </section>
 
-        <!-- 1 ─ Invite -->
-        <div class="slide active" role="tabpanel">
-          <div class="slide-copy">
-            <h3>Invite the bot to both servers</h3>
-            <p>It reads from the source and writes to the target, so it has to be on both — with Administrator on the target and its role at the top of the list.</p>
-            <div class="slide-note">
-              <strong>Tip</strong>
-              <span>Drag the bot's role to the top of the target server's role list — Discord never lets a bot create roles above its own.</span>
+    <section class="sec" id="how-it-works">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <span class="eyebrow">How it works</span>
+          <h2>Six steps from empty server <em>to exact copy</em></h2>
+          <p class="lead">Click through each step. Every stage is something you trigger yourself, and nothing is ever deleted without asking first.</p>
+        </div>
+        <div class="tabs reveal">
+          <div class="tabs-list" role="tablist" aria-label="How the bot works">
+            <button type="button" role="tab" id="step-tab-1" aria-controls="step-1" aria-selected="true"><b>1</b>Invite</button>
+            <button type="button" role="tab" id="step-tab-2" aria-controls="step-2" aria-selected="false"><b>2</b>Read</button>
+            <button type="button" role="tab" id="step-tab-3" aria-controls="step-3" aria-selected="false"><b>3</b>Confirm</button>
+            <button type="button" role="tab" id="step-tab-4" aria-controls="step-4" aria-selected="false"><b>4</b>Clone</button>
+            <button type="button" role="tab" id="step-tab-5" aria-controls="step-5" aria-selected="false"><b>5</b>Back up</button>
+            <button type="button" role="tab" id="step-tab-6" aria-controls="step-6" aria-selected="false"><b>6</b>Resume</button>
+          </div>
+          <div class="tabs-panel" role="tabpanel" id="step-1" aria-labelledby="step-tab-1">
+            <div class="stack">
+              <h3>Invite the bot to both servers</h3>
+              <p>It reads from the source and writes to the target, so it has to be on both — with Administrator on the target and its role at the top of the list.</p>
+              <div class="note">
+                <p><strong>Tip</strong> Drag the bot's role to the top of the target server's role list — Discord never lets a bot create roles above its own.</p>
+              </div>
             </div>
+            <figure class="tabs-figure">
+              <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="s1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/></linearGradient></defs><g><rect x="14" y="66" width="128" height="168" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/><rect x="14" y="66" width="128" height="30" rx="14" fill="#151B36"/><rect x="14" y="82" width="128" height="14" fill="#151B36"/><text x="30" y="86" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="11" font-weight="600">Source</text><g fill="#2A2350"><rect x="30" y="110" width="82" height="9" rx="4.5"/><rect x="30" y="130" width="96" height="9" rx="4.5"/><rect x="30" y="150" width="68" height="9" rx="4.5"/><rect x="30" y="170" width="90" height="9" rx="4.5"/><rect x="30" y="190" width="74" height="9" rx="4.5"/><rect x="30" y="210" width="86" height="9" rx="4.5"/></g></g><g><rect x="278" y="66" width="128" height="168" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/><rect x="278" y="66" width="128" height="30" rx="14" fill="#151B36"/><rect x="278" y="82" width="128" height="14" fill="#151B36"/><text x="294" y="86" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="11" font-weight="600">Target</text><rect x="294" y="120" width="96" height="9" rx="4.5" fill="#1B2140"/><rect x="294" y="140" width="72" height="9" rx="4.5" fill="#1B2140"/></g><path d="M150 150 L 186 150" stroke="#6C58F0" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"><animate attributeName="stroke-dashoffset" values="20;0" dur="1.2s" repeatCount="indefinite"/></path><path d="M234 150 L 270 150" stroke="#6C58F0" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"><animate attributeName="stroke-dashoffset" values="20;0" dur="1.2s" repeatCount="indefinite"/></path><circle cx="210" cy="150" r="30" fill="none" stroke="#6C58F0" stroke-width="1.5" opacity="0.5"><animate attributeName="r" values="26;44" dur="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0" dur="2.6s" repeatCount="indefinite"/></circle><circle cx="210" cy="150" r="26" fill="#0E1428" stroke="url(#s1g)" stroke-width="2"/><rect x="198" y="138" width="24" height="24" rx="6" transform="rotate(45 210 150)" fill="url(#s1g)"/><g opacity="0"><circle cx="78" cy="252" r="11" fill="#57F287" fill-opacity="0.14" stroke="#57F287" stroke-width="1.5"/><path d="M73 252l3.5 3.5L84 248" stroke="#57F287" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><animate attributeName="opacity" values="0;0;1;1" dur="3s" repeatCount="indefinite"/></g><g opacity="0"><circle cx="342" cy="252" r="11" fill="#57F287" fill-opacity="0.14" stroke="#57F287" stroke-width="1.5"/><path d="M337 252l3.5 3.5L348 248" stroke="#57F287" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><animate attributeName="opacity" values="0;0;0;1" dur="3s" repeatCount="indefinite"/></g></svg>
+            </figure>
           </div>
-          <div class="slide-visual">
-            <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="s1g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/>
-                </linearGradient>
-              </defs>
-              <!-- Server panels -->
-              <g>
-                <rect x="14" y="66" width="128" height="168" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/>
-                <rect x="14" y="66" width="128" height="30" rx="14" fill="#151B36"/>
-                <rect x="14" y="82" width="128" height="14" fill="#151B36"/>
-                <text x="30" y="86" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">Source</text>
-                <g fill="#2A2350">
-                  <rect x="30" y="110" width="82" height="9" rx="4.5"/>
-                  <rect x="30" y="130" width="96" height="9" rx="4.5"/>
-                  <rect x="30" y="150" width="68" height="9" rx="4.5"/>
-                  <rect x="30" y="170" width="90" height="9" rx="4.5"/>
-                  <rect x="30" y="190" width="74" height="9" rx="4.5"/>
-                  <rect x="30" y="210" width="86" height="9" rx="4.5"/>
-                </g>
-              </g>
-              <g>
-                <rect x="278" y="66" width="128" height="168" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/>
-                <rect x="278" y="66" width="128" height="30" rx="14" fill="#151B36"/>
-                <rect x="278" y="82" width="128" height="14" fill="#151B36"/>
-                <text x="294" y="86" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">Target</text>
-                <rect x="294" y="120" width="96" height="9" rx="4.5" fill="#1B2140"/>
-                <rect x="294" y="140" width="72" height="9" rx="4.5" fill="#1B2140"/>
-              </g>
-
-              <!-- Connection lines -->
-              <path d="M150 150 L 186 150" stroke="#6C58F0" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round">
-                <animate attributeName="stroke-dashoffset" values="20;0" dur="1.2s" repeatCount="indefinite"/>
-              </path>
-              <path d="M234 150 L 270 150" stroke="#6C58F0" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round">
-                <animate attributeName="stroke-dashoffset" values="20;0" dur="1.2s" repeatCount="indefinite"/>
-              </path>
-
-              <!-- Bot in the middle -->
-              <circle cx="210" cy="150" r="30" fill="none" stroke="#6C58F0" stroke-width="1.5" opacity="0.5">
-                <animate attributeName="r" values="26;44" dur="2.6s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.5;0" dur="2.6s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="210" cy="150" r="26" fill="#0E1428" stroke="url(#s1g)" stroke-width="2"/>
-              <rect x="198" y="138" width="24" height="24" rx="6" transform="rotate(45 210 150)" fill="url(#s1g)"/>
-
-              <!-- Checkmarks -->
-              <g opacity="0">
-                <circle cx="78" cy="252" r="11" fill="#57F287" fill-opacity="0.14" stroke="#57F287" stroke-width="1.5"/>
-                <path d="M73 252l3.5 3.5L84 248" stroke="#57F287" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <animate attributeName="opacity" values="0;0;1;1" dur="3s" repeatCount="indefinite"/>
-              </g>
-              <g opacity="0">
-                <circle cx="342" cy="252" r="11" fill="#57F287" fill-opacity="0.14" stroke="#57F287" stroke-width="1.5"/>
-                <path d="M337 252l3.5 3.5L348 248" stroke="#57F287" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <animate attributeName="opacity" values="0;0;0;1" dur="3s" repeatCount="indefinite"/>
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        <!-- 2 ─ Read the blueprint -->
-        <div class="slide" role="tabpanel">
-          <div class="slide-copy">
-            <h3>The bot reads a blueprint</h3>
-            <p>
-              Before writing anything the bot walks the source server and turns it into a <strong>blueprint</strong>: every role with its permission bits, every channel with its overrides, plus emojis and stickers.
-            </p>
-            <p>The engine does not care whether a blueprint came from a live server or a saved file.</p>
-            <div class="slide-note">
-              <strong>/preview</strong>
-              <span>Runs this step alone and shows you the numbers. Nothing is written, nothing is deleted.</span>
+          <div class="tabs-panel" role="tabpanel" id="step-2" aria-labelledby="step-tab-2">
+            <div class="stack">
+              <h3>The bot reads a blueprint</h3>
+              <p>Before writing anything the bot walks the source server and turns it into a <strong>blueprint</strong>: every role with its permission bits, every channel with its overrides, plus emojis and stickers.</p>
+              <p>The engine does not care whether a blueprint came from a live server or a saved file.</p>
+              <div class="note">
+                <p><strong>/preview</strong> Runs this step alone and shows you the numbers. Nothing is written, nothing is deleted.</p>
+              </div>
             </div>
+            <figure class="tabs-figure">
+              <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="s2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/></linearGradient><clipPath id="s2clip"><rect x="24" y="52" width="150" height="196" rx="14"/></clipPath></defs><rect x="24" y="52" width="150" height="196" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/><g font-family="Inter Tight,Inter,sans-serif" font-size="9.5" fill="#6E7099"><text x="42" y="80">▾ INFORMATION</text><text x="52" y="100"># rules</text><text x="52" y="118"># announcements</text><text x="42" y="140">▾ COMMUNITY</text><text x="52" y="160"># general</text><text x="52" y="178"># memes</text><text x="52" y="196">🔊 Lounge</text><text x="42" y="218">▾ ROLES</text><text x="52" y="236">@ Admin · Mod</text></g><g clip-path="url(#s2clip)"><rect x="24" y="52" width="150" height="26" fill="url(#s2g)" opacity="0.16"><animate attributeName="y" values="46;236;46" dur="4s" repeatCount="indefinite"/></rect><rect x="24" y="76" width="150" height="1.5" fill="#C2B2FF" opacity="0.8"><animate attributeName="y" values="70;260;70" dur="4s" repeatCount="indefinite"/></rect></g><path d="M186 150 L 226 150" stroke="#6C58F0" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"><animate attributeName="stroke-dashoffset" values="18;0" dur="1s" repeatCount="indefinite"/></path><path d="M222 144l7 6-7 6" stroke="#9B8AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="240" y="62" width="152" height="176" rx="14" fill="#0B1022" stroke="url(#s2g)" stroke-width="1.6"/><rect x="240" y="62" width="152" height="30" rx="14" fill="#151B36"/><rect x="240" y="78" width="152" height="14" fill="#151B36"/><text x="256" y="82" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9.5">blueprint</text><g font-family="JetBrains Mono,monospace" font-size="8.5" fill="#9B8AFF"><text x="256" y="112" opacity="0">roles: 14<animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.2;0.9;1"/></text><text x="256" y="132" opacity="0">categories: 4<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.28;0.38;0.9;1"/></text><text x="256" y="152" opacity="0">channels: 27<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.45;0.55;0.9;1"/></text><text x="256" y="172" opacity="0">overwrites: 61<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.6;0.7;0.9;1"/></text><text x="256" y="192" opacity="0">emojis: 38<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.72;0.82;0.9;1"/></text><text x="256" y="212" fill="#57F287" opacity="0">✓ complete<animate attributeName="opacity" values="0;0;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.88;0.95;1"/></text></g></svg>
+            </figure>
           </div>
-          <div class="slide-visual">
-            <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="s2g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/>
-                </linearGradient>
-                <clipPath id="s2clip"><rect x="24" y="52" width="150" height="196" rx="14"/></clipPath>
-              </defs>
-
-              <!-- Source panel -->
-              <rect x="24" y="52" width="150" height="196" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/>
-              <g font-family="Inter,sans-serif" font-size="9.5" fill="#6E7099">
-                <text x="42" y="80">▾ INFORMATION</text>
-                <text x="52" y="100"># rules</text>
-                <text x="52" y="118"># announcements</text>
-                <text x="42" y="140">▾ COMMUNITY</text>
-                <text x="52" y="160"># general</text>
-                <text x="52" y="178"># memes</text>
-                <text x="52" y="196">🔊 Lounge</text>
-                <text x="42" y="218">▾ ROLES</text>
-                <text x="52" y="236">@ Admin · Mod</text>
-              </g>
-              <!-- Scan line -->
-              <g clip-path="url(#s2clip)">
-                <rect x="24" y="52" width="150" height="26" fill="url(#s2g)" opacity="0.16">
-                  <animate attributeName="y" values="46;236;46" dur="4s" repeatCount="indefinite"/>
-                </rect>
-                <rect x="24" y="76" width="150" height="1.5" fill="#C2B2FF" opacity="0.8">
-                  <animate attributeName="y" values="70;260;70" dur="4s" repeatCount="indefinite"/>
-                </rect>
-              </g>
-
-              <!-- Arrow -->
-              <path d="M186 150 L 226 150" stroke="#6C58F0" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round">
-                <animate attributeName="stroke-dashoffset" values="18;0" dur="1s" repeatCount="indefinite"/>
-              </path>
-              <path d="M222 144l7 6-7 6" stroke="#9B8AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-
-              <!-- Blueprint card -->
-              <rect x="240" y="62" width="152" height="176" rx="14" fill="#0B1022" stroke="url(#s2g)" stroke-width="1.6"/>
-              <rect x="240" y="62" width="152" height="30" rx="14" fill="#151B36"/>
-              <rect x="240" y="78" width="152" height="14" fill="#151B36"/>
-              <text x="256" y="82" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9.5">blueprint</text>
-              <g font-family="JetBrains Mono,monospace" font-size="8.5" fill="#9B8AFF">
-                <text x="256" y="112" opacity="0">roles: 14<animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.2;0.9;1"/></text>
-                <text x="256" y="132" opacity="0">categories: 4<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.28;0.38;0.9;1"/></text>
-                <text x="256" y="152" opacity="0">channels: 27<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.45;0.55;0.9;1"/></text>
-                <text x="256" y="172" opacity="0">overwrites: 61<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.6;0.7;0.9;1"/></text>
-                <text x="256" y="192" opacity="0">emojis: 38<animate attributeName="opacity" values="0;0;1;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.72;0.82;0.9;1"/></text>
-                <text x="256" y="212" fill="#57F287" opacity="0">✓ complete<animate attributeName="opacity" values="0;0;1;0" dur="4s" repeatCount="indefinite" keyTimes="0;0.88;0.95;1"/></text>
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        <!-- 3 ─ Confirm -->
-        <div class="slide" role="tabpanel">
-          <div class="slide-copy">
-            <h3>Nothing happens without your yes</h3>
-            <p>
-              Cloning into an existing server means clearing it first. So the bot
-              stops and shows you exactly what it is about to do: how many objects
-              come in, how many channels and roles go out, and which options are on.
-            </p>
-            <div class="slide-note warn">
-              <strong>Safety</strong>
-              <span>If source and target are the same server, the bot refuses outright — that mistake would delete the original.</span>
+          <div class="tabs-panel" role="tabpanel" id="step-3" aria-labelledby="step-tab-3">
+            <div class="stack">
+              <h3>Nothing happens without your yes</h3>
+              <p>Cloning into an existing server means clearing it first. So the bot stops and shows you exactly what it is about to do: how many objects come in, how many channels and roles go out, and which options are on.</p>
+              <div class="note warn">
+                <p><strong>Safety</strong> If source and target are the same server, the bot refuses outright — that mistake would delete the original.</p>
+              </div>
             </div>
+            <figure class="tabs-figure">
+              <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="s3g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9B8AFF"/><stop offset="1" stop-color="#6C58F0"/></linearGradient></defs><rect x="52" y="42" width="316" height="216" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/><rect x="52" y="42" width="4" height="216" rx="2" fill="#FFD76F"/><text x="78" y="76" fill="#EAE8FB" font-family="Inter Tight,Inter,sans-serif" font-size="14" font-weight="700">⚠️  Confirm clone</text><text x="78" y="98" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="10.5">You are about to overwrite “Staging” with</text><text x="78" y="114" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="10.5">the contents of “Main Community”.</text><rect x="78" y="130" width="130" height="56" rx="9" fill="#151B36"/><text x="90" y="150" fill="#6E7099" font-family="Inter Tight,Inter,sans-serif" font-size="8.5" letter-spacing="1">INCOMING</text><text x="90" y="170" fill="#57F287" font-family="JetBrains Mono,monospace" font-size="13" font-weight="500">84 objects</text><rect x="216" y="130" width="130" height="56" rx="9" fill="#151B36"/><text x="228" y="150" fill="#6E7099" font-family="Inter Tight,Inter,sans-serif" font-size="8.5" letter-spacing="1">WILL BE DELETED</text><text x="228" y="170" fill="#FF6B6E" font-family="JetBrains Mono,monospace" font-size="13" font-weight="500">12 channels</text><g><rect x="78" y="204" width="122" height="36" rx="9" fill="url(#s3g)"><animate attributeName="opacity" values="1;0.75;1" dur="2.4s" repeatCount="indefinite"/></rect><text x="139" y="227" fill="#fff" font-family="Inter Tight,Inter,sans-serif" font-size="11.5" font-weight="600" text-anchor="middle">🧬  Clone now</text></g><rect x="210" y="204" width="102" height="36" rx="9" fill="#1B2140" stroke="#2A2350" stroke-width="1"/><text x="261" y="227" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="11.5" font-weight="500" text-anchor="middle">✖️  Cancel</text><g><animateTransform attributeName="transform" type="translate"values="60 40; 0 0; 0 0; 4 4; 0 0; 60 40" dur="3.4s" repeatCount="indefinite" keyTimes="0;0.35;0.5;0.58;0.68;1"/><path d="M150 218l0 20 5-5 3.5 7 4-2-3.5-7 7 0z" fill="#fff" stroke="#0B1022" stroke-width="1.4" stroke-linejoin="round"/></g></svg>
+            </figure>
           </div>
-          <div class="slide-visual">
-            <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="s3g" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stop-color="#9B8AFF"/><stop offset="1" stop-color="#6C58F0"/>
-                </linearGradient>
-              </defs>
-              <!-- Embed card -->
-              <rect x="52" y="42" width="316" height="216" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/>
-              <rect x="52" y="42" width="4" height="216" rx="2" fill="#FFD76F"/>
-
-              <text x="78" y="76" fill="#EAE8FB" font-family="Inter,sans-serif" font-size="14" font-weight="700">⚠️  Confirm clone</text>
-              <text x="78" y="98" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="10.5">You are about to overwrite “Staging” with</text>
-              <text x="78" y="114" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="10.5">the contents of “Main Community”.</text>
-
-              <!-- Two columns -->
-              <rect x="78" y="130" width="130" height="56" rx="9" fill="#151B36"/>
-              <text x="90" y="150" fill="#6E7099" font-family="Inter,sans-serif" font-size="8.5" letter-spacing="1">INCOMING</text>
-              <text x="90" y="170" fill="#57F287" font-family="JetBrains Mono,monospace" font-size="13" font-weight="500">84 objects</text>
-
-              <rect x="216" y="130" width="130" height="56" rx="9" fill="#151B36"/>
-              <text x="228" y="150" fill="#6E7099" font-family="Inter,sans-serif" font-size="8.5" letter-spacing="1">WILL BE DELETED</text>
-              <text x="228" y="170" fill="#FF6B6E" font-family="JetBrains Mono,monospace" font-size="13" font-weight="500">12 channels</text>
-
-              <!-- Buttons -->
-              <g>
-                <rect x="78" y="204" width="122" height="36" rx="9" fill="url(#s3g)">
-                  <animate attributeName="opacity" values="1;0.75;1" dur="2.4s" repeatCount="indefinite"/>
-                </rect>
-                <text x="139" y="227" fill="#fff" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" text-anchor="middle">🧬  Clone now</text>
-              </g>
-              <rect x="210" y="204" width="102" height="36" rx="9" fill="#1B2140" stroke="#2A2350" stroke-width="1"/>
-              <text x="261" y="227" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11.5" font-weight="500" text-anchor="middle">✖️  Cancel</text>
-
-              <!-- Cursor -->
-              <g>
-                <animateTransform attributeName="transform" type="translate"
-                  values="60 40; 0 0; 0 0; 4 4; 0 0; 60 40" dur="3.4s" repeatCount="indefinite" keyTimes="0;0.35;0.5;0.58;0.68;1"/>
-                <path d="M150 218l0 20 5-5 3.5 7 4-2-3.5-7 7 0z" fill="#fff" stroke="#0B1022" stroke-width="1.4" stroke-linejoin="round"/>
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        <!-- 4 ─ Clone -->
-        <div class="slide" role="tabpanel">
-          <div class="slide-copy">
-            <h3>Watch it build, live</h3>
-            <p>
-              A progress message updates as it goes: current stage, how far along, how many objects exist so far. A cancel button sits underneath.
-            </p>
-            <div class="slide-note">
-              <strong>Self-pacing</strong>
-              <span>When Discord starts rate-limiting, the bot notices and slows down on its own, then speeds back up.</span>
+          <div class="tabs-panel" role="tabpanel" id="step-4" aria-labelledby="step-tab-4">
+            <div class="stack">
+              <h3>Watch it build, live</h3>
+              <p>A progress message updates as it goes: current stage, how far along, how many objects exist so far. A cancel button sits underneath.</p>
+              <div class="note">
+                <p><strong>Self-pacing</strong> When Discord starts rate-limiting, the bot notices and slows down on its own, then speeds back up.</p>
+              </div>
             </div>
+            <figure class="tabs-figure">
+              <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="s4bar" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/></linearGradient><clipPath id="s4clip"><rect x="70" y="106" width="280" height="14" rx="7"/></clipPath></defs><rect x="52" y="46" width="316" height="208" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/><rect x="52" y="46" width="4" height="208" rx="2" fill="#9B8AFF"/><text x="70" y="78" fill="#EAE8FB" font-family="Inter Tight,Inter,sans-serif" font-size="13" font-weight="700">🔄  Cloning…</text><text x="70" y="96" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="10">Main Community → Staging</text><rect x="70" y="106" width="280" height="14" rx="7" fill="#151B36"/><g clip-path="url(#s4clip)"><rect x="70" y="106" width="0" height="14" rx="7" fill="url(#s4bar)"><animate attributeName="width" values="0;280" dur="5s" repeatCount="indefinite"/></rect></g><g font-family="Inter Tight,Inter,sans-serif" font-size="10.5"><g opacity="0.35"><text x="70" y="150" fill="#9EA0C4">🎭  Roles</text><text x="330" y="150" fill="#57F287" text-anchor="end">14</text><animate attributeName="opacity" values="0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.18;1"/></g><g opacity="0.35"><text x="70" y="176" fill="#9EA0C4">📁  Categories</text><text x="330" y="176" fill="#57F287" text-anchor="end">4</text><animate attributeName="opacity" values="0.35;0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.34;0.42;1"/></g><g opacity="0.35"><text x="70" y="202" fill="#9EA0C4">💬  Text channels</text><text x="330" y="202" fill="#57F287" text-anchor="end">21</text><animate attributeName="opacity" values="0.35;0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.56;0.64;1"/></g><g opacity="0.35"><text x="70" y="228" fill="#9EA0C4">😀  Emojis</text><text x="330" y="228" fill="#57F287" text-anchor="end">38</text><animate attributeName="opacity" values="0.35;0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.82;0.9;1"/></g></g></svg>
+            </figure>
           </div>
-          <div class="slide-visual">
-            <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="s4bar" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/>
-                </linearGradient>
-                <clipPath id="s4clip"><rect x="70" y="106" width="280" height="14" rx="7"/></clipPath>
-              </defs>
-              <rect x="52" y="46" width="316" height="208" rx="14" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/>
-              <rect x="52" y="46" width="4" height="208" rx="2" fill="#9B8AFF"/>
-
-              <text x="70" y="78" fill="#EAE8FB" font-family="Inter,sans-serif" font-size="13" font-weight="700">🔄  Cloning…</text>
-              <text x="70" y="96" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="10">Main Community → Staging</text>
-
-              <!-- Progress bar -->
-              <rect x="70" y="106" width="280" height="14" rx="7" fill="#151B36"/>
-              <g clip-path="url(#s4clip)">
-                <rect x="70" y="106" width="0" height="14" rx="7" fill="url(#s4bar)">
-                  <animate attributeName="width" values="0;280" dur="5s" repeatCount="indefinite"/>
-                </rect>
-              </g>
-
-              <!-- Stage rows -->
-              <g font-family="Inter,sans-serif" font-size="10.5">
-                <g opacity="0.35">
-                  <text x="70" y="150" fill="#9EA0C4">🎭  Roles</text>
-                  <text x="330" y="150" fill="#57F287" text-anchor="end">14</text>
-                  <animate attributeName="opacity" values="0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.18;1"/>
-                </g>
-                <g opacity="0.35">
-                  <text x="70" y="176" fill="#9EA0C4">📁  Categories</text>
-                  <text x="330" y="176" fill="#57F287" text-anchor="end">4</text>
-                  <animate attributeName="opacity" values="0.35;0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.34;0.42;1"/>
-                </g>
-                <g opacity="0.35">
-                  <text x="70" y="202" fill="#9EA0C4">💬  Text channels</text>
-                  <text x="330" y="202" fill="#57F287" text-anchor="end">21</text>
-                  <animate attributeName="opacity" values="0.35;0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.56;0.64;1"/>
-                </g>
-                <g opacity="0.35">
-                  <text x="70" y="228" fill="#9EA0C4">😀  Emojis</text>
-                  <text x="330" y="228" fill="#57F287" text-anchor="end">38</text>
-                  <animate attributeName="opacity" values="0.35;0.35;1;1" dur="5s" repeatCount="indefinite" keyTimes="0;0.82;0.9;1"/>
-                </g>
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        <!-- 5 ─ Backup -->
-        <div class="slide" role="tabpanel">
-          <div class="slide-copy">
-            <h3>Save the whole server to a file</h3>
-            <p><code>/backup</code> gives you one file holding the whole blueprint. It restores onto any server the bot can reach.</p>
-            <div class="slide-note warn">
-              <strong>Treat it like a key</strong>
-              <span>The file holds your full permission structure. Share it as carefully as you would the server itself.</span>
+          <div class="tabs-panel" role="tabpanel" id="step-5" aria-labelledby="step-tab-5">
+            <div class="stack">
+              <h3>Save the whole server to a file</h3>
+              <p><code>/backup</code> gives you one file holding the whole blueprint. It restores onto any server the bot can reach.</p>
+              <div class="note warn">
+                <p><strong>Treat it like a key</strong> The file holds your full permission structure. Share it as carefully as you would the server itself.</p>
+              </div>
             </div>
+            <figure class="tabs-figure">
+              <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="s5g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/></linearGradient></defs><rect x="20" y="86" width="116" height="128" rx="13" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/><rect x="20" y="86" width="116" height="28" rx="13" fill="#151B36"/><rect x="20" y="100" width="116" height="14" fill="#151B36"/><text x="34" y="105" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="10" font-weight="600">Server</text><g fill="#2A2350"><rect x="34" y="128" width="72" height="8" rx="4"/><rect x="34" y="146" width="88" height="8" rx="4"/><rect x="34" y="164" width="60" height="8" rx="4"/><rect x="34" y="182" width="80" height="8" rx="4"/></g><g><path d="M148 128 L 254 128" stroke="#6C58F0" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"><animate attributeName="stroke-dashoffset" values="18;0" dur="1s" repeatCount="indefinite"/></path><path d="M249 122l7 6-7 6" stroke="#9B8AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="176" y="118" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">/backup</text></g><g><path d="M254 176 L 148 176" stroke="#57F287" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round" opacity="0.75"><animate attributeName="stroke-dashoffset" values="0;18" dur="1s" repeatCount="indefinite"/></path><path d="M153 170l-7 6 7 6" stroke="#57F287" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="174" y="200" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">/restore</text></g><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -7;0 0" dur="3.4s" repeatCount="indefinite"/><path d="M268 74h72l32 32v122a12 12 0 0 1-12 12h-92a12 12 0 0 1-12-12V86a12 12 0 0 1 12-12z" fill="#0B1022" stroke="url(#s5g)" stroke-width="1.8"/><path d="M340 74v22a10 10 0 0 0 10 10h22" stroke="url(#s5g)" stroke-width="1.8" fill="none"/><g fill="#2A2350"><rect x="284" y="128" width="66" height="7" rx="3.5"/><rect x="284" y="144" width="82" height="7" rx="3.5"/><rect x="284" y="160" width="54" height="7" rx="3.5"/><rect x="284" y="176" width="74" height="7" rx="3.5"/></g><text x="284" y="208" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9">.esc.json</text><rect x="356" y="196" width="6" height="6" fill="#9B8AFF"><animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/></rect><rect x="366" y="186" width="4" height="4" fill="#C2B2FF"><animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.5s" repeatCount="indefinite"/></rect></g></svg>
+            </figure>
           </div>
-          <div class="slide-visual">
-            <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="s5g" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/>
-                </linearGradient>
-              </defs>
-              <!-- Server -->
-              <rect x="20" y="86" width="116" height="128" rx="13" fill="#0E1428" stroke="#2A2350" stroke-width="1.5"/>
-              <rect x="20" y="86" width="116" height="28" rx="13" fill="#151B36"/>
-              <rect x="20" y="100" width="116" height="14" fill="#151B36"/>
-              <text x="34" y="105" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="10" font-weight="600">Server</text>
-              <g fill="#2A2350">
-                <rect x="34" y="128" width="72" height="8" rx="4"/>
-                <rect x="34" y="146" width="88" height="8" rx="4"/>
-                <rect x="34" y="164" width="60" height="8" rx="4"/>
-                <rect x="34" y="182" width="80" height="8" rx="4"/>
-              </g>
-
-              <!-- Arrows -->
-              <g>
-                <path d="M148 128 L 254 128" stroke="#6C58F0" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round">
-                  <animate attributeName="stroke-dashoffset" values="18;0" dur="1s" repeatCount="indefinite"/>
-                </path>
-                <path d="M249 122l7 6-7 6" stroke="#9B8AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <text x="176" y="118" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">/backup</text>
-              </g>
-              <g>
-                <path d="M254 176 L 148 176" stroke="#57F287" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round" opacity="0.75">
-                  <animate attributeName="stroke-dashoffset" values="0;18" dur="1s" repeatCount="indefinite"/>
-                </path>
-                <path d="M153 170l-7 6 7 6" stroke="#57F287" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <text x="174" y="200" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">/restore</text>
-              </g>
-
-              <!-- File -->
-              <g>
-                <animateTransform attributeName="transform" type="translate" values="0 0;0 -7;0 0" dur="3.4s" repeatCount="indefinite"/>
-                <path d="M268 74h72l32 32v122a12 12 0 0 1-12 12h-92a12 12 0 0 1-12-12V86a12 12 0 0 1 12-12z" fill="#0B1022" stroke="url(#s5g)" stroke-width="1.8"/>
-                <path d="M340 74v22a10 10 0 0 0 10 10h22" stroke="url(#s5g)" stroke-width="1.8" fill="none"/>
-                <g fill="#2A2350">
-                  <rect x="284" y="128" width="66" height="7" rx="3.5"/>
-                  <rect x="284" y="144" width="82" height="7" rx="3.5"/>
-                  <rect x="284" y="160" width="54" height="7" rx="3.5"/>
-                  <rect x="284" y="176" width="74" height="7" rx="3.5"/>
-                </g>
-                <text x="284" y="208" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9">.esc.json</text>
-                <!-- Pixel sparkle -->
-                <rect x="356" y="196" width="6" height="6" fill="#9B8AFF">
-                  <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
-                </rect>
-                <rect x="366" y="186" width="4" height="4" fill="#C2B2FF">
-                  <animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.5s" repeatCount="indefinite"/>
-                </rect>
-              </g>
-            </svg>
-          </div>
-        </div>
-
-        <!-- 6 ─ Resume -->
-        <div class="slide" role="tabpanel">
-          <div class="slide-copy">
-            <h3>Interrupted? Pick up where it stopped</h3>
-            <p>
-              Big servers take minutes, and minutes are long enough to drop a connection. Every object created is written to a local checkpoint the moment it exists.
-            </p>
-            <p><code>/clone resume:True</code> skips what already exists and carries on. It never wipes what it just built.</p>
-            <div class="slide-note">
-              <strong>/status</strong>
-              <span>Lists running jobs and any unfinished run waiting to be resumed.</span>
+          <div class="tabs-panel" role="tabpanel" id="step-6" aria-labelledby="step-tab-6">
+            <div class="stack">
+              <h3>Interrupted? Pick up where it stopped</h3>
+              <p>Big servers take minutes, and minutes are long enough to drop a connection. Every object created is written to a local checkpoint the moment it exists.</p>
+              <p><code>/clone resume:True</code> skips what already exists and carries on. It never wipes what it just built.</p>
+              <div class="note">
+                <p><strong>/status</strong> Lists running jobs and any unfinished run waiting to be resumed.</p>
+              </div>
             </div>
+            <figure class="tabs-figure">
+              <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="s6bar" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/></linearGradient><clipPath id="s6c1"><rect x="60" y="46" width="300" height="16" rx="8"/></clipPath><clipPath id="s6c2"><rect x="60" y="188" width="300" height="16" rx="8"/></clipPath></defs><text x="60" y="34" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="11" font-weight="600">First attempt</text><rect x="60" y="46" width="300" height="16" rx="8" fill="#151B36"/><g clip-path="url(#s6c1)"><rect x="60" y="46" width="0" height="16" rx="8" fill="url(#s6bar)"><animate attributeName="width" values="0;168;168;168" dur="6s" repeatCount="indefinite" keyTimes="0;0.3;0.95;1"/></rect></g><text x="60" y="84" fill="#FFD76F" font-family="Inter Tight,Inter,sans-serif" font-size="10" opacity="0">🛑  Connection lost at 56%<animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.3;0.36;0.95;1"/></text><rect x="60" y="100" width="300" height="40" rx="10" fill="#9B8AFF" fill-opacity="0.07" stroke="#2A2350" stroke-width="1"/><text x="78" y="118" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9.5">state/staging.json</text><text x="78" y="132" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">47 objects checkpointed</text><g opacity="0"><circle cx="336" cy="120" r="10" fill="#57F287" fill-opacity="0.15" stroke="#57F287" stroke-width="1.4"/><path d="M331 120l3.5 3.5L342 116" stroke="#57F287" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.36;0.44;0.95;1"/></g><text x="60" y="176" fill="#9EA0C4" font-family="Inter Tight,Inter,sans-serif" font-size="11" font-weight="600">Resumed run</text><rect x="60" y="188" width="300" height="16" rx="8" fill="#151B36"/><g clip-path="url(#s6c2)"><rect x="60" y="188" width="168" height="16" fill="#6C58F0" fill-opacity="0.4"/><rect x="60" y="188" width="0" height="16" rx="8" fill="url(#s6bar)"><animate attributeName="width" values="0;0;168;300;300" dur="6s" repeatCount="indefinite" keyTimes="0;0.5;0.56;0.9;1"/></rect></g><text x="60" y="226" fill="#6E7099" font-family="Inter Tight,Inter,sans-serif" font-size="9.5">↳ 47 skipped</text><text x="360" y="226" fill="#57F287" font-family="Inter Tight,Inter,sans-serif" font-size="10" text-anchor="end" opacity="0">✅  Finished<animate attributeName="opacity" values="0;0;1;1" dur="6s" repeatCount="indefinite" keyTimes="0;0.88;0.94;1"/></text></svg>
+            </figure>
           </div>
-          <div class="slide-visual">
-            <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="s6bar" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0" stop-color="#C2B2FF"/><stop offset="1" stop-color="#6C58F0"/>
-                </linearGradient>
-                <clipPath id="s6c1"><rect x="60" y="46" width="300" height="16" rx="8"/></clipPath>
-                <clipPath id="s6c2"><rect x="60" y="188" width="300" height="16" rx="8"/></clipPath>
-              </defs>
-
-              <!-- the first attempt -->
-              <text x="60" y="34" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">First attempt</text>
-              <rect x="60" y="46" width="300" height="16" rx="8" fill="#151B36"/>
-              <g clip-path="url(#s6c1)">
-                <rect x="60" y="46" width="0" height="16" rx="8" fill="url(#s6bar)">
-                  <animate attributeName="width" values="0;168;168;168" dur="6s" repeatCount="indefinite" keyTimes="0;0.3;0.95;1"/>
-                </rect>
-              </g>
-              <text x="60" y="84" fill="#FFD76F" font-family="Inter,sans-serif" font-size="10" opacity="0">🛑  Connection lost at 56%
-                <animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.3;0.36;0.95;1"/>
-              </text>
-
-              <!-- Intermediate state: the frame is always there, only the check is added -->
-              <rect x="60" y="100" width="300" height="40" rx="10" fill="#9B8AFF" fill-opacity="0.07" stroke="#2A2350" stroke-width="1"/>
-              <text x="78" y="118" fill="#C2B2FF" font-family="JetBrains Mono,monospace" font-size="9.5">state/staging.json</text>
-              <text x="78" y="132" fill="#6E7099" font-family="JetBrains Mono,monospace" font-size="9">47 objects checkpointed</text>
-              <g opacity="0">
-                <circle cx="336" cy="120" r="10" fill="#57F287" fill-opacity="0.15" stroke="#57F287" stroke-width="1.4"/>
-                <path d="M331 120l3.5 3.5L342 116" stroke="#57F287" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <animate attributeName="opacity" values="0;0;1;1;0" dur="6s" repeatCount="indefinite" keyTimes="0;0.36;0.44;0.95;1"/>
-              </g>
-
-              <!-- a resumed run -->
-              <text x="60" y="176" fill="#9EA0C4" font-family="Inter,sans-serif" font-size="11" font-weight="600">Resumed run</text>
-              <rect x="60" y="188" width="300" height="16" rx="8" fill="#151B36"/>
-              <g clip-path="url(#s6c2)">
-                <!-- The part already done is skipped, not rebuilt. -->
-                <rect x="60" y="188" width="168" height="16" fill="#6C58F0" fill-opacity="0.4"/>
-                <rect x="60" y="188" width="0" height="16" rx="8" fill="url(#s6bar)">
-                  <animate attributeName="width" values="0;0;168;300;300" dur="6s" repeatCount="indefinite" keyTimes="0;0.5;0.56;0.9;1"/>
-                </rect>
-              </g>
-              <text x="60" y="226" fill="#6E7099" font-family="Inter,sans-serif" font-size="9.5">↳ 47 skipped</text>
-              <text x="360" y="226" fill="#57F287" font-family="Inter,sans-serif" font-size="10" text-anchor="end" opacity="0">✅  Finished
-                <animate attributeName="opacity" values="0;0;1;1" dur="6s" repeatCount="indefinite" keyTimes="0;0.88;0.94;1"/>
-              </text>
-            </svg>
+          <div class="tabs-foot">
+            <button type="button" data-tabs-step="-1" aria-label="Previous step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <span class="tabs-count">01 / 06</span>
+            <button type="button" data-tabs-step="1" aria-label="Next step"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
           </div>
         </div>
-
       </div>
+    </section>
 
-      <!-- Controls -->
-      <div class="slide-controls">
-        <button class="slide-arrow slide-prev" type="button" aria-label="Previous step">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="slide-dots">
-          <button class="slide-dot" type="button" aria-label="Step 1" aria-current="true"></button>
-          <button class="slide-dot" type="button" aria-label="Step 2"></button>
-          <button class="slide-dot" type="button" aria-label="Step 3"></button>
-          <button class="slide-dot" type="button" aria-label="Step 4"></button>
-          <button class="slide-dot" type="button" aria-label="Step 5"></button>
-          <button class="slide-dot" type="button" aria-label="Step 6"></button>
+    <section class="sec" id="highlights">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <span class="eyebrow">Why this one</span>
+          <h2>Built to be boring <em>in the right places</em></h2>
+          <p class="lead">A tool that deletes channels for a living should be predictable. These are the decisions that make it safe to actually run.</p>
         </div>
-        <span class="slide-counter">01 / 06</span>
-        <button class="slide-arrow slide-next" type="button" aria-label="Next step">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Highlights ──────────────────────────────────────────────────────── -->
-<section id="highlights">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="eyebrow">Why this one</span>
-      <h2>Built to be boring in the right places</h2>
-      <p>A tool that deletes channels for a living should be predictable. These are
-         the decisions that make it safe to actually run.</p>
-    </div>
-
-    <div class="grid grid-3">
-      <article class="card reveal">
-        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-        <h3>Asks before it deletes</h3>
-        <p>A confirmation dialog with real numbers, a 60-second timeout, and a hard
-           refusal if source and target are the same server.</p>
-      </article>
-
-      <article class="card reveal" data-delay="70">
-        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></div>
-        <h3>Survives interruptions</h3>
-        <p>Checkpoints after every created object. A dropped connection costs you
-           seconds, not the whole run.</p>
-      </article>
-
-      <article class="card reveal" data-delay="140">
-        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></div>
-        <h3>Backups you own</h3>
-        <p>One file, plain JSON, gzip-compressed when large. No account, no service,
-           nothing stored anywhere but on your disk.</p>
-      </article>
-
-      <article class="card reveal">
-        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></div>
-        <h3>Correct role hierarchy</h3>
-        <p>Roles are created top-down, because Discord inserts each new one at the
-           bottom. Get that backwards and your whole ranking inverts.</p>
-      </article>
-
-      <article class="card reveal" data-delay="70">
-        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-        <h3>Paces itself</h3>
-        <p>Detects when Discord throttles, backs off automatically, then speeds back
-           up once things calm down.</p>
-      </article>
-
-      <article class="card reveal" data-delay="140">
-        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-        <h3>Your token stays yours</h3>
-        <p>Configuration lives in a local <code>.env</code>, git-ignored by default.
-           Self-hosted — the bot only ever talks to Discord.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- ── Quick start ─────────────────────────────────────────────────────── -->
-<section id="quickstart">
-  <div class="wrap">
-    <div class="grid grid-2" style="align-items:center;gap:3rem">
-      <div class="reveal">
-        <span class="eyebrow">Quick start</span>
-        <h2>Four commands to running</h2>
-        <p>
-          Python 3.10 or newer. The setup page covers the Developer Portal steps and the one
-          setting almost everyone forgets.
-        </p>
-        <div class="btn-row">
-          <a class="btn" href="/setup.html">
-            Full setup guide
-            <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </a>
+        <div class="cards" data-cols="3">
+          <article class="card reveal">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v6c0 4.4 3 7.7 7 9 4-1.3 7-4.6 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <h3>Asks before it deletes</h3>
+            <p>A confirmation dialog with real numbers, a 60-second timeout, and a hard refusal if source and target are the same server.</p>
+          </article>
+          <article class="card reveal">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.6 4.5L20 16M20 20v-4h-4"/></svg></span>
+            <h3>Survives interruptions</h3>
+            <p>Checkpoints after every created object. A dropped connection costs you seconds, not the whole run.</p>
+          </article>
+          <article class="card reveal">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></svg></span>
+            <h3>Backups you own</h3>
+            <p>One file, plain JSON, gzip-compressed when large. No account, no service, nothing stored anywhere but on your disk.</p>
+          </article>
+          <article class="card reveal">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5"/></svg></span>
+            <h3>Correct role hierarchy</h3>
+            <p>Roles are created top-down, because Discord inserts each new one at the bottom. Get that backwards and your whole ranking inverts.</p>
+          </article>
+          <article class="card reveal">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9"/></svg></span>
+            <h3>Paces itself</h3>
+            <p>Detects when Discord throttles, backs off automatically, then speeds back up once things calm down.</p>
+          </article>
+          <article class="card reveal">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12 20 3M16 7l3 3M14 9l2 2"/></svg></span>
+            <h3>Your token stays yours</h3>
+            <p>Configuration lives in a local <code>.env</code>, git-ignored by default. Self-hosted — the bot only ever talks to Discord.</p>
+          </article>
         </div>
       </div>
+    </section>
 
-      <div class="reveal" data-delay="80">
-        <div class="code">
-          <div class="code-head"><span class="dots"><i></i><i></i><i></i></span> terminal</div>
-<pre><span class="c"># Grab the project</span>
-<span class="p">$</span> git clone https://github.com/aquaxs1/Easy-Cloner.git
-<span class="p">$</span> cd Easy-Cloner
+    <section class="sec" id="quickstart">
+      <div class="wrap">
+        <div class="split">
+          <div class="stack reveal">
+            <span class="eyebrow">Quick start</span>
+            <h2>Four commands <em>to running</em></h2>
+            <p class="lead">Python 3.10 or newer. The setup page covers the Developer Portal steps and the one setting almost everyone forgets.</p>
+            <a class="btn" href="setup">Full setup guide<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </div>
+          <div class="reveal">
+            <pre data-label="terminal"><code># Grab the project
+$ git clone https://github.com/aquaxs1/Easy-Cloner.git
+$ cd Easy-Cloner
 
-<span class="c"># Install and configure</span>
-<span class="p">$</span> pip install -r requirements.txt
-<span class="p">$</span> cp .env.example .env
+# Install and configure
+$ pip install -r requirements.txt
+$ cp .env.example .env
 
-<span class="c"># Paste your bot token into .env, then</span>
-<span class="p">$</span> python main.py
+# Paste your bot token into .env, then
+$ python main.py
 
-<span class="s">✓ Logged in as Easy Server Cloner#1234</span>
-<span class="s">✓ Active on 2 server(s).</span></pre>
+✓ Logged in as Easy Server Cloner#1234
+✓ Active on 2 server(s).</code></pre>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ── CTA ─────────────────────────────────────────────────────────────── -->
-<section id="get-started">
-  <div class="wrap">
-    <div class="cta-band reveal">
-      <h2>Ready to clone your first server?</h2>
-      <p>Free, open source, and self-hosted. Set it up once and it is yours —
-         no subscription, no dashboard, no third party in the middle.</p>
-      <div class="btn-row">
-        <a class="btn" href="/setup.html">
-          Set Up
-          <svg class="arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <a class="btn btn-ghost" href="/features.html">View More</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-</main>
-
-<!-- ── Footer ──────────────────────────────────────────────────────────── -->
-<footer class="footer">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div class="footer-about">
-        <a class="brand" href="/index.html">
-          <img src="/assets/img/logo.svg" alt="" width="30" height="30">
-          Easy Server Cloner
-        </a>
-        <p>An open-source Discord bot that copies a server's full structure — and
-           gives you a backup file you actually own.</p>
-        <div class="footer-social">
-          <a href="https://github.com/aquaxs1/Easy-Cloner" aria-label="GitHub repository">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
-          </a>
-          <a href="https://discord.com/developers/applications" aria-label="Discord Developer Portal">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.32 4.44A19.8 19.8 0 0 0 15.43 3l-.25.46a13.6 13.6 0 0 1 4.02 2.03 18.9 18.9 0 0 0-14.4 0A13.6 13.6 0 0 1 8.82 3.5L8.57 3a19.8 19.8 0 0 0-4.89 1.44C.87 8.62.1 12.7.48 16.72a19.9 19.9 0 0 0 6.04 3.06l.8-1.37c-.66-.25-1.3-.55-1.9-.9l.47-.36a14.2 14.2 0 0 0 12.22 0l.47.36c-.6.35-1.24.65-1.9.9l.8 1.37a19.9 19.9 0 0 0 6.04-3.06c.44-4.65-.75-8.7-3.2-12.28zM8.68 14.4c-1.18 0-2.15-1.08-2.15-2.4 0-1.34.95-2.42 2.15-2.42 1.2 0 2.17 1.09 2.15 2.41 0 1.33-.95 2.41-2.15 2.41zm6.64 0c-1.18 0-2.15-1.08-2.15-2.4 0-1.34.95-2.42 2.15-2.42 1.2 0 2.17 1.09 2.15 2.41 0 1.33-.95 2.41-2.15 2.41z"/></svg>
-          </a>
+    <section class="sec" id="get-started">
+      <div class="wrap">
+        <div class="cta reveal">
+          <h2>Ready to clone <em>your first server?</em></h2>
+          <p class="lead">Free, open source, and self-hosted. Set it up once and it is yours — no subscription, no dashboard, no third party in the middle.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary btn-lg" href="setup">Set Up<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-lg" href="features">View More</a>
+          </div>
         </div>
       </div>
+    </section>
+  </main>
 
-      <div class="footer-col">
-        <h4>Product</h4>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-about">
+          <a class="brand" href="./"><img src="assets/img/logo.svg" alt="" width="32" height="32" loading="lazy"><span>Easy Server Cloner</span></a>
+          <p>An open-source Discord bot that copies a server's full structure — and gives you a backup file you actually own.</p>
+        </div>
+        <nav class="footer-col" aria-label="Product">
+          <h2>Product</h2>
+          <ul>
+            <li><a href="features">All features</a></li>
+            <li><a href="features#commands">Commands</a></li>
+            <li><a href="features#backup">Backup &amp; restore</a></li>
+            <li><a href="features#limits">What can&#x27;t be copied</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Get started">
+          <h2>Get started</h2>
+          <ul>
+            <li><a href="setup">Setup guide</a></li>
+            <li><a href="setup#token">Bot token</a></li>
+            <li><a href="setup#docker">Docker</a></li>
+            <li><a href="download">Download</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Resources">
+          <h2>Resources</h2>
+          <ul>
+            <li><a href="faq">FAQ</a></li>
+            <li><a href="faq#troubleshooting">Troubleshooting</a></li>
+            <li><a href="https://github.com/aquaxs1/Easy-Cloner/issues" rel="noopener">Report an issue</a></li>
+            <li><a href="https://github.com/aquaxs1/Easy-Cloner" rel="noopener">GitHub</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Legal">
+          <h2>Legal</h2>
+          <ul>
+            <li><a href="terms">Terms of Use</a></li>
+            <li><a href="terms#privacy">Privacy</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="family">
+        <span class="family-label">More by AquAxs</span>
         <ul>
-          <li><a href="/features.html">All features</a></li>
-          <li><a href="/features.html#commands">Commands</a></li>
-          <li><a href="/features.html#backup">Backup &amp; restore</a></li>
-          <li><a href="/features.html#limits">What can't be copied</a></li>
+          <li><a href="https://aqua.is-a.dev/portfolio" data-home rel="noopener">All projects</a></li>
+          <li><a href="https://pfpair.app/" rel="noopener">Pfpair</a></li>
+          <li><a href="https://handled-market.vercel.app/" rel="noopener">Handled</a></li>
+          <li><a href="https://larpcorddc.vercel.app/" rel="noopener">Larpcord</a></li>
+          <li><a href="https://mybluejarvis.vercel.app/" rel="noopener">My Jarvis</a></li>
+          <li><a href="https://guardiantus-av.vercel.app/" rel="noopener">Guardiantus AV</a></li>
+          <li><a href="https://explorer-manager.vercel.app/" rel="noopener">Explorer Manager</a></li>
+          <li><a href="https://cipher-box-file-encrypter.vercel.app/" rel="noopener">CipherBox</a></li>
+          <li><a href="https://simple-skin.vercel.app/" rel="noopener">Simple Skin</a></li>
+          <li><a href="https://autobuild-gui.vercel.app/" rel="noopener">Autobuild GUI</a></li>
+          <li><a href="https://timetrackerextension.vercel.app/" rel="noopener">WebsiteTimeTrack</a></li>
+          <li><a href="https://wave-uninstaller.vercel.app/" rel="noopener">Wave Uninstaller</a></li>
+          <li><a href="https://discord-sakurabot.vercel.app/" rel="noopener">Sakura Bot</a></li>
+          <li><a href="https://revox-client.vercel.app/" rel="noopener">Revox Client</a></li>
+          <li><a href="https://chesstrainer.cc.cd/" rel="noopener">Chess Trainer</a></li>
         </ul>
       </div>
-
-      <div class="footer-col">
-        <h4>Get started</h4>
-        <ul>
-          <li><a href="/setup.html">Setup guide</a></li>
-          <li><a href="/setup.html#token">Bot token</a></li>
-          <li><a href="/setup.html#docker">Docker</a></li>
-          <li><a href="/download.html">Download</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="/faq.html">FAQ</a></li>
-          <li><a href="/faq.html#troubleshooting">Troubleshooting</a></li>
-          <li><a href="https://github.com/aquaxs1/Easy-Cloner/issues">Report an issue</a></li>
-          <li><a href="/terms.html">Terms of Use</a></li>
-          <li><a href="/terms.html#privacy">Privacy</a></li>
-        </ul>
+      <div class="footer-legal">
+        <p>© 2026 Easy Server Cloner · MIT licensed</p>
+        <p>Not affiliated with, endorsed by or sponsored by Discord Inc.</p>
       </div>
     </div>
-
-    <div class="footer-bottom">
-      <span>© <span data-year>2026</span> Easy Server Cloner · MIT licensed</span>
-      <nav aria-label="Quick links">
-        <a href="/terms.html">Terms of Use</a>
-        <a href="/terms.html#privacy">Privacy</a>
-        <a href="/download.html">Download</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/features.html">Features</a>
-        <a href="/setup.html">Setup</a>
-        <a href="https://github.com/aquaxs1/Easy-Cloner">GitHub</a>
-      </nav>
-    </div>
-  </div>
-</footer>
-
-<script src="/assets/js/main.js" defer></script>
+  </footer>
 </body>
 </html>

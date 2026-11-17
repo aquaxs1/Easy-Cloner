@@ -1,32 +1,59 @@
-# 🌐 Easy Server Cloner — Website
+# Easy Server Cloner — website
 
-The marketing and documentation site for the bot. Plain HTML, CSS and JavaScript —
-no framework, no build step, no dependencies.
+The site at <https://easy-cloner.vercel.app>. Plain HTML, CSS and JavaScript: no build
+step, no framework, nothing loaded from another host.
+
+| File | What it is |
+| --- | --- |
+| `index.html` | Landing page |
+| `setup.html` | Setup |
+| `features.html` | Features & Commands |
+| `faq.html` | FAQ |
+| `download.html` | Download |
+| `terms.html` | Terms of Use |
+| `404.html` | Shown for any address that does not exist |
+| `assets/site.css` | This project's accent colour and anything only this site needs |
+| `assets/scene.js` | The 3D scene in the page header |
+| `assets/aqx/` | The look and behaviour shared by all AquAxs project sites |
+
+## The shared part
+
+`assets/aqx/` is the same in every project site: the stylesheet (`aqx.css`),
+the interactions (`aqx.js`), the 3D stage (`stage.js`), three.js and the three
+typefaces. It follows the portfolio at aqua.is-a.dev: a black sky with slow
+dots, glass cards that lean towards the pointer, Bodoni Moda headlines.
+Change the accent in `assets/site.css` (`--ac`, `--ac-hi`), not in `aqx.css`.
+
+## The 3D scene
+
+`assets/scene.js` exports one function that builds its objects into
+`stage.frame`. The stage (`assets/aqx/stage.js`) does the rest: camera, lights,
+resizing, pointer and touch, pausing off screen. With reduced motion the scene
+is one still frame; without WebGL a glow in the accent colour stays instead.
+
+## Preview
+
+Links have no `.html` (Vercel serves `/download` from `download.html`), so open
+the folder through a server that does the same:
+
+```bash
+npx serve site
+```
+
+## Deploy
+
+Vercel, root directory `site`, no build command. `vercel.json` sets clean URLs
+and the security headers. The site sets no cookies and stores nothing.
 
 ## Deploying to Vercel
 
-### Through the dashboard
+Import `aquaxs1/Easy-Cloner` and **leave Root Directory at its default** (the repository
+root). The `vercel.json` in the repository root tells Vercel there is nothing to build and
+that `site/` is the directory to serve.
 
-1. [vercel.com/new](https://vercel.com/new) → import `aquaxs1/Easy-Cloner`
-2. **Leave Root Directory at its default** (`Easy-Cloner (root)`)
-3. **Deploy**
-
-That is the whole procedure. The `vercel.json` in the repository root tells Vercel
-there is nothing to build and that `site/` is the directory to serve.
-
-> **Do not go looking for `site` in the Root Directory picker — it will not be
-> there.** Vercel only lists subdirectories that contain a project manifest it
-> recognises (`package.json`, `next.config.js`, and friends). This site is plain
-> HTML with no manifest, so the picker shows only the repository root. That is
-> expected, and the root `vercel.json` is what makes it work anyway.
-
-### From the terminal
-
-```bash
-npm i -g vercel
-vercel          # preview deployment — run from the repository root
-vercel --prod   # production
-```
+> Do not go looking for `site` in the Root Directory picker — it will not be there. Vercel
+> only lists subdirectories that contain a project manifest it recognises, and this site has
+> none. That is expected; the root `vercel.json` is what makes it work anyway.
 
 ### Two config files, on purpose
 
@@ -35,89 +62,11 @@ vercel --prod   # production
 | `vercel.json` (repo root) | Root Directory is the default — **the documented path** |
 | `site/vercel.json` | Root Directory was manually set to `site` |
 
-Both carry the same headers and redirects, so either setup produces the same
-result. If you change one, change the other too.
+Both carry the same headers and redirects (`/docs`, `/commands`, `/install`, `/help`), so
+either setup produces the same result. If you change one, change the other too.
 
-## Running it locally
+## The six-step walkthrough
 
-Any static file server will do:
-
-```bash
-cd site
-python3 -m http.server 8000
-```
-
-Then open <http://localhost:8000>. Links use absolute paths (`/features.html`), so
-opening the files directly via `file://` will break navigation — use a server.
-
-## Pages
-
-| File | Purpose |
-|---|---|
-| `index.html` | Landing page, hero, click-through slideshow, highlights |
-| `setup.html` | Nine-step setup guide with copyable commands |
-| `features.html` | All commands, options, limits, configuration |
-| `faq.html` | Questions and troubleshooting, as an accordion |
-| `terms.html` | Terms of use and privacy |
-| `404.html` | Not-found page (Vercel serves this automatically) |
-
-## Structure
-
-```
-site/
-├── index.html · setup.html · features.html · faq.html · terms.html · 404.html
-├── assets/
-│   ├── css/style.css        One stylesheet, tokens at the top
-│   ├── css/fonts.css        @font-face rules for the self-hosted fonts
-│   ├── fonts/               Inter + JetBrains Mono (woff2, latin + latin-ext, OFL)
-│   ├── js/main.js           Slideshow, copy buttons, reveals, pixel canvas
-│   └── img/
-│       ├── logo.svg         The mark, rebuilt as vector — used everywhere
-│       ├── logo.png         512px raster, for the Apple touch icon
-│       └── og-image.png     1200×630 social preview card
-├── vercel.json              Security headers, asset caching, short redirects
-└── robots.txt
-```
-
-## Notes
-
-- **The logo** is `assets/img/logo.svg`, a vector rebuild of the original artwork so
-  it stays crisp at any size and needs no dark background baked in.
-- **Colours and spacing** are CSS custom properties at the top of `style.css`. Change
-  `--brand` there and the whole site follows.
-- **JavaScript is optional.** Without it the slideshow shows its first step, the
-  accordion stays closed and everything else works normally.
-- **`prefers-reduced-motion`** disables the pixel canvas and every animation.
-- **No cookies, no analytics, no trackers, no external requests.** The fonts (Inter,
-  JetBrains Mono) are self-hosted in `assets/fonts/` and declared in
-  `assets/css/fonts.css`, so no visitor's IP address goes to Google. Keep it that way:
-  the privacy section in `terms.html` says so, and the CSP blocks other font hosts.
-
-## Editing content
-
-The nav and footer are duplicated across pages on purpose — it keeps the site
-dependency-free and renders without JavaScript. When you change a footer link,
-update it in all six files.
-
-## The Content-Security-Policy and the inline script
-
-`vercel.json` sends a strict CSP. `script-src` allows `'self'` plus one SHA-256
-hash, which covers the single inline one-liner in every page's `<head>`:
-
-```html
-<script>document.documentElement.classList.add("js");</script>
-```
-
-It has to stay inline — it runs before the first paint so the no-JS styles never
-flash — so a hash is used instead of `'unsafe-inline'`. **Change that line by even
-one character and the browser silently refuses to run it**, and the `js` class
-never lands on `<html>`. If you edit it, recompute the hash and update the
-`Content-Security-Policy` value in `vercel.json`:
-
-```sh
-printf '%s' 'document.documentElement.classList.add("js");' \
-  | openssl dgst -sha256 -binary | openssl base64
-```
-
-Inline `<style>` and `style="…"` attributes are covered by `'unsafe-inline'` in
-`style-src`, so those need no such care.
+The pictures in "How it works" on the landing page are inline SVG in `index.html`, one per
+step. The tabs around them are the shared kit's (`assets/aqx/aqx.js`); without script all six
+steps are simply shown one under the other.
