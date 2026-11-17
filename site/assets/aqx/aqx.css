@@ -386,7 +386,7 @@ kbd {
 }
 
 /* Blocks that follow one another inside a section keep their distance. */
-.wrap > :is(.cards, .steps, .table-wrap, .note, .flow, .faq, .prose, .split, .stats, .panel, pre) + :is(.cards, .steps, .table-wrap, .note, .flow, .faq, .prose, .split, .stats, .panel, pre) {
+.wrap > :is(.cards, .steps, .table-wrap, .note, .flow, .faq, .prose, .split, .stats, .panel, .cta, .tabs, pre) + :is(.cards, .steps, .table-wrap, .note, .flow, .faq, .prose, .split, .stats, .panel, .cta, .tabs, pre) {
   margin-top: 1.25rem;
 }
 
@@ -1284,6 +1284,11 @@ kbd {
   font-weight: 500;
 }
 
+.tabs-list [role='tab'] b svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
 .tabs-list [role='tab']:hover {
   color: var(--fg);
 }
@@ -1313,6 +1318,16 @@ kbd {
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 40px 90px -60px color-mix(in srgb, var(--ac) 65%, transparent);
   min-width: 0;
+}
+
+.tabs-panel > * {
+  min-width: 0;
+}
+
+/* One column, for panels whose content is one long line or one block. */
+.tabs-panel[data-cols='1'] {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
 }
 
 .tabs-panel[hidden] {
